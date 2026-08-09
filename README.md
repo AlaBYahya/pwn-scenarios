@@ -104,14 +104,35 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **16,436 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **25,140 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
 | HackerOne public Hacktivity (GraphQL API) | `hackerone` | 7,897 |
-| Pentester Land + 3 curated GitHub lists + 3 Medium feeds + 3 researcher blogs | `aggregated_writeup` | 5,979 |
-| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,391 |
-| GitHub CTF writeup repositories | `ctf` | 169 |
+| GitHub CTF-writeup repos (file-level, not repo-level) | `ctf` | 7,377 |
+| Pentester Land + 3 curated GitHub lists + 3 Medium feeds + 3 researcher blogs | `aggregated_writeup` | 5,980 |
+| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,386 |
+| GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,500 |
+
+**The CTF and HackTheBox jump is the real story of this round.** Both
+collectors originally indexed *repositories* (one record per repo --
+`ctf` was 169 records total). The `ctf-writeups` GitHub topic alone spans
+1,800+ repos, each often containing dozens of individual challenge
+writeups -- indexing at the repo level was leaving nearly all of that on
+the table. Both collectors now walk each repo's file tree and extract one
+record per challenge/machine writeup file (same pattern
+`collect_tryhackme.py` already used), title derived from the file/parent-dir
+name, cross-repo deduplication by normalized title so the same popular box
+("Blue", "Legacy") isn't counted once per repo that covers it. HackTheBox
+writeups are commonly PDFs, not markdown, so both extensions are collected
+(link + derived title only, the PDF is never fetched for content).
+
+Two real bugs turned up building this: GitHub's own `.github/ISSUE_TEMPLATE/*.md`
+files were slipping through as fake "writeup titles" (fixed by excluding
+`.github` from the path walk), and repos using sequential numbering
+(`1.md`, `2.md`, ...) instead of descriptive filenames produced content-free
+titles like "1" and "2" (fixed by dropping purely-numeric titles). Both
+fixes are in the collectors now, not just patched after the fact.
 
 The Medium feeds (InfoSec Write-ups, System Weakness, OSINT Team --
 `scripts/collect_medium_feeds.py`, via each publication's own RSS `/feed`)
@@ -161,7 +182,7 @@ precisely classified records.
 sometimes link to the same HackerOne report we already pulled directly.
 `normalize.py` dedups by URL *across* platforms (not just within one),
 preferring the more precisely-classified HackerOne-native record when both
-exist -- 748 cross-platform duplicates were dropped this way, on top of the
+exist -- 1,628 cross-platform duplicates were dropped this way, on top of the
 usual per-source dedup.
 
 ### AI/LLM vulnerability classes
@@ -173,7 +194,7 @@ sensitive information disclosure, supply chain, data/model poisoning,
 improper output handling (CWE-1426), excessive agency, system prompt
 leakage, vector/embedding weaknesses, and unbounded consumption. They're
 fully wired into the attack graph (see below) -- but honestly, real-world
-grounded instances are scarce right now: only **prompt injection (22
+grounded instances are scarce right now: only **prompt injection (55
 records)** and **model DoS (1 record)** matched anything in the sources
 above, because "Prompt Injection" is only just emerging as a tag bug
 hunters actually use; the other 8 classes have zero grounded instances yet.
@@ -187,7 +208,7 @@ Here's the honest accounting: pushing every legitimate source available as
 far as it goes -- a full pull of HackerOne's disclosed reports (not a
 sample), Pentester Land's complete index, two more curated GitHub
 writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
-dataset from 7,342 to **16,436** unique records. That's real growth, not
+dataset from 7,342 to **25,140** unique records. That's real growth, not
 padding (every record is schema-validated, source-linked, and deduplicated
 by URL across sources). It's not 100k.
 
@@ -287,7 +308,7 @@ simulator are the better starting point -- see below.
 
 ## Finding records: three ways to consume the dataset
 
-A single 16,436-line JSONL file isn't practical to browse or filter by hand.
+A single 25,140-line JSONL file isn't practical to browse or filter by hand.
 Only one form of the dataset is committed to the repo -- the other two are
 generated locally in seconds, not shipped, so the repo stays clonable:
 
@@ -347,7 +368,8 @@ scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_curated_lists.py   Additional curated GitHub writeup-list collectors
 scripts/collect_medium_feeds.py    Medium publication RSS feed collector (InfoSec Write-ups, etc.)
 scripts/collect_blogs.py           Individual researcher blog collector (atom feeds + sitemap+og:title)
-scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
+scripts/collect_ctf.py             GitHub CTF-writeup collector (file-level, cross-repo dedup)
+scripts/collect_hackthebox.py      GitHub HackTheBox-writeup collector (file-level, md+pdf, cross-repo dedup)
 scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cross-repo dedup)
 scripts/ingest_submissions.py      Converts an issue-form submission into community_submissions.jsonl
 scripts/normalize.py               Classifies raw records against playbooks, emits unified schema (cross-platform URL dedup)

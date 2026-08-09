@@ -31,7 +31,7 @@ import sys
 
 SCHEMA_VERSION = "1.0.0"
 
-EXCLUDED_PLAYBOOKS = {"ctf_challenge_generic", "tryhackme_room_generic"}
+EXCLUDED_PLAYBOOKS = {"ctf_challenge_generic", "tryhackme_room_generic", "hackthebox_box_generic"}
 
 # Heuristic "how valuable is confirming this vulnerability class, on its own"
 # -- authored security judgment, not a measured score. See DATA_LICENSE.

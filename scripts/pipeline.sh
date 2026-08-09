@@ -4,9 +4,10 @@
 # SQLite index).
 #
 # Usage: ./pipeline.sh [hackerone_pages] [pentesterland_limit] [ctf_per_page] [thm_repos_per_topic]
-# Defaults below reproduce the full-scale run (~16.2k records): a complete
+# Defaults below reproduce the full-scale run (~25k records): a complete
 # HackerOne pull (260 pages x 50 = up to 13,000 disclosed reports) and a wide
-# TryHackMe/CTF repo search. Pass smaller numbers for a quick local test run.
+# TryHackMe/HackTheBox/CTF repo search (file-level, not repo-level). Pass
+# smaller numbers for a quick local test run.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -33,10 +34,13 @@ echo "== Collecting individual researcher blogs ==" >&2
 python3 collect_blogs.py --out ../data/raw/blogs.jsonl
 
 echo "== Collecting CTF writeup repositories ==" >&2
-python3 collect_ctf.py --per-page "$CTF_PER_PAGE" --out ../data/raw/ctf.jsonl
+python3 collect_ctf.py --repos-per-topic "$CTF_PER_PAGE" --max-files-per-repo 300 --out ../data/raw/ctf.jsonl
 
 echo "== Collecting TryHackMe room writeups ==" >&2
 python3 collect_tryhackme.py --repos-per-topic "$THM_REPOS_PER_TOPIC" --max-files-per-repo 400 --out ../data/raw/tryhackme.jsonl
+
+echo "== Collecting HackTheBox machine writeups ==" >&2
+python3 collect_hackthebox.py --repos-per-topic "$THM_REPOS_PER_TOPIC" --max-files-per-repo 400 --out ../data/raw/hackthebox.jsonl
 
 if [ -s ../knowledge/community_submissions.jsonl ]; then
   echo "== Folding in community submissions ==" >&2

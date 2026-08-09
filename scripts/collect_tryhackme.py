@@ -35,7 +35,7 @@ SKIP_PARENT_DIRS = {
     "solutions", "ctf", "src", "notes", "images", "img", "assets", "tools",
     "tool", "scripts", "misc",
 }
-SKIP_PATH_SEGMENTS = {"tools", "tool", "scripts", "assets", "images", "img"}
+SKIP_PATH_SEGMENTS = {"tools", "tool", "scripts", "assets", "images", "img", ".github", ".git"}
 
 
 def gh_json(path):
@@ -127,7 +127,7 @@ def main():
                 for path in files:
                     title = title_from_path(path)
                     norm = normalize_title(title)
-                    if not norm:
+                    if not norm or title.strip().isdigit():
                         continue
                     if norm in seen_titles:
                         dup_titles_skipped += 1

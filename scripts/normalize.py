@@ -122,9 +122,8 @@ def build_record(raw, playbook_id, confidence, playbooks_by_id, collector_name):
         author = None
         disclosed_at = None
         bounty = None
-        tags = ["ctf", raw.get("topic_matched")]
-        stars = raw.get("stars")
-        summary = f"Curated CTF writeup collection ({stars} stars on GitHub): {raw.get('description') or title}."
+        tags = ["ctf"]
+        summary = f"CTF writeup ('{title}') covering {pb['vulnerability_class']}."
     elif platform == "tryhackme":
         title = raw.get("title") or pb["vulnerability_class"]
         severity = "unknown"
@@ -135,6 +134,16 @@ def build_record(raw, playbook_id, confidence, playbooks_by_id, collector_name):
         stars = raw.get("repo_stars")
         tags = ["tryhackme"]
         summary = f"TryHackMe room writeup ('{title}') covering {pb['vulnerability_class']}."
+    elif platform == "hackthebox":
+        title = raw.get("title") or pb["vulnerability_class"]
+        severity = "unknown"
+        program = "HackTheBox"
+        author = None
+        disclosed_at = None
+        bounty = None
+        stars = raw.get("repo_stars")
+        tags = ["hackthebox"]
+        summary = f"HackTheBox machine writeup ('{title}') covering {pb['vulnerability_class']}."
     else:
         raise ValueError(f"unknown platform {platform}")
 
@@ -203,7 +212,7 @@ def main():
     # to a HackerOne report we already collected directly) resolves in favor
     # of the more precisely-classified record rather than whichever file glob
     # happened to sort first alphabetically.
-    SOURCE_PRIORITY = ["hackerone.jsonl", "tryhackme.jsonl", "ctf.jsonl", "community_submissions.jsonl", "blogs.jsonl", "pentesterland.jsonl", "curated_lists.jsonl", "medium_feeds.jsonl"]
+    SOURCE_PRIORITY = ["hackerone.jsonl", "tryhackme.jsonl", "hackthebox.jsonl", "ctf.jsonl", "community_submissions.jsonl", "blogs.jsonl", "pentesterland.jsonl", "curated_lists.jsonl", "medium_feeds.jsonl"]
     all_files = sorted(glob.glob(os.path.join(args.raw_dir, "*.jsonl")))
     ordered_files = sorted(all_files, key=lambda p: SOURCE_PRIORITY.index(os.path.basename(p)) if os.path.basename(p) in SOURCE_PRIORITY else len(SOURCE_PRIORITY))
 
@@ -232,9 +241,12 @@ def main():
                         text_fields = (raw.get("bugs") or []) + [raw.get("title")]
                         tag_field = " ".join(raw.get("bugs") or [])
                     elif platform == "ctf":
-                        text_fields = ["ctf writeups"]
-                        tag_field = "ctf"
+                        text_fields = [raw.get("title")]
+                        tag_field = raw.get("title")
                     elif platform == "tryhackme":
+                        text_fields = [raw.get("title")]
+                        tag_field = raw.get("title")
+                    elif platform == "hackthebox":
                         text_fields = [raw.get("title")]
                         tag_field = raw.get("title")
                     else:
@@ -248,11 +260,15 @@ def main():
                         if playbook_id:
                             confidence = "low"
 
-                    # TryHackMe room titles are often thematic (e.g. "Blue", "Ice") rather
-                    # than vulnerability-descriptive; fall back to the generic room-solving
-                    # playbook instead of dropping the record.
+                    # Room/box/challenge titles are often thematic (e.g. "Blue", "Ice")
+                    # rather than vulnerability-descriptive; fall back to the platform's
+                    # generic solving playbook instead of dropping the record.
                     if not playbook_id and platform == "tryhackme":
                         playbook_id, confidence = "tryhackme_room_generic", "low"
+                    if not playbook_id and platform == "hackthebox":
+                        playbook_id, confidence = "hackthebox_box_generic", "low"
+                    if not playbook_id and platform == "ctf":
+                        playbook_id, confidence = "ctf_challenge_generic", "low"
 
                     if not playbook_id:
                         total_skipped += 1

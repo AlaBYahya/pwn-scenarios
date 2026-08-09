@@ -32,7 +32,9 @@ anything else in the graph until you also add bridge action(s) for it in
 
 Edit `knowledge/graph/bridges.json` (generic capability chains) or
 `knowledge/graph/technology_bridges.json` (a specific CVE -- please verify
-the CVE ID and CVSS against [NVD](https://nvd.nist.gov/) first): add any new
+the CVE ID and CVSS against NVD first, e.g.
+`python3 scripts/lookup_cve.py CVE-2021-44228`; set `NVD_API_KEY` in your
+environment for a higher rate limit on multiple lookups): add any new
 state(s) to `states`, and an action to `actions` with `from_state` set to an
 existing `{playbook_id}_confirmed` state (or another bridge state) and one
 or more `outcomes` pointing at `to_state`s. Then:

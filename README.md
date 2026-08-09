@@ -1,5 +1,10 @@
 <p align="center"><img src="assets/logo.svg" alt="pwn-scenarios — IT sec for fun and profit" width="600"></p>
 
+<p align="center">
+  <a href="https://colab.research.google.com/github/AlaBYahya/pwn-scenarios/blob/main/notebooks/quickstart.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
+  <a href="https://github.com/AlaBYahya/pwn-scenarios/releases/latest"><img src="https://img.shields.io/github/v/release/AlaBYahya/pwn-scenarios" alt="Latest release"></a>
+</p>
+
 A dataset of penetration testing / bug bounty **scenarios** -- generalized,
 reusable condition → step → impact → remediation processes for common
 vulnerability classes, each grounded in a real, publicly disclosed report or

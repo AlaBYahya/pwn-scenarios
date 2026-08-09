@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this dataset or its attack graph, please cite it as below."
+title: "pwn-scenarios: An AI-ready dataset of penetration testing and bug bounty scenarios"
+type: dataset
+authors:
+  - name: "AlaBYahya"
+repository-code: "https://github.com/AlaBYahya/pwn-scenarios"
+url: "https://github.com/AlaBYahya/pwn-scenarios"
+license:
+  - MIT
+  - CC-BY-4.0
+version: 1.0.0
+date-released: "2026-08-09"
+keywords:
+  - bug-bounty
+  - penetration-testing
+  - security-dataset
+  - cve
+  - llm-security
+  - rag
+  - dataset
+  - infosec

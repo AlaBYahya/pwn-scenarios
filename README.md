@@ -104,17 +104,32 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **25,140 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **28,280 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
-| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 7,897 |
+| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 10,977 |
 | GitHub CTF-writeup repos (file-level, not repo-level) | `ctf` | 7,377 |
-| Pentester Land + 3 curated GitHub lists + 3 Medium feeds + 3 researcher blogs | `aggregated_writeup` | 5,980 |
+| Pentester Land + 3 curated GitHub lists + 4 RSS feeds + 3 researcher blogs | `aggregated_writeup` | 6,040 |
 | GitHub TryHackMe room-writeup repos | `tryhackme` | 2,386 |
 | GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,500 |
 
-**The CTF and HackTheBox jump is the real story of this round.** Both
+**Real bug bounty vs. lab/CTF content**: an explicit ask this round was
+more real bug bounty reports relative to CTF/lab writeups. The highest-leverage
+fix needed no new scraping at all: 3,080 of the 12,386 HackerOne reports
+already collected were sitting unclassified because their `weakness` value
+(HackerOne's own CWE-based taxonomy string, e.g. "Improper Access Control -
+Generic", "Cryptographic Issues - Generic") didn't match any alias in
+`knowledge/vulnerability_playbooks.json`. Added ~50 new aliases across 10
+existing playbooks plus one new playbook (`cryptographic_issues`, CWE-310 --
+weak algorithms, broken certificate validation, predictable randomness; 211
+records) to cover the actual distribution of HackerOne's taxonomy, not just
+the terms bug hunters happen to use in writeup titles. Real bug bounty
+(`hackerone` + `aggregated_writeup`) went from 55.2% to **60.2%** of the
+dataset as a direct result -- purely from classifying data already sitting
+in `data/raw/hackerone.jsonl`, nothing new fetched.
+
+**The CTF and HackTheBox jump was the previous round's story.** Both
 collectors originally indexed *repositories* (one record per repo --
 `ctf` was 169 records total). The `ctf-writeups` GitHub topic alone spans
 1,800+ repos, each often containing dozens of individual challenge
@@ -134,11 +149,17 @@ files were slipping through as fake "writeup titles" (fixed by excluding
 titles like "1" and "2" (fixed by dropping purely-numeric titles). Both
 fixes are in the collectors now, not just patched after the fact.
 
-The Medium feeds (InfoSec Write-ups, System Weakness, OSINT Team --
-`scripts/collect_medium_feeds.py`, via each publication's own RSS `/feed`)
-only return their ~10 most recent posts per fetch; re-running the collector
+`scripts/collect_rss_feeds.py` pulls from each publisher's own RSS `/feed`:
+three Medium publications (InfoSec Write-ups, System Weakness, OSINT Team)
+plus the **Intigriti** platform blog (a mix of company posts, a "Bug Bytes"
+digest, and real technical research -- non-writeup posts just don't match
+any vulnerability-class alias and get dropped automatically, same
+self-cleaning behavior relied on everywhere else). These feeds only return
+the ~10-20 most recent posts per fetch; re-running the collector
 periodically accumulates more as new articles publish, deduped
-automatically by URL.
+automatically by URL. `bugbountydaily.com` was also checked and skipped --
+a client-rendered React/Supabase app with no feed, sitemap, or robots.txt,
+same category of problem as `writeups.io`.
 
 `scripts/collect_blogs.py` adds three individual researcher blogs:
 **Embrace The Red** (Johann Rehberger's AI/LLM security research -- 213
@@ -208,7 +229,7 @@ Here's the honest accounting: pushing every legitimate source available as
 far as it goes -- a full pull of HackerOne's disclosed reports (not a
 sample), Pentester Land's complete index, two more curated GitHub
 writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
-dataset from 7,342 to **25,140** unique records. That's real growth, not
+dataset from 7,342 to **28,280** unique records. That's real growth, not
 padding (every record is schema-validated, source-linked, and deduplicated
 by URL across sources). It's not 100k.
 
@@ -216,8 +237,10 @@ Platforms that could plausibly have gotten closer were checked and ruled
 out rather than worked around:
 - **Open Bug Bounty** sits behind a Cloudflare bot-detection challenge --
   bypassing that isn't something this project will do.
-- **Intigriti**'s API requires an authenticated account; there's no public,
-  unauthenticated equivalent to HackerOne's Hacktivity API.
+- **Intigriti**'s disclosed-*reports* API requires an authenticated account;
+  there's no public, unauthenticated equivalent to HackerOne's Hacktivity
+  API. (Their platform *blog* does have a public RSS feed, since added --
+  see below. Different thing from a disclosure archive.)
 - **Bugcrowd**'s public `crowdstream` is a live *submission-acceptance*
   feed, not a disclosure archive -- almost none of it has `disclosed` set,
   so there's little actual writeup content to collect from it.
@@ -233,9 +256,11 @@ out rather than worked around:
 - **bugbountyhunter.com/disclosed** links almost entirely to
   `hackerone.com/reports/*` -- URLs we already collect completely and
   directly via the HackerOne API. Near-zero unique incremental value.
-- **writeups.io** is a client-side-rendered (Next.js) app with no
-  discoverable public API; its content isn't reachable via a feed, sitemap,
-  or endpoint the way every other source here is.
+- **writeups.io** and **bugbountydaily.com** are both client-side-rendered
+  apps (Next.js and React/Supabase respectively) with no discoverable public
+  API, feed, or sitemap; their content isn't reachable the way every other
+  source here is without executing JavaScript or reverse-engineering a
+  private backend.
 
 Reaching 100k for real would mean either scraping full writeup bodies from
 thousands of individual blogs at scale (the copyright problem this project
@@ -266,22 +291,25 @@ python3 ingest_submissions.py --url https://... --title "..." --tags "IDOR,SSRF"
 cp ../knowledge/community_submissions.jsonl ../data/raw/community_submissions.jsonl
 python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
 python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
-python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir ../data/scenarios/by_class --db ../data/index.sqlite3
+python3 build_views.py    # rebuilds by_class/ + index.sqlite3
+python3 chunk_scenarios.py   # re-splits scenarios.jsonl into the committed chunks/
 ```
 
 Unlike `data/raw/*.jsonl` from the API/feed collectors (ephemeral,
 re-fetchable, gitignored), `knowledge/community_submissions.jsonl` is
 committed directly -- it's real human contribution, not something a script
 can regenerate. Every PR that touches the dataset or graph is checked by
-[`.github/workflows/validate.yml`](.github/workflows/validate.yml):
-schema validation, referential integrity, and a check that the committed
-`attack_graph.json`/`by_class/` files actually match what their source
-files would regenerate.
+[`.github/workflows/validate.yml`](.github/workflows/validate.yml): schema
+validation, referential integrity, a check that the committed
+`attack_graph.json` actually matches what its source files would
+regenerate, and a check that `data/scenarios/chunks/` reassembles to the
+SHA256 recorded in its own `manifest.json`.
 
 ## Using this dataset: RAG, not raw fine-tuning
 
-`scenarios.jsonl` repeats the same ~35 authored playbook texts across 7,342
-records with different source-metadata wrappers. That's fine, even good, for
+`scenarios.jsonl` repeats a relatively small library of authored playbook
+texts (48 vulnerability classes) across 28,280 records with different
+source-metadata wrappers. That's fine, even good, for
 **retrieval** -- look up "what do I know about SSRF," get back the playbook
 plus real grounding links. It's a poor fit for **supervised fine-tuning as
 a raw dump**: training on it directly would mostly teach a model to
@@ -306,32 +334,41 @@ For anything closer to actual **decision-making/RL training data**, the
 [attack graph](#beyond-a-flat-list-the-attack-decision-graph) and its
 simulator are the better starting point -- see below.
 
-## Finding records: three ways to consume the dataset
+## Finding records: how the dataset is shipped and consumed
 
-A single 25,140-line JSONL file isn't practical to browse or filter by hand.
-Only one form of the dataset is committed to the repo -- the other two are
-generated locally in seconds, not shipped, so the repo stays clonable:
+A single 28,280-line, ~80MB JSONL file isn't practical to download, upload,
+or browse by hand. Nothing that large is committed as one file -- here's
+what actually is:
 
-1. **`data/scenarios/scenarios.jsonl`** (committed, ~47MB) -- the canonical
-   file, one record per line. Best for bulk loading (e.g.
-   `datasets.load_dataset("json", data_files=...)` in Python) or streaming
-   the whole thing.
-2. **`data/scenarios/by_class/<playbook_id>.jsonl`** (git-ignored, build
-   locally) -- the same records split per vulnerability class, so you can
-   work with just `by_class/sqli.jsonl` or `by_class/ssrf.jsonl` without
-   loading everything.
-3. **`data/index.sqlite3`** (git-ignored, build locally) -- an indexed
-   SQLite database (CWE, severity, platform, playbook_id, target_type,
-   confidence, plus an FTS5 full-text index) for actual filtering.
+1. **`data/scenarios/chunks/scenarios.part001.jsonl` ... `part015.jsonl`**
+   (committed, ~5MB each) -- the dataset split into fixed-size,
+   sequentially-numbered chunks via `scripts/chunk_scenarios.py`. This is
+   the thing you actually clone/download/upload. Grab one chunk to sample
+   the data, or all of them for the full set. A `manifest.json` alongside
+   them records the total record count and a SHA256 of the reassembled
+   file, so you can verify nothing got corrupted or truncated in transit.
+2. **`data/scenarios/scenarios.jsonl`** (git-ignored, local working file)
+   -- reassemble it from the chunks with a single command, whenever you
+   want the whole thing as one stream:
+   ```bash
+   cat data/scenarios/chunks/*.jsonl > data/scenarios/scenarios.jsonl
+   ```
+   This is what every downstream script (`build_views.py`,
+   `sample_balanced.py`, `normalize.py`'s own output) reads/writes locally
+   -- it's the canonical form, just not the committed form.
+3. **`data/scenarios/by_class/<playbook_id>.jsonl`** and **`data/index.sqlite3`**
+   (both git-ignored, build locally) -- same records split per
+   vulnerability class, and an indexed SQLite database (CWE, severity,
+   platform, playbook_id, target_type, confidence, plus FTS5 full-text)
+   for actual filtering. Build (or rebuild) both, plus the chunks, in one
+   step from a reassembled `scenarios.jsonl`:
+   ```bash
+   cd scripts
+   python3 build_views.py
+   python3 chunk_scenarios.py
+   ```
 
-Build both in one step, no arguments needed:
-
-```bash
-cd scripts
-python3 build_views.py
-```
-
-Then query it directly with `sqlite3`, or use the bundled CLI:
+Then query the SQLite index directly with `sqlite3`, or use the bundled CLI:
 
 ```bash
 python3 query.py --cwe CWE-89                          # by CWE
@@ -342,14 +379,16 @@ python3 query.py --cwe CWE-639 --json                   # full record JSON out
 python3 query.py                                        # no filters -> lists all playbook_ids/platforms
 ```
 
-**Why these two aren't committed**: both are 100% mechanically derived from
-`scenarios.jsonl` -- shipping them meant storing the same ~16k records
-three times over (scenarios.jsonl + by_class + inside the SQLite rows),
-which is how the repo hit ~179MB and tripped GitHub's recommended
-50MB-per-file warning on the SQLite index. `build_views.py` regenerates
-both from the one committed source of truth in well under a minute; CI
-runs it on every push to catch drift (record-count check against
-`scenarios.jsonl`), it just doesn't commit the output.
+**Why chunk instead of shipping one file**: `by_class/` and `index.sqlite3`
+are 100% mechanically derived from `scenarios.jsonl`, so they were dropped
+from git entirely (regenerate locally, see above) -- that fixed the repo's
+overall size. But `scenarios.jsonl` itself is the canonical *source*, not a
+derived duplicate, so it can't just be gitignored-and-regenerated the same
+way; it has to be shipped somehow. At 28,280 records (~80MB) it tripped
+GitHub's 50MB single-file warning on its own. Splitting it into ~5MB chunks
+solves the actual complaint (awkward to download/upload/read) without
+losing anything -- `cat`-ing them back together reproduces the original
+byte-for-byte, which CI verifies via the manifest's SHA256 on every push.
 
 ## Repo layout
 
@@ -366,7 +405,7 @@ knowledge/community_submissions.jsonl    Committed log of writeups submitted via
 scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_curated_lists.py   Additional curated GitHub writeup-list collectors
-scripts/collect_medium_feeds.py    Medium publication RSS feed collector (InfoSec Write-ups, etc.)
+scripts/collect_rss_feeds.py    Medium publication RSS feed collector (InfoSec Write-ups, etc.)
 scripts/collect_blogs.py           Individual researcher blog collector (atom feeds + sitemap+og:title)
 scripts/collect_ctf.py             GitHub CTF-writeup collector (file-level, cross-repo dedup)
 scripts/collect_hackthebox.py      GitHub HackTheBox-writeup collector (file-level, md+pdf, cross-repo dedup)
@@ -381,8 +420,10 @@ scripts/build_graph.py             Generates per-class graph chains from playboo
 scripts/validate_graph.py          Graph schema + referential integrity + reachability validation
 scripts/query_graph.py             CLI for traversing the graph / finding candidate attack paths
 scripts/simulate_graph.py          Samples synthetic (state, action, outcome, reward) episodes from the graph
-scripts/pipeline.sh                Runs the full chain: collect -> normalize -> validate -> build_views -> build_graph
-data/scenarios/scenarios.jsonl     The canonical published scenario dataset
+scripts/chunk_scenarios.py         Splits scenarios.jsonl into fixed-size chunks for git
+scripts/pipeline.sh                Runs the full chain: collect -> normalize -> validate -> build_views -> build_graph -> chunk
+data/scenarios/chunks/              The committed dataset: scenarios.jsonl split into ~5MB chunks + manifest.json
+data/scenarios/scenarios.jsonl     Reassembled working file (gitignored -- `cat chunks/*.jsonl >` this)
 data/scenarios/by_class/           Same records, split per vulnerability class (gitignored, `build_views.py`)
 data/scenarios/balanced_sample.jsonl   Class-balanced subset (see "Using this dataset")
 data/index.sqlite3                 Indexed + full-text-searchable SQLite view (gitignored, `build_views.py`)
@@ -471,12 +512,14 @@ structured so a `--llm` mode could be added without changing the schema).
   were tried, which were ruled out, and why.
 - **Repo size**: `data/index.sqlite3` and `data/scenarios/by_class/` are no
   longer committed (they're 100% derived from `scenarios.jsonl` --
-  regenerate with `python3 scripts/build_views.py`), which is what actually
-  fixed the growth problem noted in earlier versions of this doc rather than
-  just working around it. `scenarios.jsonl` itself (~47MB) still grows with
-  every new source and every community submission, which is expected and
-  fine -- it's real, non-duplicated data. If it eventually gets large enough
-  to matter on its own, Git LFS is the next lever, not before.
+  regenerate with `python3 scripts/build_views.py`). `scenarios.jsonl`
+  itself crossed GitHub's 50MB single-file warning as it grew past ~25k
+  records; it's now shipped as ~5MB chunks under `data/scenarios/chunks/`
+  instead (`scripts/chunk_scenarios.py`), reassembled locally with `cat`.
+  The chunks will keep growing with every new source and community
+  submission, which is expected and fine -- it's real, non-duplicated data,
+  and chunking (unlike the derived-views fix) scales indefinitely without
+  needing a bigger lever like Git LFS.
 
 ## License
 

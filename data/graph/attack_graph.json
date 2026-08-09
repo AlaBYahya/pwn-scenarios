@@ -962,6 +962,86 @@
       ]
     },
     {
+      "state_id": "cryptographic_issues_after_step1",
+      "description": "Step 1 of Cryptographic Issues testing succeeded: List of cryptographic usage points and their apparent algorithm/parameters",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of cryptographic usage points and their apparent algorithm/parameters"
+        }
+      ]
+    },
+    {
+      "state_id": "cryptographic_issues_after_step2",
+      "description": "Step 2 of Cryptographic Issues testing succeeded: A weak/deprecated algorithm identified (MD5, SHA1 for passwords, RC4, TLS 1.0, ECB mode, predictable PRNG)",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A weak/deprecated algorithm identified (MD5, SHA1 for passwords, RC4, TLS 1.0, ECB mode, predictable PRNG)"
+        }
+      ]
+    },
+    {
+      "state_id": "cryptographic_issues_after_step3",
+      "description": "Step 3 of Cryptographic Issues testing succeeded: A self-signed or mismatched certificate is silently accepted, enabling MITM interception",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A self-signed or mismatched certificate is silently accepted, enabling MITM interception"
+        }
+      ]
+    },
+    {
+      "state_id": "cryptographic_issues_confirmed",
+      "description": "Cryptographic Issues confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "medium",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Plaintext recovered, or future token values predicted from the observed weakness"
+        }
+      ]
+    },
+    {
+      "state_id": "cryptographic_issues_ruled_out",
+      "description": "Cryptographic Issues was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "csrf_after_step1",
       "description": "Step 1 of Cross-Site Request Forgery (CSRF) testing succeeded: List of sensitive POST/PUT/DELETE endpoints",
       "tier": "recon",
@@ -7018,6 +7098,120 @@
           "observation": "Expected result not observed ('null origin or arbitrary subdomain also accepted' did not occur).",
           "likelihood": "possible",
           "to_state": "cors_misconfiguration_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "cryptographic_issues_step1",
+      "from_state": "web_target_identified",
+      "action": "Identify where cryptography is used: password storage, token generation, data-at-rest encryption, TLS configuration, signed URLs/tokens",
+      "technique": "attack surface mapping",
+      "tools": [
+        "manual review",
+        "testssl.sh"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "List of cryptographic usage points and their apparent algorithm/parameters",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('List of cryptographic usage points and their apparent algorithm/parameters' did not occur).",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "cryptographic_issues_step2",
+      "from_state": "cryptographic_issues_after_step1",
+      "action": "Fingerprint the algorithm/parameters in use (hash type, cipher suite, key length, TLS version) via response headers, token structure, or protocol handshake",
+      "technique": "cryptographic fingerprinting",
+      "tools": [
+        "testssl.sh",
+        "jwt_tool",
+        "hashid"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A weak/deprecated algorithm identified (MD5, SHA1 for passwords, RC4, TLS 1.0, ECB mode, predictable PRNG)",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A weak/deprecated algorithm identified (MD5, SHA1 for passwords, RC4, TLS 1.0, ECB mode, predictable PRNG)' did not occur).",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "cryptographic_issues_step3",
+      "from_state": "cryptographic_issues_after_step2",
+      "action": "For certificate validation, test whether the client (mobile app, backend service) properly validates the presented certificate chain, hostname, and expiry",
+      "technique": "certificate validation testing",
+      "tools": [
+        "Burp Suite",
+        "mitmproxy",
+        "self-signed cert"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A self-signed or mismatched certificate is silently accepted, enabling MITM interception",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A self-signed or mismatched certificate is silently accepted, enabling MITM interception' did not occur).",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "cryptographic_issues_step4",
+      "from_state": "cryptographic_issues_after_step3",
+      "action": "Attempt to exploit the weakness directly: crack weakly-hashed values offline, decrypt data using a known/derivable key, or predict a 'random' token from observed outputs",
+      "technique": "cryptanalysis / offline cracking",
+      "tools": [
+        "hashcat",
+        "custom scripts"
+      ],
+      "playbook_ref": "cryptographic_issues",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Plaintext recovered, or future token values predicted from the observed weakness",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Plaintext recovered, or future token values predicted from the observed weakness' did not occur).",
+          "likelihood": "possible",
+          "to_state": "cryptographic_issues_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]

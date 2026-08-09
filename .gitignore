@@ -8,3 +8,10 @@ __pycache__/
 # See "Building the derived views locally" in the README.
 data/index.sqlite3
 data/scenarios/by_class/
+
+# scenarios.jsonl itself is the canonical source of truth, so it's not
+# regenerable the way the views above are -- but a single 78MB+ file is the
+# same problem in a different shape. It's shipped chunked instead: see
+# data/scenarios/chunks/ and `scripts/chunk_scenarios.py`. Reassemble locally
+# with: cat data/scenarios/chunks/*.jsonl > data/scenarios/scenarios.jsonl
+data/scenarios/scenarios.jsonl

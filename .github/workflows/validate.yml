@@ -19,6 +19,23 @@ jobs:
       - name: Install dependencies
         run: pip install jsonschema
 
+      - name: Reassemble scenarios.jsonl from chunks and verify checksum
+        # scenarios.jsonl itself isn't committed (see .gitignore) -- only the
+        # fixed-size chunks under data/scenarios/chunks/ are. This both
+        # reconstructs the working file for the rest of the job and confirms
+        # the chunks weren't corrupted/truncated in transit.
+        run: |
+          cat data/scenarios/chunks/scenarios.part*.jsonl > data/scenarios/scenarios.jsonl
+          python3 -c "
+          import hashlib, json
+          manifest = json.load(open('data/scenarios/chunks/manifest.json'))
+          actual = hashlib.sha256(open('data/scenarios/scenarios.jsonl', 'rb').read()).hexdigest()
+          assert actual == manifest['sha256'], f\"checksum mismatch: manifest={manifest['sha256']} actual={actual}\"
+          actual_count = sum(1 for _ in open('data/scenarios/scenarios.jsonl'))
+          assert actual_count == manifest['total_records'], f\"record count mismatch: manifest={manifest['total_records']} actual={actual_count}\"
+          print(f\"OK: {actual_count} records, checksum matches manifest\")
+          "
+
       - name: Validate scenario dataset against schema
         run: |
           cd scripts

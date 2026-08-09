@@ -1,0 +1,83 @@
+{
+  "total_records": 28280,
+  "records_per_chunk": 2000,
+  "chunk_count": 15,
+  "sha256": "9d4ff5cf2a6af316ef84a496afc87d1b9db3c50b22143e9b6015f30101f22a7c",
+  "chunks": [
+    {
+      "file": "scenarios.part001.jsonl",
+      "records": 2000,
+      "bytes": 5909211
+    },
+    {
+      "file": "scenarios.part002.jsonl",
+      "records": 2000,
+      "bytes": 5888179
+    },
+    {
+      "file": "scenarios.part003.jsonl",
+      "records": 2000,
+      "bytes": 5878726
+    },
+    {
+      "file": "scenarios.part004.jsonl",
+      "records": 2000,
+      "bytes": 5852659
+    },
+    {
+      "file": "scenarios.part005.jsonl",
+      "records": 2000,
+      "bytes": 5821177
+    },
+    {
+      "file": "scenarios.part006.jsonl",
+      "records": 2000,
+      "bytes": 5941621
+    },
+    {
+      "file": "scenarios.part007.jsonl",
+      "records": 2000,
+      "bytes": 6096220
+    },
+    {
+      "file": "scenarios.part008.jsonl",
+      "records": 2000,
+      "bytes": 5711760
+    },
+    {
+      "file": "scenarios.part009.jsonl",
+      "records": 2000,
+      "bytes": 5380129
+    },
+    {
+      "file": "scenarios.part010.jsonl",
+      "records": 2000,
+      "bytes": 5357980
+    },
+    {
+      "file": "scenarios.part011.jsonl",
+      "records": 2000,
+      "bytes": 5414000
+    },
+    {
+      "file": "scenarios.part012.jsonl",
+      "records": 2000,
+      "bytes": 6028927
+    },
+    {
+      "file": "scenarios.part013.jsonl",
+      "records": 2000,
+      "bytes": 6041501
+    },
+    {
+      "file": "scenarios.part014.jsonl",
+      "records": 2000,
+      "bytes": 6041410
+    },
+    {
+      "file": "scenarios.part015.jsonl",
+      "records": 280,
+      "bytes": 849808
+    }
+  ]
+}

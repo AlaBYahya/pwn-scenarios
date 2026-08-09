@@ -28,7 +28,7 @@ echo "== Collecting additional curated GitHub writeup lists ==" >&2
 python3 collect_curated_lists.py --out ../data/raw/curated_lists.jsonl
 
 echo "== Collecting Medium publication RSS feeds ==" >&2
-python3 collect_medium_feeds.py --out ../data/raw/medium_feeds.jsonl
+python3 collect_rss_feeds.py --out ../data/raw/rss_feeds.jsonl
 
 echo "== Collecting individual researcher blogs ==" >&2
 python3 collect_blogs.py --out ../data/raw/blogs.jsonl
@@ -63,9 +63,12 @@ python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../sc
 echo "== Building a class-balanced fine-tuning sample ==" >&2
 python3 sample_balanced.py --data ../data/scenarios/scenarios.jsonl --max-per-class 20 --min-confidence medium --out ../data/scenarios/balanced_sample.jsonl
 
+echo "== Splitting scenarios.jsonl into fixed-size chunks for git ==" >&2
+python3 chunk_scenarios.py --data ../data/scenarios/scenarios.jsonl --out-dir ../data/scenarios/chunks --records-per-chunk 2000
+
 echo "== Sampling synthetic graph episodes ==" >&2
 python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 3000 --policy random --out ../data/graph/episodes_random.jsonl
 python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl
 python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy epsilon_greedy --out ../data/graph/episodes_epsilon_greedy.jsonl
 
-echo "Done. Canonical: ../data/scenarios/scenarios.jsonl | Browsable: ../data/scenarios/by_class/ | Queryable: ../data/index.sqlite3 | Graph: ../data/graph/attack_graph.json | Episodes: ../data/graph/episodes_*.jsonl" >&2
+echo "Done. Canonical (local, gitignored): ../data/scenarios/scenarios.jsonl | Committed chunks: ../data/scenarios/chunks/ | Browsable: ../data/scenarios/by_class/ | Queryable: ../data/index.sqlite3 | Graph: ../data/graph/attack_graph.json | Episodes: ../data/graph/episodes_*.jsonl" >&2

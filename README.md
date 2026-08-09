@@ -3,6 +3,7 @@
 <p align="center">
   <a href="https://colab.research.google.com/github/AlaBYahya/pwn-scenarios/blob/main/notebooks/quickstart.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
   <a href="https://github.com/AlaBYahya/pwn-scenarios/releases/latest"><img src="https://img.shields.io/github/v/release/AlaBYahya/pwn-scenarios" alt="Latest release"></a>
+  <a href="https://huggingface.co/datasets/aeby/pwn-scenarios"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-yellow" alt="Hugging Face Dataset"></a>
 </p>
 
 A dataset of penetration testing / bug bounty **scenarios** -- generalized,
@@ -146,6 +147,12 @@ whole. It ships as fixed-size chunks instead:
    **`data/index.sqlite3`** (both gitignored, build locally with
    `python3 scripts/build_views.py`) -- per-class files and an indexed,
    full-text-searchable SQLite view.
+4. **[Hugging Face Hub](https://huggingface.co/datasets/aeby/pwn-scenarios)**
+   -- same 30,293 records as a Parquet file, no cloning or reassembly:
+   ```python
+   from datasets import load_dataset
+   ds = load_dataset("aeby/pwn-scenarios")
+   ```
 
 Query the SQLite index directly, or via the bundled CLI:
 

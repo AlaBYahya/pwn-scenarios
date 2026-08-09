@@ -38,16 +38,22 @@ uses to evaluate candidate moves and their resulting positions.
 States are conditions/capabilities ("`idor_confirmed`",
 "`low_priv_shell_obtained`", "`full_host_compromise`"); actions are moves
 that branch into qualitatively-scored outcomes leading to new states. 35
-generic vulnerability classes plus 8 real, specific CVE chains (Log4Shell,
+generic vulnerability classes, 8 real specific CVE chains (Log4Shell,
 Spring4Shell, the Confluence/GitLab/Struts/Citrix/Exchange/Laravel RCEs --
-CVE IDs and CVSS scores verified against NVD) converge and chain through a
-shared vocabulary of hand-authored bridge states -- e.g. every RCE-capable
-class or CVE all converge on `low_priv_shell_obtained`, and SSRF can chain
-into `cloud_metadata_reachable -> cloud_credentials_obtained -> full_cloud_account_compromise`.
-Each state also carries `detection_signals`: authored hints (not a working
-classifier) for recognizing it from real tool output -- e.g. what a metadata
-credentials response actually looks like, or what a root shell's `id` output
-looks like.
+CVE IDs and CVSS scores verified against NVD), and 9 AI/LLM classes (prompt
+injection, excessive agency, insecure output handling, ...) all converge and
+chain through a shared vocabulary of hand-authored bridge states -- e.g.
+every RCE-capable class or CVE converges on `low_priv_shell_obtained`, SSRF
+can chain into `cloud_metadata_reachable -> cloud_credentials_obtained ->
+full_cloud_account_compromise`, and -- the interesting one -- a prompt
+injection that abuses an over-scoped agent tool converges on the exact same
+`unauthorized_privileged_action_possible` state that IDOR or mass assignment
+reach: AI-specific and classic web vulnerabilities landing on the same
+attacker objective through different paths, not two separate graphs bolted
+together. Each state also carries `detection_signals`: authored hints (not
+a working classifier) for recognizing it from real tool output -- e.g. what
+a metadata credentials response actually looks like, or what a root shell's
+`id` output looks like.
 
 ```bash
 cd scripts
@@ -68,7 +74,7 @@ python3 simulate_graph.py --episodes 1000 --policy greedy --out ../data/graph/ep
 ```
 
 On the current graph, the value-iteration-informed greedy policy reaches a
-`full_compromise` state **13.1%** of the time vs **6.1%** for a uniformly
+`full_compromise` state **13.1%** of the time vs **5.3%** for a uniformly
 random policy -- a real, if modest, measurable gap. This is still bootstrapped
 from the graph's own authored priors, not ground truth (see caveat below and
 in `docs/GRAPH.md`) -- but it's a materially different artifact than the
@@ -98,29 +104,114 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **7,342 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **16,212 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
-| Pentester Land curated writeup index | `aggregated_writeup` | 5,498 |
-| GitHub TryHackMe room-writeup repos | `tryhackme` | 1,367 |
-| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 393 |
-| GitHub CTF writeup repositories | `ctf` | 84 |
+| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 7,897 |
+| Pentester Land + 2 curated GitHub writeup-list repos | `aggregated_writeup` | 5,755 |
+| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,391 |
+| GitHub CTF writeup repositories | `ctf` | 169 |
 
-Top vulnerability classes by record count: TryHackMe general room-solving
-process (1,280 -- see note below), Broken Access Control (735), Sensitive
-Information Disclosure (692), Reflected XSS (660), Account Takeover (416),
-RCE (354), IDOR (287), Business Logic Flaws (265), SSRF (239) -- 37 classes
-total, see [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
+HackerOne is now a **full pull of every currently disclosed report**
+(12,386 fetched, ~4,489 didn't match a recognized vulnerability class and
+were dropped rather than force-classified). 46 vulnerability classes total
+(35 generic + 9 AI/LLM, see below), see
+[`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
 for the full list.
 
-74% of records (5,451) are `confidence: "high"` classification matches; see
+74% of records are `confidence: "high"` classification matches; see
 [`docs/SCHEMA.md`](docs/SCHEMA.md#confidence-levels) to filter for precision.
 TryHackMe room titles are often thematic ("Blue", "Ice") rather than
 vulnerability-descriptive, so most of them fall back to the generic
 `tryhackme_room_generic` playbook (`confidence: "low"`) rather than a specific
 vulnerability class -- filter to `confidence: "high"` if you only want
 precisely classified records.
+
+**Cross-source deduplication**: Pentester Land and the curated GitHub lists
+sometimes link to the same HackerOne report we already pulled directly.
+`normalize.py` dedups by URL *across* platforms (not just within one),
+preferring the more precisely-classified HackerOne-native record when both
+exist -- 506 cross-platform duplicates were dropped this way, on top of the
+usual per-source dedup.
+
+### AI/LLM vulnerability classes
+
+9 new playbooks cover the [OWASP Top 10 for LLM Applications (2025)](https://genai.owasp.org/llm-top-10/)
+(all except LLM09 Misinformation, which isn't a testable technical
+vulnerability the way the others are): prompt injection (CWE-1427),
+sensitive information disclosure, supply chain, data/model poisoning,
+improper output handling (CWE-1426), excessive agency, system prompt
+leakage, vector/embedding weaknesses, and unbounded consumption. They're
+fully wired into the attack graph (see below) -- but honestly, real-world
+grounded instances are scarce right now: only **prompt injection (22
+records)** and **model DoS (1 record)** matched anything in the sources
+above, because "Prompt Injection" is only just emerging as a tag bug
+hunters actually use; the other 8 classes have zero grounded instances yet.
+The playbooks and graph chains are ready the moment real writeups start
+using this terminology, or via community submission (see below).
+
+### A note on scale
+
+An earlier ask for this project was "extend this to 100k unique writeups."
+Here's the honest accounting: pushing every legitimate source available as
+far as it goes -- a full pull of HackerOne's disclosed reports (not a
+sample), Pentester Land's complete index, two more curated GitHub
+writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
+dataset from 7,342 to **16,212** unique records. That's real growth, not
+padding (every record is schema-validated, source-linked, and deduplicated
+by URL across sources). It's not 100k.
+
+Three platforms that could plausibly have gotten closer were checked and
+ruled out rather than worked around:
+- **Open Bug Bounty** sits behind a Cloudflare bot-detection challenge --
+  bypassing that isn't something this project will do.
+- **Intigriti**'s API requires an authenticated account; there's no public,
+  unauthenticated equivalent to HackerOne's Hacktivity API.
+- **Bugcrowd**'s public `crowdstream` is a live *submission-acceptance*
+  feed, not a disclosure archive -- almost none of it has `disclosed` set,
+  so there's little actual writeup content to collect from it.
+
+Reaching 100k for real would mean either scraping full writeup bodies from
+thousands of individual blogs at scale (the copyright problem this project
+has deliberately avoided since day one -- see `DATA_LICENSE`) or padding
+with low-relevance filler, which would break the "trusted good writeups"
+bar this was supposed to meet. The contribution mechanism below is the
+actual intended path past this ceiling: platform disclosure counts grow
+over time on their own, and every real submission adds a record no
+automated collector could have found.
+
+## Contributing a writeup
+
+Anyone can submit a writeup link without touching JSON or the schema:
+[open an issue using the "Submit a writeup" template](../../issues/new?template=submit-writeup.yml).
+It asks for the URL, title, author, program, and vulnerability tags --
+metadata only, same policy as every other source in this dataset (see
+`DATA_LICENSE`): we link to your writeup, we don't copy it.
+
+For maintainers processing a submission:
+
+```bash
+cd scripts
+python3 ingest_submissions.py --from-issue 42   # parses the issue form via `gh issue view`
+# or manually:
+python3 ingest_submissions.py --url https://... --title "..." --tags "IDOR,SSRF"
+
+# fold it into the published dataset:
+cp ../knowledge/community_submissions.jsonl ../data/raw/community_submissions.jsonl
+python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
+python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
+python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir ../data/scenarios/by_class --db ../data/index.sqlite3
+```
+
+Unlike `data/raw/*.jsonl` from the API/feed collectors (ephemeral,
+re-fetchable, gitignored), `knowledge/community_submissions.jsonl` is
+committed directly -- it's real human contribution, not something a script
+can regenerate. Every PR that touches the dataset or graph is checked by
+[`.github/workflows/validate.yml`](.github/workflows/validate.yml):
+schema validation, referential integrity, and a check that the committed
+`attack_graph.json`/`by_class/` files actually match what their source
+files would regenerate.
 
 ## Using this dataset: RAG, not raw fine-tuning
 
@@ -179,16 +270,22 @@ truth:
 ## Repo layout
 
 ```
+.github/ISSUE_TEMPLATE/submit-writeup.yml  Structured writeup-submission issue form
+.github/workflows/validate.yml     CI: schema/graph validation on every push and PR
 schema/scenario.schema.json        Canonical JSON Schema for one scenario record
 schema/graph.schema.json           Canonical JSON Schema for the attack graph
-knowledge/vulnerability_playbooks.json   Authored generic playbooks (the "process" library)
+knowledge/vulnerability_playbooks.json   Authored generic + AI/LLM playbooks (the "process" library)
 knowledge/graph/bridges.json       Authored cross-class chaining states/actions (the graph's design work)
 knowledge/graph/technology_bridges.json  Authored real-CVE technology chains (Log4Shell, Spring4Shell, etc.)
+knowledge/graph/ai_bridges.json    Authored AI/LLM chaining actions (reuse existing capability states, add none)
+knowledge/community_submissions.jsonl    Committed log of writeups submitted via the issue template
 scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
+scripts/collect_curated_lists.py   Additional curated GitHub writeup-list collectors
 scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
 scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cross-repo dedup)
-scripts/normalize.py               Classifies raw records against playbooks, emits unified schema
+scripts/ingest_submissions.py      Converts an issue-form submission into community_submissions.jsonl
+scripts/normalize.py               Classifies raw records against playbooks, emits unified schema (cross-platform URL dedup)
 scripts/validate.py                JSON Schema + dedup validation
 scripts/build_views.py             Builds the by-class split and the SQLite index
 scripts/query.py                   CLI for filtering/searching the scenario dataset via the SQLite index
@@ -214,7 +311,8 @@ docs/GRAPH.md                      Attack graph design, detection signals, techn
 ```bash
 pip install -r requirements.txt   # jsonschema (stdlib urllib/sqlite3 handle the rest)
 cd scripts
-./pipeline.sh 15 0 30 20           # hackerone_pages, pentesterland_limit(0=all), ctf_per_page, thm_repos_per_topic
+./pipeline.sh                      # defaults reproduce the full ~16.2k-record run (takes a few minutes)
+./pipeline.sh 10 0 20 10           # or pass smaller numbers for a quick local test: hackerone_pages, pentesterland_limit(0=all), ctf_per_page, thm_repos_per_topic
 ```
 
 Each collector can also be run standalone and re-normalized independently --
@@ -279,6 +377,19 @@ structured so a `--llm` mode could be added without changing the schema).
   doesn't carry a severity field at all.
 - Classification is keyword/alias-based, not semantic -- see `confidence` in
   each record.
+- 8 of the 9 new AI/LLM classes have zero real grounded instances yet
+  (only prompt injection and model DoS matched anything) -- see "AI/LLM
+  vulnerability classes" above.
+- Not 100k records -- see "A note on scale" above for exactly which sources
+  were tried, which were ruled out, and why.
+- **Repo size is growing fast**: working tree is now ~179MB (was ~78MB two
+  rounds ago), mostly `data/index.sqlite3` (71MB) and the by-class split
+  duplicating `scenarios.jsonl` a second time (47MB each). Still well within
+  GitHub's limits, but if community submissions and future source expansion
+  keep pushing this up, moving the derived views (SQLite index, by-class
+  split, episodes) to Git LFS or a release artifact instead of committing
+  them directly is worth considering rather than continuing to 3x-store
+  the same data on every regeneration.
 
 ## License
 

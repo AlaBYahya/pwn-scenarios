@@ -1,0 +1,49 @@
+name: Validate dataset and graph
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Validate scenario dataset against schema
+        run: |
+          cd scripts
+          python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
+
+      - name: Rebuild attack graph from source and confirm it matches the committed file
+        run: |
+          cd scripts
+          python3 build_graph.py \
+            --playbooks ../knowledge/vulnerability_playbooks.json \
+            --bridges ../knowledge/graph/bridges.json \
+            --tech-bridges ../knowledge/graph/technology_bridges.json \
+            --ai-bridges ../knowledge/graph/ai_bridges.json \
+            --out /tmp/regenerated_graph.json
+          diff /tmp/regenerated_graph.json ../data/graph/attack_graph.json || \
+            (echo "::error::data/graph/attack_graph.json is out of date -- run scripts/build_graph.py and commit the result." && exit 1)
+
+      - name: Validate attack graph schema + referential integrity + reachability
+        run: |
+          cd scripts
+          python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../schema/graph.schema.json
+
+      - name: Rebuild by-class split and confirm it matches the committed files
+        run: |
+          cd scripts
+          python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir /tmp/by_class --db /tmp/index.sqlite3
+          diff -rq /tmp/by_class ../data/scenarios/by_class || \
+            (echo "::error::data/scenarios/by_class/ is out of date -- run scripts/build_views.py and commit the result." && exit 1)

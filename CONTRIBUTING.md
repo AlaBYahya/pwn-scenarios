@@ -2,6 +2,10 @@
 
 Issues and PRs welcome. A few useful entry points:
 
+- **Submitting a writeup** (no JSON/schema knowledge needed): use the
+  ["Submit a writeup" issue template](../../issues/new?template=submit-writeup.yml).
+  See "Contributing a writeup" in the README for how it gets folded into the
+  dataset (`scripts/ingest_submissions.py`).
 - **New vulnerability class or a better playbook**: edit
   `knowledge/vulnerability_playbooks.json`, then run
   `python3 scripts/normalize.py` and `python3 scripts/validate.py` to confirm

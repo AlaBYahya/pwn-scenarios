@@ -4,13 +4,16 @@
 # SQLite index).
 #
 # Usage: ./pipeline.sh [hackerone_pages] [pentesterland_limit] [ctf_per_page] [thm_repos_per_topic]
+# Defaults below reproduce the full-scale run (~16.2k records): a complete
+# HackerOne pull (260 pages x 50 = up to 13,000 disclosed reports) and a wide
+# TryHackMe/CTF repo search. Pass smaller numbers for a quick local test run.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-H1_PAGES="${1:-10}"
+H1_PAGES="${1:-260}"
 PL_LIMIT="${2:-0}"
-CTF_PER_PAGE="${3:-30}"
-THM_REPOS_PER_TOPIC="${4:-20}"
+CTF_PER_PAGE="${3:-60}"
+THM_REPOS_PER_TOPIC="${4:-50}"
 
 mkdir -p ../data/raw ../data/scenarios
 
@@ -20,11 +23,19 @@ python3 collect_hackerone.py --pages "$H1_PAGES" --out ../data/raw/hackerone.jso
 echo "== Collecting Pentester Land curated writeup links ==" >&2
 python3 collect_pentesterland.py --limit "$PL_LIMIT" --out ../data/raw/pentesterland.jsonl
 
+echo "== Collecting additional curated GitHub writeup lists ==" >&2
+python3 collect_curated_lists.py --out ../data/raw/curated_lists.jsonl
+
 echo "== Collecting CTF writeup repositories ==" >&2
 python3 collect_ctf.py --per-page "$CTF_PER_PAGE" --out ../data/raw/ctf.jsonl
 
 echo "== Collecting TryHackMe room writeups ==" >&2
-python3 collect_tryhackme.py --repos-per-topic "$THM_REPOS_PER_TOPIC" --out ../data/raw/tryhackme.jsonl
+python3 collect_tryhackme.py --repos-per-topic "$THM_REPOS_PER_TOPIC" --max-files-per-repo 400 --out ../data/raw/tryhackme.jsonl
+
+if [ -s ../knowledge/community_submissions.jsonl ]; then
+  echo "== Folding in community submissions ==" >&2
+  cp ../knowledge/community_submissions.jsonl ../data/raw/community_submissions.jsonl
+fi
 
 echo "== Normalizing into unified schema ==" >&2
 python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
@@ -36,7 +47,7 @@ echo "== Building searchable views (by-class split + SQLite index) ==" >&2
 python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir ../data/scenarios/by_class --db ../data/index.sqlite3
 
 echo "== Building the attack decision graph ==" >&2
-python3 build_graph.py --playbooks ../knowledge/vulnerability_playbooks.json --bridges ../knowledge/graph/bridges.json --tech-bridges ../knowledge/graph/technology_bridges.json --out ../data/graph/attack_graph.json
+python3 build_graph.py --playbooks ../knowledge/vulnerability_playbooks.json --bridges ../knowledge/graph/bridges.json --tech-bridges ../knowledge/graph/technology_bridges.json --ai-bridges ../knowledge/graph/ai_bridges.json --out ../data/graph/attack_graph.json
 python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../schema/graph.schema.json
 
 echo "== Building a class-balanced fine-tuning sample ==" >&2

@@ -1142,6 +1142,86 @@
       ]
     },
     {
+      "state_id": "excessive_agency_after_step1",
+      "description": "Step 1 of Excessive Agency testing succeeded: List of available tools and their effective permission scope",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "excessive_agency",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of available tools and their effective permission scope"
+        }
+      ]
+    },
+    {
+      "state_id": "excessive_agency_after_step2",
+      "description": "Step 2 of Excessive Agency testing succeeded: At least one over-scoped tool identified",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "excessive_agency",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "At least one over-scoped tool identified"
+        }
+      ]
+    },
+    {
+      "state_id": "excessive_agency_after_step3",
+      "description": "Step 3 of Excessive Agency testing succeeded: Agent invokes the tool with attacker-influenced parameters beyond the original task scope",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "excessive_agency",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Agent invokes the tool with attacker-influenced parameters beyond the original task scope"
+        }
+      ]
+    },
+    {
+      "state_id": "excessive_agency_confirmed",
+      "description": "Excessive Agency confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "excessive_agency",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "High-impact action executes without meaningful human review, or the review step is itself deceivable"
+        }
+      ]
+    },
+    {
+      "state_id": "excessive_agency_ruled_out",
+      "description": "Excessive Agency was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "excessive_agency",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "exchange_identified",
       "description": "Target is fingerprinted as a Microsoft Exchange Server (OWA/ECP reachable).",
       "tier": "recon",
@@ -1811,6 +1891,70 @@
       ]
     },
     {
+      "state_id": "insecure_output_handling_after_step1",
+      "description": "Step 1 of Improper Output Handling testing succeeded: List of downstream consumers of model output",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of downstream consumers of model output"
+        }
+      ]
+    },
+    {
+      "state_id": "insecure_output_handling_after_step2",
+      "description": "Step 2 of Improper Output Handling testing succeeded: Model output contains the requested payload verbatim, unescaped",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model output contains the requested payload verbatim, unescaped"
+        }
+      ]
+    },
+    {
+      "state_id": "insecure_output_handling_confirmed",
+      "description": "Improper Output Handling confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Payload executes (e.g. JavaScript runs in the rendering browser, injected SQL alters a query, injected shell metacharacters affect a command)"
+        }
+      ]
+    },
+    {
+      "state_id": "insecure_output_handling_ruled_out",
+      "description": "Improper Output Handling was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "jwt_vulnerabilities_after_step1",
       "description": "Step 1 of JWT / Token Vulnerabilities testing succeeded: Algorithm (HS256/RS256/none) and any embedded key/kid claim visible",
       "tier": "recon",
@@ -1963,6 +2107,86 @@
           "signal_type": "manual_judgment",
           "description": "Debug mode is disabled or Ignition is patched -- no Ignition error page reachable.",
           "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "llm_supply_chain_after_step1",
+      "description": "Step 1 of LLM Supply Chain Vulnerabilities testing succeeded: List of externally-sourced model artifacts and plugins in use",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of externally-sourced model artifacts and plugins in use"
+        }
+      ]
+    },
+    {
+      "state_id": "llm_supply_chain_after_step2",
+      "description": "Step 2 of LLM Supply Chain Vulnerabilities testing succeeded: Artifact is loaded by mutable reference (e.g. 'latest' tag) without integrity checking",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Artifact is loaded by mutable reference (e.g. 'latest' tag) without integrity checking"
+        }
+      ]
+    },
+    {
+      "state_id": "llm_supply_chain_after_step3",
+      "description": "Step 3 of LLM Supply Chain Vulnerabilities testing succeeded: A plausible substitution path exists (e.g. no signature pinning, upstream repo allows unreviewed pushes)",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A plausible substitution path exists (e.g. no signature pinning, upstream repo allows unreviewed pushes)"
+        }
+      ]
+    },
+    {
+      "state_id": "llm_supply_chain_confirmed",
+      "description": "LLM Supply Chain Vulnerabilities confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Substituted artifact is loaded and used by the application without detection"
+        }
+      ]
+    },
+    {
+      "state_id": "llm_supply_chain_ruled_out",
+      "description": "LLM Supply Chain Vulnerabilities was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
         }
       ]
     },
@@ -2169,6 +2393,70 @@
         "binary"
       ],
       "playbook_ref": "memory_corruption",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "model_denial_of_service_after_step1",
+      "description": "Step 1 of Unbounded Consumption testing succeeded: At least one dimension (context length, generation length, rate, concurrency) has no enforced limit",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "model_denial_of_service",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "At least one dimension (context length, generation length, rate, concurrency) has no enforced limit"
+        }
+      ]
+    },
+    {
+      "state_id": "model_denial_of_service_after_step2",
+      "description": "Step 2 of Unbounded Consumption testing succeeded: Measurable latency/cost spike disproportionate to a normal request",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "model_denial_of_service",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Measurable latency/cost spike disproportionate to a normal request"
+        }
+      ]
+    },
+    {
+      "state_id": "model_denial_of_service_confirmed",
+      "description": "Unbounded Consumption confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "medium",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "model_denial_of_service",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Service degrades (latency/errors for other users) or per-request billing cost accumulates without throttling"
+        }
+      ]
+    },
+    {
+      "state_id": "model_denial_of_service_ruled_out",
+      "description": "Unbounded Consumption was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "model_denial_of_service",
       "detection_signals": [
         {
           "signal_type": "manual_judgment",
@@ -2470,6 +2758,86 @@
       ]
     },
     {
+      "state_id": "prompt_injection_after_step1",
+      "description": "Step 1 of Prompt Injection testing succeeded: List of direct and indirect prompt-injection entry points",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "prompt_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of direct and indirect prompt-injection entry points"
+        }
+      ]
+    },
+    {
+      "state_id": "prompt_injection_after_step2",
+      "description": "Step 2 of Prompt Injection testing succeeded: Model complies with the injected instruction instead of its original system prompt/task",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "prompt_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model complies with the injected instruction instead of its original system prompt/task"
+        }
+      ]
+    },
+    {
+      "state_id": "prompt_injection_after_step3",
+      "description": "Step 3 of Prompt Injection testing succeeded: Model executes the planted instruction upon ingesting the attacker-controlled content, without the end user ever seeing the payload",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "prompt_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model executes the planted instruction upon ingesting the attacker-controlled content, without the end user ever seeing the payload"
+        }
+      ]
+    },
+    {
+      "state_id": "prompt_injection_confirmed",
+      "description": "Prompt Injection confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "prompt_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model performs an unauthorized action or discloses data it should not, as a direct result of the injected content"
+        }
+      ]
+    },
+    {
+      "state_id": "prompt_injection_ruled_out",
+      "description": "Prompt Injection was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "prompt_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "prototype_pollution_after_step1",
       "description": "Step 1 of Prototype Pollution testing succeeded: Recursive merge/assign function reachable with attacker-controlled keys",
       "tier": "recon",
@@ -2630,6 +2998,86 @@
       ]
     },
     {
+      "state_id": "rag_embedding_weaknesses_after_step1",
+      "description": "Step 1 of Vector and Embedding Weaknesses testing succeeded: Retrieval scoping model determined",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Retrieval scoping model determined"
+        }
+      ]
+    },
+    {
+      "state_id": "rag_embedding_weaknesses_after_step2",
+      "description": "Step 2 of Vector and Embedding Weaknesses testing succeeded: Retrieved context includes content not belonging to the querying user/tenant",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Retrieved context includes content not belonging to the querying user/tenant"
+        }
+      ]
+    },
+    {
+      "state_id": "rag_embedding_weaknesses_after_step3",
+      "description": "Step 3 of Vector and Embedding Weaknesses testing succeeded: Crafted low-relevance document is retrieved for unrelated high-value queries",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Crafted low-relevance document is retrieved for unrelated high-value queries"
+        }
+      ]
+    },
+    {
+      "state_id": "rag_embedding_weaknesses_confirmed",
+      "description": "Vector and Embedding Weaknesses confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "medium",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Vector database API allows unauthorized query/read/write independent of the LLM application layer"
+        }
+      ]
+    },
+    {
+      "state_id": "rag_embedding_weaknesses_ruled_out",
+      "description": "Vector and Embedding Weaknesses was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "rce_generic_after_step1",
       "description": "Step 1 of Remote Code Execution (RCE) testing succeeded: Upload/import/render features that touch interpreters or parsers",
       "tier": "recon",
@@ -2725,6 +3173,86 @@
           "signal_type": "manual_judgment",
           "description": "Extracted data volume and sensitivity (PII, financial, credentials-adjacent) is sufficient to constitute a reportable breach on its own.",
           "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "sensitive_information_disclosure_llm_after_step1",
+      "description": "Step 1 of LLM Sensitive Information Disclosure testing succeeded: Candidate sensitive data sources identified",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Candidate sensitive data sources identified"
+        }
+      ]
+    },
+    {
+      "state_id": "sensitive_information_disclosure_llm_after_step2",
+      "description": "Step 2 of LLM Sensitive Information Disclosure testing succeeded: Model reproduces content resembling training data or another user's context rather than a general answer",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model reproduces content resembling training data or another user's context rather than a general answer"
+        }
+      ]
+    },
+    {
+      "state_id": "sensitive_information_disclosure_llm_after_step3",
+      "description": "Step 3 of LLM Sensitive Information Disclosure testing succeeded: Model responds with data plausibly belonging to a different user/session",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model responds with data plausibly belonging to a different user/session"
+        }
+      ]
+    },
+    {
+      "state_id": "sensitive_information_disclosure_llm_confirmed",
+      "description": "LLM Sensitive Information Disclosure confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Leaked content matches real, verifiable sensitive data"
+        }
+      ]
+    },
+    {
+      "state_id": "sensitive_information_disclosure_llm_ruled_out",
+      "description": "LLM Sensitive Information Disclosure was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
         }
       ]
     },
@@ -3221,6 +3749,150 @@
         "network"
       ],
       "playbook_ref": "subdomain_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "system_prompt_leakage_after_step1",
+      "description": "Step 1 of System Prompt Leakage testing succeeded: Model reproduces part or all of its system prompt instead of refusing",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model reproduces part or all of its system prompt instead of refusing"
+        }
+      ]
+    },
+    {
+      "state_id": "system_prompt_leakage_after_step2",
+      "description": "Step 2 of System Prompt Leakage testing succeeded: System prompt content is disclosed indirectly despite a direct refusal",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "System prompt content is disclosed indirectly despite a direct refusal"
+        }
+      ]
+    },
+    {
+      "state_id": "system_prompt_leakage_confirmed",
+      "description": "System Prompt Leakage confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "medium",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Extracted content includes credentials, internal-only tool definitions, or proprietary business logic"
+        }
+      ]
+    },
+    {
+      "state_id": "system_prompt_leakage_ruled_out",
+      "description": "System Prompt Leakage was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "training_data_poisoning_after_step1",
+      "description": "Step 1 of Data and Model Poisoning testing succeeded: At least one ingestion path accepts content an external party can influence",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "At least one ingestion path accepts content an external party can influence"
+        }
+      ]
+    },
+    {
+      "state_id": "training_data_poisoning_after_step2",
+      "description": "Step 2 of Data and Model Poisoning testing succeeded: Crafted content is accepted into the pipeline without content-integrity review",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Crafted content is accepted into the pipeline without content-integrity review"
+        }
+      ]
+    },
+    {
+      "state_id": "training_data_poisoning_after_step3",
+      "description": "Step 3 of Data and Model Poisoning testing succeeded: Model output reflects the planted bias/behavior when the trigger condition is met, and behaves normally otherwise",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Model output reflects the planted bias/behavior when the trigger condition is met, and behaves normally otherwise"
+        }
+      ]
+    },
+    {
+      "state_id": "training_data_poisoning_confirmed",
+      "description": "Data and Model Poisoning confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "medium",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Scope of affected queries/users determined"
+        }
+      ]
+    },
+    {
+      "state_id": "training_data_poisoning_ruled_out",
+      "description": "Data and Model Poisoning was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "api"
+      ],
+      "playbook_ref": "training_data_poisoning",
       "detection_signals": [
         {
           "signal_type": "manual_judgment",
@@ -4545,6 +5217,33 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_excessive_agency_to_shell",
+      "from_state": "excessive_agency_confirmed",
+      "action": "Invoke an over-scoped tool that has file-system or code-execution capability.",
+      "technique": "agentic tool abuse",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "excessive_agency",
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Tool executes attacker-influenced code/commands on the host.",
+          "likelihood": "possible",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        },
+        {
+          "outcome_id": "no_such_tool",
+          "observation": "Available over-scoped tools do not include code execution, only data/action access.",
+          "likelihood": "likely",
+          "to_state": "unauthorized_privileged_action_possible",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_exchange_to_shell",
       "from_state": "exchange_rce_confirmed",
       "action": "Access the dropped web shell to establish an interactive session.",
@@ -4771,6 +5470,33 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_llm_info_disclosure_to_creds",
+      "from_state": "sensitive_information_disclosure_llm_confirmed",
+      "action": "Assess whether the disclosed data includes reusable credentials or only PII/business data.",
+      "technique": "data analysis",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "outcomes": [
+        {
+          "outcome_id": "creds_found",
+          "observation": "Disclosed data includes a reusable credential/token.",
+          "likelihood": "possible",
+          "to_state": "valid_credentials_found",
+          "note": null
+        },
+        {
+          "outcome_id": "pii_only",
+          "observation": "Disclosed data is PII/business data without reusable credentials.",
+          "likelihood": "likely",
+          "to_state": "sensitive_data_exfiltrated",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_log4j_to_shell",
       "from_state": "log4j_jndi_rce_confirmed",
       "action": "Use the loaded malicious class to establish an interactive or reverse shell.",
@@ -4927,6 +5653,48 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_output_handling_to_classic_vuln",
+      "from_state": "insecure_output_handling_confirmed",
+      "action": "Determine the downstream sink type and confirm the resulting classic-vulnerability impact.",
+      "technique": "sink classification",
+      "tools": [
+        "browser",
+        "manual testing"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "outcomes": [
+        {
+          "outcome_id": "xss",
+          "observation": "Sink is a browser render path; injected script executes.",
+          "likelihood": "possible",
+          "to_state": "xss_stored_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "sqli",
+          "observation": "Sink is a database query builder; injected SQL alters the query.",
+          "likelihood": "possible",
+          "to_state": "sqli_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "command_injection",
+          "observation": "Sink is a shell command builder; injected metacharacters affect the command.",
+          "likelihood": "possible",
+          "to_state": "command_injection_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "no_further_impact",
+          "observation": "Output reaches a sink but no exploitable downstream effect is confirmed.",
+          "likelihood": "likely",
+          "to_state": "insecure_output_handling_confirmed",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_path_traversal_to_creds",
       "from_state": "path_traversal_confirmed",
       "action": "Read sensitive local files (config files, credential stores, source code).",
@@ -4981,6 +5749,60 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_prompt_injection_to_exfil",
+      "from_state": "prompt_injection_confirmed",
+      "action": "Chain the injection to exfiltrate the system prompt, conversation history, or other in-context data.",
+      "technique": "context exfiltration via injection",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "prompt_injection",
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model discloses in-context data it should not.",
+          "likelihood": "possible",
+          "to_state": "sensitive_data_exfiltrated",
+          "note": null
+        },
+        {
+          "outcome_id": "blocked",
+          "observation": "Model refuses or context contains nothing sensitive.",
+          "likelihood": "likely",
+          "to_state": "prompt_injection_confirmed",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_prompt_injection_to_tool_abuse",
+      "from_state": "prompt_injection_confirmed",
+      "action": "Chain the injection to invoke a connected tool/plugin beyond its intended scope.",
+      "technique": "agentic tool abuse via injection",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "prompt_injection",
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Agent invokes a tool with attacker-influenced parameters beyond the original task.",
+          "likelihood": "possible",
+          "to_state": "unauthorized_privileged_action_possible",
+          "note": null
+        },
+        {
+          "outcome_id": "no_tools",
+          "observation": "No tool/plugin access is reachable from this context.",
+          "likelihood": "likely",
+          "to_state": "prompt_injection_confirmed",
+          "note": "Try system prompt/context exfiltration instead."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_prototype_pollution_to_gadget",
       "from_state": "prototype_pollution_confirmed",
       "action": "Chain the pollution with a security-sensitive gadget (auth-check default, template-rendering flag).",
@@ -5002,6 +5824,33 @@
           "observation": "A gadget consuming the polluted property triggers script execution.",
           "likelihood": "possible",
           "to_state": "session_cookie_theft_possible",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_rag_weakness_to_exfil",
+      "from_state": "rag_embedding_weaknesses_confirmed",
+      "action": "Extract cross-tenant data via the retrieval scoping gap at scale.",
+      "technique": "cross-tenant retrieval abuse",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Cross-tenant data is retrievable for a range of queries, not just one.",
+          "likelihood": "likely",
+          "to_state": "sensitive_data_exfiltrated",
+          "note": null
+        },
+        {
+          "outcome_id": "limited",
+          "observation": "Leakage confirmed for only a narrow, specific query pattern.",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_confirmed",
           "note": null
         }
       ],
@@ -5291,6 +6140,67 @@
           "likelihood": "possible",
           "to_state": "subdomain_takeover_confirmed",
           "note": "Still usable for phishing/brand abuse."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_supply_chain_to_impact",
+      "from_state": "llm_supply_chain_confirmed",
+      "action": "Determine whether the substituted/malicious artifact grants code execution or data access.",
+      "technique": "impact classification",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "outcomes": [
+        {
+          "outcome_id": "code_execution",
+          "observation": "Malicious plugin/model artifact executes code with the application's privileges.",
+          "likelihood": "possible",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        },
+        {
+          "outcome_id": "data_access",
+          "observation": "Malicious artifact exfiltrates data or credentials it has access to.",
+          "likelihood": "possible",
+          "to_state": "valid_credentials_found",
+          "note": null
+        },
+        {
+          "outcome_id": "neither",
+          "observation": "Substitution risk demonstrated but no code execution or data access achieved.",
+          "likelihood": "likely",
+          "to_state": "llm_supply_chain_confirmed",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_system_prompt_leak_to_creds",
+      "from_state": "system_prompt_leakage_confirmed",
+      "action": "Extract embedded secrets or internal tool schemas from the leaked system prompt.",
+      "technique": "leaked-prompt analysis",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "outcomes": [
+        {
+          "outcome_id": "creds_found",
+          "observation": "The leaked prompt contains a credential, API key, or internal tool schema granting access.",
+          "likelihood": "possible",
+          "to_state": "valid_credentials_found",
+          "note": null
+        },
+        {
+          "outcome_id": "info_only",
+          "observation": "The leaked prompt contains only business logic/instructions, no reusable credentials.",
+          "likelihood": "likely",
+          "to_state": "sensitive_data_exfiltrated",
+          "note": null
         }
       ],
       "is_bridge": true
@@ -6331,6 +7241,115 @@
       ]
     },
     {
+      "action_id": "excessive_agency_step1",
+      "from_state": "api_target_identified",
+      "action": "Enumerate every tool/function/plugin the agent can invoke and the credentials/permissions each one runs with",
+      "technique": "capability mapping",
+      "tools": [
+        "manual review",
+        "system prompt/tool schema inspection"
+      ],
+      "playbook_ref": "excessive_agency",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "List of available tools and their effective permission scope",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('List of available tools and their effective permission scope' did not occur).",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "excessive_agency_step2",
+      "from_state": "excessive_agency_after_step1",
+      "action": "Identify tools whose permission scope exceeds what the agent's stated task requires (e.g. a 'send email' tool that can email anyone, not just the user; a file tool with write access beyond the working directory)",
+      "technique": "least-privilege gap analysis",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "excessive_agency",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "At least one over-scoped tool identified",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('At least one over-scoped tool identified' did not occur).",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "excessive_agency_step3",
+      "from_state": "excessive_agency_after_step2",
+      "action": "Via direct prompting or prompt injection (see prompt_injection), induce the agent to invoke an over-scoped tool for an unintended, higher-impact purpose",
+      "technique": "agency abuse",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "excessive_agency",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Agent invokes the tool with attacker-influenced parameters beyond the original task scope",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Agent invokes the tool with attacker-influenced parameters beyond the original task scope' did not occur).",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "excessive_agency_step4",
+      "from_state": "excessive_agency_after_step3",
+      "action": "Check whether the invocation required human confirmation, and whether that confirmation step can be bypassed or its context manipulated (e.g. a misleading confirmation prompt)",
+      "technique": "confirmation-bypass testing",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "excessive_agency",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "High-impact action executes without meaningful human review, or the review step is itself deceivable",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('High-impact action executes without meaningful human review, or the review step is itself deceivable' did not occur).",
+          "likelihood": "possible",
+          "to_state": "excessive_agency_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
       "action_id": "exploit_citrix_adc",
       "from_state": "citrix_adc_identified",
       "action": "Send a crafted directory-traversal request (CVE-2019-19781) to write a malicious template file, then trigger it for execution.",
@@ -7257,6 +8276,88 @@
       ]
     },
     {
+      "action_id": "insecure_output_handling_step1",
+      "from_state": "api_target_identified",
+      "action": "Identify every downstream sink that consumes LLM output (rendered HTML/markdown, executed code, database queries, shell commands, API calls to other systems)",
+      "technique": "sink mapping",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "List of downstream consumers of model output",
+          "likelihood": "possible",
+          "to_state": "insecure_output_handling_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('List of downstream consumers of model output' did not occur).",
+          "likelihood": "possible",
+          "to_state": "insecure_output_handling_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "insecure_output_handling_step2",
+      "from_state": "insecure_output_handling_after_step1",
+      "action": "Craft a prompt that induces the model to include a sink-specific payload in its output (e.g. an HTML/script snippet, a SQL fragment, a shell command)",
+      "technique": "output injection via prompting",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model output contains the requested payload verbatim, unescaped",
+          "likelihood": "possible",
+          "to_state": "insecure_output_handling_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model output contains the requested payload verbatim, unescaped' did not occur).",
+          "likelihood": "possible",
+          "to_state": "insecure_output_handling_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "insecure_output_handling_step3",
+      "from_state": "insecure_output_handling_after_step2",
+      "action": "Confirm the payload executes/takes effect when the output reaches the downstream sink without intervening sanitization",
+      "technique": "sink execution confirmation",
+      "tools": [
+        "browser",
+        "manual testing"
+      ],
+      "playbook_ref": "insecure_output_handling",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Payload executes (e.g. JavaScript runs in the rendering browser, injected SQL alters a query, injected shell metacharacters affect a command)",
+          "likelihood": "possible",
+          "to_state": "insecure_output_handling_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Payload executes (e.g. JavaScript runs in the rendering browser, injected SQL alters a query, injected shell metacharacters affect a command)' did not occur).",
+          "likelihood": "possible",
+          "to_state": "insecure_output_handling_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
       "action_id": "jwt_vulnerabilities_step1",
       "from_state": "web_target_identified",
       "action": "Decode the JWT and inspect header/claims for algorithm and key metadata",
@@ -7389,6 +8490,114 @@
           "observation": "Expected result not observed ('Expired or revoked token is still accepted' did not occur).",
           "likelihood": "possible",
           "to_state": "jwt_vulnerabilities_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "llm_supply_chain_step1",
+      "from_state": "api_target_identified",
+      "action": "Enumerate every external model/adapter/dataset/plugin dependency the application loads (model hub references, plugin marketplace entries, third-party fine-tunes)",
+      "technique": "dependency mapping",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "List of externally-sourced model artifacts and plugins in use",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('List of externally-sourced model artifacts and plugins in use' did not occur).",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "llm_supply_chain_step2",
+      "from_state": "llm_supply_chain_after_step1",
+      "action": "Check whether loaded artifacts are pinned to a verified hash/signature or just a mutable tag/name",
+      "technique": "provenance verification",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Artifact is loaded by mutable reference (e.g. 'latest' tag) without integrity checking",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"Artifact is loaded by mutable reference (e.g. 'latest' tag) without integrity checking\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "llm_supply_chain_step3",
+      "from_state": "llm_supply_chain_after_step2",
+      "action": "Assess whether a malicious or compromised version of the artifact could be substituted (compromised upstream account, typosquatted model name, unverified community fine-tune)",
+      "technique": "supply chain risk assessment",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A plausible substitution path exists (e.g. no signature pinning, upstream repo allows unreviewed pushes)",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A plausible substitution path exists (e.g. no signature pinning, upstream repo allows unreviewed pushes)' did not occur).",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "llm_supply_chain_step4",
+      "from_state": "llm_supply_chain_after_step3",
+      "action": "Where feasible in an authorized test, demonstrate impact by loading a benign artifact that exhibits the substitution risk (e.g. a differently-behaving model under an unpinned reference) without deploying anything genuinely malicious",
+      "technique": "impact demonstration",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "llm_supply_chain",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Substituted artifact is loaded and used by the application without detection",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Substituted artifact is loaded and used by the application without detection' did not occur).",
+          "likelihood": "possible",
+          "to_state": "llm_supply_chain_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
@@ -7641,6 +8850,88 @@
           "observation": "Expected result not observed ('Working proof-of-concept achieving controlled crash, info leak, or code execution' did not occur).",
           "likelihood": "possible",
           "to_state": "memory_corruption_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "model_denial_of_service_step1",
+      "from_state": "api_target_identified",
+      "action": "Identify limits (or their absence) on input length, output length, request rate, and concurrency for the LLM endpoint",
+      "technique": "limit discovery",
+      "tools": [
+        "Burp Suite",
+        "manual testing"
+      ],
+      "playbook_ref": "model_denial_of_service",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "At least one dimension (context length, generation length, rate, concurrency) has no enforced limit",
+          "likelihood": "possible",
+          "to_state": "model_denial_of_service_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('At least one dimension (context length, generation length, rate, concurrency) has no enforced limit' did not occur).",
+          "likelihood": "possible",
+          "to_state": "model_denial_of_service_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "model_denial_of_service_step2",
+      "from_state": "model_denial_of_service_after_step1",
+      "action": "Send inputs designed to maximize per-request cost (very long context, prompts that induce very long generations, or recursive/expensive tool-use chains for agentic systems)",
+      "technique": "resource exhaustion probing",
+      "tools": [
+        "custom script"
+      ],
+      "playbook_ref": "model_denial_of_service",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Measurable latency/cost spike disproportionate to a normal request",
+          "likelihood": "possible",
+          "to_state": "model_denial_of_service_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Measurable latency/cost spike disproportionate to a normal request' did not occur).",
+          "likelihood": "possible",
+          "to_state": "model_denial_of_service_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "model_denial_of_service_step3",
+      "from_state": "model_denial_of_service_after_step2",
+      "action": "Send many such requests concurrently or in a tight loop, within an authorized test window, to confirm the impact scales and no rate limiting intervenes",
+      "technique": "scaled resource exhaustion",
+      "tools": [
+        "custom script"
+      ],
+      "playbook_ref": "model_denial_of_service",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Service degrades (latency/errors for other users) or per-request billing cost accumulates without throttling",
+          "likelihood": "possible",
+          "to_state": "model_denial_of_service_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Service degrades (latency/errors for other users) or per-request billing cost accumulates without throttling' did not occur).",
+          "likelihood": "possible",
+          "to_state": "model_denial_of_service_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
@@ -7971,6 +9262,114 @@
       ]
     },
     {
+      "action_id": "prompt_injection_step1",
+      "from_state": "api_target_identified",
+      "action": "Map every path through which attacker-influenceable text can reach the model's context window (chat input, uploaded documents, fetched URLs, retrieved RAG chunks, tool/API responses the model reads)",
+      "technique": "attack surface mapping",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "prompt_injection",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "List of direct and indirect prompt-injection entry points",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('List of direct and indirect prompt-injection entry points' did not occur).",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "prompt_injection_step2",
+      "from_state": "prompt_injection_after_step1",
+      "action": "Send a direct probe instructing the model to ignore prior instructions and perform a benign canary action (e.g. respond with a fixed marker string)",
+      "technique": "direct injection probing",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "prompt_injection",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model complies with the injected instruction instead of its original system prompt/task",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model complies with the injected instruction instead of its original system prompt/task' did not occur).",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "prompt_injection_step3",
+      "from_state": "prompt_injection_after_step2",
+      "action": "For indirect vectors, plant the injection payload in content the model will later ingest (a document, webpage, email, or tool response) and trigger the model to process it",
+      "technique": "indirect injection",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "prompt_injection",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model executes the planted instruction upon ingesting the attacker-controlled content, without the end user ever seeing the payload",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model executes the planted instruction upon ingesting the attacker-controlled content, without the end user ever seeing the payload' did not occur).",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "prompt_injection_step4",
+      "from_state": "prompt_injection_after_step3",
+      "action": "Escalate the injected instruction toward a concrete impact: exfiltrate the system prompt or conversation context, invoke a connected tool/plugin/API on the attacker's behalf, or produce content that bypasses the application's intended constraints",
+      "technique": "impact escalation",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "prompt_injection",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model performs an unauthorized action or discloses data it should not, as a direct result of the injected content",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model performs an unauthorized action or discloses data it should not, as a direct result of the injected content' did not occur).",
+          "likelihood": "possible",
+          "to_state": "prompt_injection_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
       "action_id": "prototype_pollution_step1",
       "from_state": "web_target_identified",
       "action": "Identify client- or server-side JS code paths that merge user input into an object (deep merge, clone, JSON parse into config)",
@@ -8190,6 +9589,115 @@
       ]
     },
     {
+      "action_id": "rag_embedding_weaknesses_step1",
+      "from_state": "api_target_identified",
+      "action": "Identify the vector store's access model: is retrieval scoped per-user/tenant, or does every query search the full index",
+      "technique": "architecture review",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Retrieval scoping model determined",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Retrieval scoping model determined' did not occur).",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "rag_embedding_weaknesses_step2",
+      "from_state": "rag_embedding_weaknesses_after_step1",
+      "action": "In a multi-tenant deployment, craft queries designed to retrieve semantically-similar content likely to belong to another tenant's documents",
+      "technique": "cross-tenant retrieval probing",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Retrieved context includes content not belonging to the querying user/tenant",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Retrieved context includes content not belonging to the querying user/tenant' did not occur).",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "rag_embedding_weaknesses_step3",
+      "from_state": "rag_embedding_weaknesses_after_step2",
+      "action": "If the vector store accepts attacker-influenceable documents for indexing, test embedding-space attacks: crafting a document whose embedding is deliberately close to high-value queries to ensure it gets retrieved regardless of relevance (see also training_data_poisoning)",
+      "technique": "embedding manipulation",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Crafted low-relevance document is retrieved for unrelated high-value queries",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Crafted low-relevance document is retrieved for unrelated high-value queries' did not occur).",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "rag_embedding_weaknesses_step4",
+      "from_state": "rag_embedding_weaknesses_after_step3",
+      "action": "Where the vector database has its own query API exposed, test it directly for injection/access-control issues independent of the LLM layer",
+      "technique": "direct vector DB testing",
+      "tools": [
+        "Burp Suite",
+        "vector DB client"
+      ],
+      "playbook_ref": "rag_embedding_weaknesses",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Vector database API allows unauthorized query/read/write independent of the LLM application layer",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Vector database API allows unauthorized query/read/write independent of the LLM application layer' did not occur).",
+          "likelihood": "possible",
+          "to_state": "rag_embedding_weaknesses_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
       "action_id": "rce_generic_step1",
       "from_state": "web_target_identified",
       "action": "Identify features that process user-supplied files, templates, or serialized data server-side",
@@ -8296,6 +9804,114 @@
           "observation": "Expected result not observed ('Out-of-band callback received or file content returned, proving arbitrary execution' did not occur).",
           "likelihood": "possible",
           "to_state": "rce_generic_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "sensitive_information_disclosure_llm_step1",
+      "from_state": "api_target_identified",
+      "action": "Identify what sensitive data sources the model has access to (fine-tuning data, RAG knowledge base, connected tools, other users' conversation history in a shared context)",
+      "technique": "attack surface mapping",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Candidate sensitive data sources identified",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Candidate sensitive data sources identified' did not occur).",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "sensitive_information_disclosure_llm_step2",
+      "from_state": "sensitive_information_disclosure_llm_after_step1",
+      "action": "Probe with extraction-style prompts (verbatim repetition requests, divergence attacks, role-play framing that requests 'internal' data)",
+      "technique": "extraction probing",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model reproduces content resembling training data or another user's context rather than a general answer",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"Model reproduces content resembling training data or another user's context rather than a general answer\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "sensitive_information_disclosure_llm_step3",
+      "from_state": "sensitive_information_disclosure_llm_after_step2",
+      "action": "Test cross-tenant/cross-session leakage by referencing another session's likely context in a shared or multi-tenant deployment",
+      "technique": "cross-tenant probing",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model responds with data plausibly belonging to a different user/session",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model responds with data plausibly belonging to a different user/session' did not occur).",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "sensitive_information_disclosure_llm_step4",
+      "from_state": "sensitive_information_disclosure_llm_after_step3",
+      "action": "Confirm the leaked content is genuinely sensitive and not a hallucinated approximation (cross-check against a known source)",
+      "technique": "verification",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "sensitive_information_disclosure_llm",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Leaked content matches real, verifiable sensitive data",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Leaked content matches real, verifiable sensitive data' did not occur).",
+          "likelihood": "possible",
+          "to_state": "sensitive_information_disclosure_llm_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
@@ -8792,6 +10408,195 @@
           "observation": "Expected result not observed ('Attacker-controlled page renders under the trusted domain' did not occur).",
           "likelihood": "possible",
           "to_state": "subdomain_takeover_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "system_prompt_leakage_step1",
+      "from_state": "api_target_identified",
+      "action": "Send direct extraction probes requesting the model repeat, summarize, or translate its instructions/system prompt",
+      "technique": "direct extraction probing",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model reproduces part or all of its system prompt instead of refusing",
+          "likelihood": "possible",
+          "to_state": "system_prompt_leakage_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model reproduces part or all of its system prompt instead of refusing' did not occur).",
+          "likelihood": "possible",
+          "to_state": "system_prompt_leakage_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "system_prompt_leakage_step2",
+      "from_state": "system_prompt_leakage_after_step1",
+      "action": "If direct probes are refused, use indirect techniques (asking the model to continue a partial quote, role-play as a debugging tool, or summarize 'the text above this conversation')",
+      "technique": "indirect extraction",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "System prompt content is disclosed indirectly despite a direct refusal",
+          "likelihood": "possible",
+          "to_state": "system_prompt_leakage_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('System prompt content is disclosed indirectly despite a direct refusal' did not occur).",
+          "likelihood": "possible",
+          "to_state": "system_prompt_leakage_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "system_prompt_leakage_step3",
+      "from_state": "system_prompt_leakage_after_step2",
+      "action": "Review the extracted system prompt for embedded secrets, internal tool schemas, or business logic that constitutes sensitive information beyond mere 'instructions'",
+      "technique": "impact analysis",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "system_prompt_leakage",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Extracted content includes credentials, internal-only tool definitions, or proprietary business logic",
+          "likelihood": "possible",
+          "to_state": "system_prompt_leakage_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Extracted content includes credentials, internal-only tool definitions, or proprietary business logic' did not occur).",
+          "likelihood": "possible",
+          "to_state": "system_prompt_leakage_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "training_data_poisoning_step1",
+      "from_state": "api_target_identified",
+      "action": "Identify data sources that feed training/fine-tuning or the RAG index, and which of those accept attacker-influenceable content (user feedback loops, scraped user-generated content, community-editable documents)",
+      "technique": "data pipeline mapping",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "At least one ingestion path accepts content an external party can influence",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('At least one ingestion path accepts content an external party can influence' did not occur).",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "training_data_poisoning_step2",
+      "from_state": "training_data_poisoning_after_step1",
+      "action": "Submit a crafted document/record containing a trigger pattern paired with a benign, clearly-attributable behavior change (for RAG: content designed to be retrieved for a specific query and bias the answer)",
+      "technique": "poisoning payload injection",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Crafted content is accepted into the pipeline without content-integrity review",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Crafted content is accepted into the pipeline without content-integrity review' did not occur).",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "training_data_poisoning_step3",
+      "from_state": "training_data_poisoning_after_step2",
+      "action": "Trigger retraining/re-indexing (or wait for the next scheduled cycle) and then query the model/RAG system with the trigger condition",
+      "technique": "trigger verification",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Model output reflects the planted bias/behavior when the trigger condition is met, and behaves normally otherwise",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Model output reflects the planted bias/behavior when the trigger condition is met, and behaves normally otherwise' did not occur).",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "training_data_poisoning_step4",
+      "from_state": "training_data_poisoning_after_step3",
+      "action": "Assess blast radius: does the poisoned behavior affect all users, or only queries matching the specific trigger",
+      "technique": "impact scoping",
+      "tools": [
+        "manual testing"
+      ],
+      "playbook_ref": "training_data_poisoning",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Scope of affected queries/users determined",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Scope of affected queries/users determined' did not occur).",
+          "likelihood": "possible",
+          "to_state": "training_data_poisoning_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]

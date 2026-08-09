@@ -39,10 +39,10 @@ Optionally, a state also carries `detection_signals` (hints for recognizing
 it from real tool output -- see below), and technology-specific states carry
 `technology` and `cve_refs`.
 
-## Three layers
+## Four layers
 
 1. **Generated per-class chains** (`scripts/build_graph.py`, mechanical):
-   each of the 35 real vulnerability playbooks in
+   each of the 44 real vulnerability playbooks (35 generic + 9 AI/LLM) in
    `knowledge/vulnerability_playbooks.json` becomes a linear chain --
    `{target_type}_target_identified -> ... -> {playbook_id}_confirmed`, with
    every step also branching to a `{playbook_id}_ruled_out` dead end on
@@ -84,8 +84,22 @@ it from real tool output -- see below), and technology-specific states carry
    bridge into the same `low_priv_shell_obtained` capability state the
    generic RCE-capable classes use.
 
+4. **Hand-authored AI/LLM bridges** (`knowledge/graph/ai_bridges.json`): the
+   9 OWASP LLM Top 10 (2025) classes -- prompt injection, excessive agency,
+   insecure output handling, sensitive information disclosure, supply
+   chain, data/model poisoning, system prompt leakage, vector/embedding
+   weaknesses, unbounded consumption -- converge into the *exact same*
+   capability states the web/app classes use, and add **zero new states**.
+   A prompt injection that hijacks an over-scoped agent tool reaches
+   `unauthorized_privileged_action_possible`, the same state IDOR or mass
+   assignment reach; insecure output handling fans out directly into
+   `xss_stored_confirmed` / `sqli_confirmed` / `command_injection_confirmed`
+   depending on the downstream sink. This is deliberate: AI security isn't
+   a separate graph bolted onto the side, it's the same attacker objectives
+   reached through a model-mediated path.
+
 Run `scripts/build_graph.py` to regenerate the merged output after editing
-any of the three source files.
+any of the four source files.
 
 ## Detection signals: authored hints, not a working classifier
 
@@ -184,7 +198,7 @@ Three policies:
 - **epsilon_greedy** -- greedy with probability `1-epsilon` random exploration.
 
 On the current graph (3000/1000/1000 episodes, seed 42): random reaches a
-`full_compromise` state **6.1%** of the time, epsilon_greedy **10.8%**,
+`full_compromise` state **5.3%** of the time, epsilon_greedy **10.3%**,
 greedy **13.1%** -- a real, measurable gap that also sanity-checks the graph
 itself (if greedy couldn't beat random, that would flag a bridge-chain gap).
 
@@ -207,7 +221,10 @@ Each episode:
 
 ## Stats
 
-222 states, 207 actions: 144 generated from the 35 generic playbooks, 21
-hand-authored generic-bridge states / 45 generic-bridge actions, 23
-technology states / 18 technology actions covering 8 real CVEs. Validated
-with zero schema errors, zero unreachable states (`scripts/validate_graph.py`).
+264 states, 248 actions: 226 generated from the 44 vulnerability playbooks
+(35 generic + 9 AI/LLM) plus 5 shared target-type entry states, 15 net-new
+hand-authored generic-bridge states (21 defined, 6 are detection-signal
+overrides of already-generated states) / 45 generic-bridge actions, 23
+technology states / 18 technology actions covering 8 real CVEs, and 8
+AI-bridge actions adding zero new states. Validated with zero schema
+errors, zero unreachable states (`scripts/validate_graph.py`).

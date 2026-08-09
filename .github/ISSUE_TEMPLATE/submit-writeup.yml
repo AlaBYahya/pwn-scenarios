@@ -1,0 +1,73 @@
+name: Submit a writeup
+description: Share a link to a bug bounty / pentest / CTF writeup for inclusion in the dataset.
+title: "[writeup] "
+labels: ["writeup-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing! A few things before you submit:
+
+        - We only store **metadata + a link back to your source** (title, author, program, vulnerability tags, date) -- never the writeup's full text. See [DATA_LICENSE](../../DATA_LICENSE) for why.
+        - The link must be to a **publicly accessible, already-published** writeup (your own or one you have the right to reference). Don't submit private/paywalled content.
+        - One writeup per issue, please -- makes review and de-duplication easier.
+  - type: input
+    id: url
+    attributes:
+      label: Writeup URL
+      description: Direct link to the published writeup.
+      placeholder: "https://example.com/my-idor-writeup"
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      placeholder: "IDOR in the Widget API leads to full account takeover"
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: Author (you, or who to credit)
+      placeholder: "Jane Researcher"
+    validations:
+      required: false
+  - type: input
+    id: program
+    attributes:
+      label: Program / target (if applicable)
+      placeholder: "Acme Corp (HackerOne)"
+    validations:
+      required: false
+  - type: input
+    id: tags
+    attributes:
+      label: Vulnerability tags (comma-separated)
+      description: What kind(s) of bug is this? Use terms like "IDOR", "SSRF", "Prompt Injection", "SQLi" -- see knowledge/vulnerability_playbooks.json for the full list of recognized classes. Unrecognized tags are still stored, just won't auto-classify into a specific playbook.
+      placeholder: "IDOR, Broken Access Control"
+    validations:
+      required: true
+  - type: input
+    id: bounty
+    attributes:
+      label: Bounty amount (if disclosed, else leave blank)
+      placeholder: "$2,500"
+    validations:
+      required: false
+  - type: input
+    id: date
+    attributes:
+      label: Publication date (YYYY-MM-DD)
+      placeholder: "2026-08-09"
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: This writeup is publicly accessible at the URL above (no login/paywall required).
+          required: true
+        - label: I have the right to submit this link (it's my own writeup, or I'm referencing someone else's already-public work by link only).
+          required: true

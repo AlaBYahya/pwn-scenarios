@@ -1,0 +1,41 @@
+{
+  "_comment": "AI/LLM chaining knowledge. Unlike bridges.json and technology_bridges.json, this adds zero new states -- every AI/LLM vulnerability class's impact converges into a capability state the web/app classes already use (unauthorized_privileged_action_possible, sensitive_data_exfiltrated, valid_credentials_found, low_priv_shell_obtained, or directly into xss_stored/sqli/command_injection confirmed states for insecure output handling). This is deliberate: it demonstrates that 'AI security' isn't a separate graph bolted on the side, it's the same attacker objectives reached through a model-mediated path.",
+  "states": [],
+  "actions": [
+    {"action_id": "bridge_prompt_injection_to_tool_abuse", "from_state": "prompt_injection_confirmed", "action": "Chain the injection to invoke a connected tool/plugin beyond its intended scope.", "technique": "agentic tool abuse via injection", "tools": ["manual testing"], "playbook_ref": "prompt_injection", "outcomes": [
+      {"outcome_id": "success", "observation": "Agent invokes a tool with attacker-influenced parameters beyond the original task.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "no_tools", "observation": "No tool/plugin access is reachable from this context.", "likelihood": "likely", "to_state": "prompt_injection_confirmed", "note": "Try system prompt/context exfiltration instead."}
+    ]},
+    {"action_id": "bridge_prompt_injection_to_exfil", "from_state": "prompt_injection_confirmed", "action": "Chain the injection to exfiltrate the system prompt, conversation history, or other in-context data.", "technique": "context exfiltration via injection", "tools": ["manual testing"], "playbook_ref": "prompt_injection", "outcomes": [
+      {"outcome_id": "success", "observation": "Model discloses in-context data it should not.", "likelihood": "possible", "to_state": "sensitive_data_exfiltrated", "note": null},
+      {"outcome_id": "blocked", "observation": "Model refuses or context contains nothing sensitive.", "likelihood": "likely", "to_state": "prompt_injection_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_system_prompt_leak_to_creds", "from_state": "system_prompt_leakage_confirmed", "action": "Extract embedded secrets or internal tool schemas from the leaked system prompt.", "technique": "leaked-prompt analysis", "tools": ["manual review"], "playbook_ref": "system_prompt_leakage", "outcomes": [
+      {"outcome_id": "creds_found", "observation": "The leaked prompt contains a credential, API key, or internal tool schema granting access.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "info_only", "observation": "The leaked prompt contains only business logic/instructions, no reusable credentials.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null}
+    ]},
+    {"action_id": "bridge_excessive_agency_to_shell", "from_state": "excessive_agency_confirmed", "action": "Invoke an over-scoped tool that has file-system or code-execution capability.", "technique": "agentic tool abuse", "tools": ["manual testing"], "playbook_ref": "excessive_agency", "outcomes": [
+      {"outcome_id": "success", "observation": "Tool executes attacker-influenced code/commands on the host.", "likelihood": "possible", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "no_such_tool", "observation": "Available over-scoped tools do not include code execution, only data/action access.", "likelihood": "likely", "to_state": "unauthorized_privileged_action_possible", "note": null}
+    ]},
+    {"action_id": "bridge_llm_info_disclosure_to_creds", "from_state": "sensitive_information_disclosure_llm_confirmed", "action": "Assess whether the disclosed data includes reusable credentials or only PII/business data.", "technique": "data analysis", "tools": ["manual review"], "playbook_ref": "sensitive_information_disclosure_llm", "outcomes": [
+      {"outcome_id": "creds_found", "observation": "Disclosed data includes a reusable credential/token.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "pii_only", "observation": "Disclosed data is PII/business data without reusable credentials.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null}
+    ]},
+    {"action_id": "bridge_output_handling_to_classic_vuln", "from_state": "insecure_output_handling_confirmed", "action": "Determine the downstream sink type and confirm the resulting classic-vulnerability impact.", "technique": "sink classification", "tools": ["browser", "manual testing"], "playbook_ref": "insecure_output_handling", "outcomes": [
+      {"outcome_id": "xss", "observation": "Sink is a browser render path; injected script executes.", "likelihood": "possible", "to_state": "xss_stored_confirmed", "note": null},
+      {"outcome_id": "sqli", "observation": "Sink is a database query builder; injected SQL alters the query.", "likelihood": "possible", "to_state": "sqli_confirmed", "note": null},
+      {"outcome_id": "command_injection", "observation": "Sink is a shell command builder; injected metacharacters affect the command.", "likelihood": "possible", "to_state": "command_injection_confirmed", "note": null},
+      {"outcome_id": "no_further_impact", "observation": "Output reaches a sink but no exploitable downstream effect is confirmed.", "likelihood": "likely", "to_state": "insecure_output_handling_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_supply_chain_to_impact", "from_state": "llm_supply_chain_confirmed", "action": "Determine whether the substituted/malicious artifact grants code execution or data access.", "technique": "impact classification", "tools": ["manual testing"], "playbook_ref": "llm_supply_chain", "outcomes": [
+      {"outcome_id": "code_execution", "observation": "Malicious plugin/model artifact executes code with the application's privileges.", "likelihood": "possible", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "data_access", "observation": "Malicious artifact exfiltrates data or credentials it has access to.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "neither", "observation": "Substitution risk demonstrated but no code execution or data access achieved.", "likelihood": "likely", "to_state": "llm_supply_chain_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_rag_weakness_to_exfil", "from_state": "rag_embedding_weaknesses_confirmed", "action": "Extract cross-tenant data via the retrieval scoping gap at scale.", "technique": "cross-tenant retrieval abuse", "tools": ["manual testing"], "playbook_ref": "rag_embedding_weaknesses", "outcomes": [
+      {"outcome_id": "success", "observation": "Cross-tenant data is retrievable for a range of queries, not just one.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null},
+      {"outcome_id": "limited", "observation": "Leakage confirmed for only a narrow, specific query pattern.", "likelihood": "possible", "to_state": "rag_embedding_weaknesses_confirmed", "note": null}
+    ]}
+  ]
+}

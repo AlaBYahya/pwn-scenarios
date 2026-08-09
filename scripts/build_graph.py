@@ -47,6 +47,10 @@ CONFIRMED_VALUE = {
     "business_logic_flaw": "medium", "cache_poisoning": "medium", "clickjacking": "medium",
     "graphql_abuse": "medium", "prototype_pollution": "medium", "2fa_bypass": "medium",
     "information_disclosure": "medium", "hardcoded_secrets": "medium", "dos": "medium",
+    "prompt_injection": "high", "excessive_agency": "high", "insecure_output_handling": "high",
+    "sensitive_information_disclosure_llm": "high", "llm_supply_chain": "high",
+    "system_prompt_leakage": "medium", "rag_embedding_weaknesses": "medium",
+    "training_data_poisoning": "medium", "model_denial_of_service": "medium",
 }
 
 
@@ -196,6 +200,7 @@ def main():
     ap.add_argument("--playbooks", default="../knowledge/vulnerability_playbooks.json")
     ap.add_argument("--bridges", default="../knowledge/graph/bridges.json")
     ap.add_argument("--tech-bridges", default="../knowledge/graph/technology_bridges.json")
+    ap.add_argument("--ai-bridges", default="../knowledge/graph/ai_bridges.json")
     ap.add_argument("--out", default="../data/graph/attack_graph.json")
     args = ap.parse_args()
 
@@ -205,10 +210,13 @@ def main():
         bridges = json.load(f)
     with open(args.tech_bridges) as f:
         tech_bridges = json.load(f)
+    with open(args.ai_bridges) as f:
+        ai_bridges = json.load(f)
 
     states, actions = build_per_class(playbooks)
     states, actions = merge_bridges(states, actions, bridges)
     states, actions = merge_bridges(states, actions, tech_bridges)
+    states, actions = merge_bridges(states, actions, ai_bridges)
 
     graph = {
         "schema_version": SCHEMA_VERSION,

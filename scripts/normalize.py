@@ -194,11 +194,21 @@ def main():
     playbooks_by_id, alias_map = load_playbooks(args.playbooks)
 
     seen_ids = set()
-    total_in, total_out, total_skipped = 0, 0, 0
+    seen_urls = set()
+    total_in, total_out, total_skipped, total_cross_platform_dupes = 0, 0, 0, 0
     skip_reasons = {}
 
+    # Process the most structured/authoritative source for a given real-world
+    # writeup first, so cross-platform URL overlap (e.g. Pentester Land linking
+    # to a HackerOne report we already collected directly) resolves in favor
+    # of the more precisely-classified record rather than whichever file glob
+    # happened to sort first alphabetically.
+    SOURCE_PRIORITY = ["hackerone.jsonl", "tryhackme.jsonl", "ctf.jsonl", "community_submissions.jsonl", "pentesterland.jsonl", "curated_lists.jsonl"]
+    all_files = sorted(glob.glob(os.path.join(args.raw_dir, "*.jsonl")))
+    ordered_files = sorted(all_files, key=lambda p: SOURCE_PRIORITY.index(os.path.basename(p)) if os.path.basename(p) in SOURCE_PRIORITY else len(SOURCE_PRIORITY))
+
     with open(args.out, "w") as out_f:
-        for raw_path in sorted(glob.glob(os.path.join(args.raw_dir, "*.jsonl"))):
+        for raw_path in ordered_files:
             collector_name = os.path.basename(raw_path)
             count_this_source = 0
             with open(raw_path) as f:
@@ -209,6 +219,11 @@ def main():
                     total_in += 1
                     raw = json.loads(line)
                     platform = raw["source_platform"]
+
+                    raw_url = raw.get("url")
+                    if raw_url and raw_url in seen_urls:
+                        total_cross_platform_dupes += 1
+                        continue
 
                     if platform == "hackerone":
                         text_fields = [raw.get("weakness"), raw.get("title")]
@@ -251,12 +266,14 @@ def main():
                     if record["id"] in seen_ids:
                         continue
                     seen_ids.add(record["id"])
+                    if raw_url:
+                        seen_urls.add(raw_url)
 
                     out_f.write(json.dumps(record, ensure_ascii=False) + "\n")
                     total_out += 1
                     count_this_source += 1
 
-    print(f"Read {total_in} raw records, wrote {total_out} scenarios, skipped {total_skipped} (unclassified)", file=sys.stderr)
+    print(f"Read {total_in} raw records, wrote {total_out} scenarios, skipped {total_skipped} (unclassified), {total_cross_platform_dupes} cross-platform URL duplicates dropped", file=sys.stderr)
     print(f"Skip breakdown by source: {skip_reasons}", file=sys.stderr)
 
 

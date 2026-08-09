@@ -1,0 +1,71 @@
+name: Daily writeup collection (RSS + blogs)
+
+# Fast, cheap sources that publish new content frequently: RSS feeds only
+# return their ~10-20 most recent posts per fetch, so running this daily is
+# what actually captures new articles before they age out of that window.
+# The larger, slower GitHub-repo-scanning collectors (CTF/HackTheBox/
+# TryHackMe/curated lists) live in weekly-collect.yml instead -- repos don't
+# change often enough to justify a daily full re-scan, and re-searching many
+# GitHub topics + fetching file trees for hundreds of repos takes minutes,
+# not seconds.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # 03:00 UTC daily
+  workflow_dispatch: {}   # allow manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Reassemble scenarios.jsonl from committed chunks
+        run: cat data/scenarios/chunks/scenarios.part*.jsonl > data/scenarios/scenarios.jsonl
+
+      - name: Collect RSS feeds and researcher blogs
+        run: |
+          cd scripts
+          python3 collect_rss_feeds.py --out ../data/raw/rss_feeds.jsonl
+          python3 collect_blogs.py --out ../data/raw/blogs.jsonl
+
+      - name: Fold in any community submissions
+        run: |
+          if [ -s knowledge/community_submissions.jsonl ]; then
+            cp knowledge/community_submissions.jsonl data/raw/community_submissions.jsonl
+          fi
+
+      - name: Normalize, validate, and re-chunk
+        run: |
+          cd scripts
+          python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
+          python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
+          python3 chunk_scenarios.py --data ../data/scenarios/scenarios.jsonl --out-dir ../data/scenarios/chunks --records-per-chunk 2000
+
+      - name: Rebuild the balanced fine-tuning sample
+        run: |
+          cd scripts
+          python3 sample_balanced.py --data ../data/scenarios/scenarios.jsonl --max-per-class 20 --min-confidence medium --out ../data/scenarios/balanced_sample.jsonl
+
+      - name: Commit and push if the dataset changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/scenarios/chunks data/scenarios/balanced_sample.jsonl
+          if git diff --cached --quiet; then
+            echo "No new records today -- nothing to commit."
+          else
+            new_count=$(python3 -c "import json; print(json.load(open('data/scenarios/chunks/manifest.json'))['total_records'])")
+            git commit -m "Daily collection: RSS feeds + blogs ($new_count total records)" -m "Automated by .github/workflows/daily-collect.yml"
+            git push
+          fi

@@ -1,89 +1,1911 @@
 {
   "_comment": "Technology/CVE-specific chains. Each grounds a specific, real, patched-for-years CVE (CVSS/description verified against NVD) rather than the generic 'web AppSec 101' chains in bridges.json. Entry: a fingerprinting action from web_target_identified fans out into per-technology recon states; each then has one exploit action reaching a {tech}_{cve}_confirmed state, bridged into the same low_priv_shell_obtained capability state used by the generic classes. Log4Shell skips the fingerprint step -- blind JNDI injection is tried broadly in practice, not gated behind first confirming Log4j is in use.",
   "states": [
-    {"state_id": "spring_mvc_identified", "description": "Target is fingerprinted as a Spring MVC/WebFlux application (Spring Boot error pages, Whitelabel Error Page, or actuator endpoints).", "tier": "recon", "value": "low", "target_types": ["web"], "playbook_ref": null, "technology": "Spring Framework", "detection_signals": [{"signal_type": "http_response", "description": "Default Spring Boot error response format or reachable /actuator endpoints.", "examples": ["response body contains \"Whitelabel Error Page\"", "GET /actuator/env returns 200 with environment properties"]}]},
-    {"state_id": "confluence_identified", "description": "Target is fingerprinted as Atlassian Confluence Server/Data Center.", "tier": "recon", "value": "low", "target_types": ["web"], "playbook_ref": null, "technology": "Atlassian Confluence", "detection_signals": [{"signal_type": "http_response", "description": "Confluence-specific login page branding, /server-info.action, or X-Confluence-* headers.", "examples": ["response headers include \"X-Confluence-Request-Time\"", "/server-info.action discloses the Confluence version"]}]},
-    {"state_id": "gitlab_identified", "description": "Target is fingerprinted as a self-hosted GitLab instance.", "tier": "recon", "value": "low", "target_types": ["web"], "playbook_ref": null, "technology": "GitLab", "detection_signals": [{"signal_type": "http_response", "description": "GitLab-specific sign-in page branding or /help page disclosing version.", "examples": ["/help page footer discloses the GitLab version string"]}]},
-    {"state_id": "laravel_debug_identified", "description": "Target is fingerprinted as a Laravel application running with debug mode (Ignition error page) enabled.", "tier": "recon", "value": "low", "target_types": ["web"], "playbook_ref": null, "technology": "Laravel/Ignition", "detection_signals": [{"signal_type": "http_response", "description": "Triggering an application error returns the Ignition debug page instead of a generic error.", "examples": ["forcing a 500 error returns a page with \"Ignition\" branding and a stack trace with local file paths"]}]},
-    {"state_id": "struts_identified", "description": "Target is fingerprinted as an Apache Struts 2 application (file upload / .action endpoints).", "tier": "recon", "value": "low", "target_types": ["web"], "playbook_ref": null, "technology": "Apache Struts 2", "detection_signals": [{"signal_type": "http_response", "description": "URLs use the .action extension, or a Struts-specific error page/stack trace is triggerable.", "examples": ["endpoint paths end in .action", "malformed request triggers a Struts-branded exception page"]}]},
-    {"state_id": "citrix_adc_identified", "description": "Target is fingerprinted as a Citrix Application Delivery Controller (ADC) / Gateway appliance.", "tier": "recon", "value": "low", "target_types": ["network", "web"], "playbook_ref": null, "technology": "Citrix ADC/Gateway", "detection_signals": [{"signal_type": "http_response", "description": "Citrix-branded login portal at the default management path.", "examples": ["/vpn/index.html serves the Citrix Gateway login page"]}]},
-    {"state_id": "exchange_identified", "description": "Target is fingerprinted as a Microsoft Exchange Server (OWA/ECP reachable).", "tier": "recon", "value": "low", "target_types": ["web"], "playbook_ref": null, "technology": "Microsoft Exchange Server", "detection_signals": [{"signal_type": "http_response", "description": "OWA or ECP login portal reachable at the default paths.", "examples": ["/owa/ serves the Outlook Web App login page", "/ecp/ serves the Exchange admin center login page"]}]},
-
-    {"state_id": "spring_mvc_ruled_out", "description": "Spring4Shell-style exploitation was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "Payload rejected or had no effect; likely patched, wrong JDK version, or not a WAR/Tomcat deployment.", "examples": []}]},
-    {"state_id": "confluence_ruled_out", "description": "The Confluence OGNL injection exploit was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "Injected OGNL expression was not evaluated; version is likely patched.", "examples": []}]},
-    {"state_id": "gitlab_ruled_out", "description": "The GitLab ExifTool RCE exploit was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "Crafted image processed without triggering an OOB callback; version is likely patched.", "examples": []}]},
-    {"state_id": "laravel_ruled_out", "description": "The Laravel Ignition RCE exploit was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "Debug mode is disabled or Ignition is patched -- no Ignition error page reachable.", "examples": []}]},
-    {"state_id": "struts_ruled_out", "description": "The Struts Jakarta Multipart RCE exploit was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "OGNL payload in Content-Type header had no effect; version is likely patched.", "examples": []}]},
-    {"state_id": "citrix_adc_ruled_out", "description": "The Citrix ADC directory traversal / RCE exploit was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["network", "web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "Traversal request blocked or returned no file content; version is likely patched.", "examples": []}]},
-    {"state_id": "exchange_ruled_out", "description": "The Exchange ProxyLogon/ProxyShell exploit chain was not successful against this target.", "tier": "ruled_out", "value": "none", "target_types": ["web"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "Chain failed at the SSRF/authentication-bypass stage; version is likely patched.", "examples": []}]},
-    {"state_id": "log4j_rce_ruled_out", "description": "No JNDI injection callback was observed across the probed input points.", "tier": "ruled_out", "value": "none", "target_types": ["web", "api"], "playbook_ref": null, "detection_signals": [{"signal_type": "manual_judgment", "description": "No OOB callback across all probed input points; Log4j is not in use, is patched, or the vulnerable code path is unreachable.", "examples": []}]},
-
-    {"state_id": "spring4shell_confirmed", "description": "Spring4Shell RCE confirmed exploitable via class-loader data binding.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": null, "technology": "Spring Framework", "cve_refs": ["CVE-2022-22965"], "detection_signals": [{"signal_type": "http_response", "description": "A crafted parameter-binding payload that overwrites the Tomcat AccessLogValve pattern results in a subsequently accessible web shell.", "examples": ["a JSP file appears at a predictable path and executes commands passed via a request parameter"]}]},
-    {"state_id": "confluence_ognl_confirmed", "description": "Confluence OGNL injection RCE confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": null, "technology": "Atlassian Confluence", "cve_refs": ["CVE-2022-26134"], "detection_signals": [{"signal_type": "http_response", "description": "An OGNL expression injected via a crafted URL path is evaluated server-side.", "examples": ["response reflects the evaluated result of an injected OGNL arithmetic expression, or an OOB callback fires"]}]},
-    {"state_id": "gitlab_exiftool_confirmed", "description": "GitLab ExifTool RCE confirmed exploitable via crafted image upload.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": null, "technology": "GitLab", "cve_refs": ["CVE-2021-22205"], "detection_signals": [{"signal_type": "tool_output", "description": "An out-of-band callback fires when a crafted image file (malicious DjVu/exiftool metadata) is uploaded as an avatar/attachment.", "examples": ["interactsh logs a hit shortly after the crafted image is uploaded and processed"]}]},
-    {"state_id": "laravel_ignition_confirmed", "description": "Laravel Ignition debug-mode RCE confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": null, "technology": "Laravel/Ignition", "cve_refs": ["CVE-2021-3129"], "detection_signals": [{"signal_type": "http_response", "description": "A crafted request abusing Ignition's file_get_contents/file_put_contents debug functionality writes and executes a malicious file.", "examples": ["a written file is subsequently retrievable and executes injected PHP code"]}]},
-    {"state_id": "struts_jakarta_confirmed", "description": "Apache Struts Jakarta Multipart parser RCE confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": null, "technology": "Apache Struts 2", "cve_refs": ["CVE-2017-5638"], "detection_signals": [{"signal_type": "http_response", "description": "An OGNL payload in the Content-Type header of a multipart upload request is evaluated during exception handling.", "examples": ["response includes the output of an injected OS command, or an OOB callback fires"]}]},
-    {"state_id": "citrix_adc_rce_confirmed", "description": "Citrix ADC/Gateway directory traversal to RCE confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["network", "web"], "playbook_ref": null, "technology": "Citrix ADC/Gateway", "cve_refs": ["CVE-2019-19781"], "detection_signals": [{"signal_type": "http_response", "description": "A crafted path-traversal request writes a malicious Perl/template file that is then triggered for execution.", "examples": ["a subsequently requested crafted path returns the output of an injected command"]}]},
-    {"state_id": "exchange_rce_confirmed", "description": "Microsoft Exchange Server RCE confirmed exploitable via the ProxyLogon/ProxyShell-family SSRF + authentication-bypass + arbitrary-file-write chain. Modeled here as a single consolidated exploit step; the real chain involves multiple intermediate CVEs (SSRF to bypass auth, then arbitrary file write to drop a web shell).", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": null, "technology": "Microsoft Exchange Server", "cve_refs": ["CVE-2021-26855", "CVE-2021-34473"], "detection_signals": [{"signal_type": "http_response", "description": "A web shell dropped via the chain is reachable and executes commands.", "examples": ["a .aspx web shell at a predictable OWA-relative path returns command output"]}]},
-    {"state_id": "log4j_jndi_rce_confirmed", "description": "Log4Shell (Log4j2 JNDI injection) RCE confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web", "api"], "playbook_ref": null, "technology": "Apache Log4j2", "cve_refs": ["CVE-2021-44228"], "detection_signals": [{"signal_type": "tool_output", "description": "An out-of-band LDAP/DNS callback fires after a JNDI lookup payload is submitted in any logged input, and a subsequent weaponized callback achieves class loading.", "examples": ["interactsh/Collaborator logs an LDAP lookup correlated to the injected ${jndi:ldap://...} payload"]}]}
+    {
+      "state_id": "spring_mvc_identified",
+      "description": "Target is fingerprinted as a Spring MVC/WebFlux application (Spring Boot error pages, Whitelabel Error Page, or actuator endpoints).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Spring Framework",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Default Spring Boot error response format or reachable /actuator endpoints.",
+          "examples": [
+            "response body contains \"Whitelabel Error Page\"",
+            "GET /actuator/env returns 200 with environment properties"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "confluence_identified",
+      "description": "Target is fingerprinted as Atlassian Confluence Server/Data Center.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Atlassian Confluence",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Confluence-specific login page branding, /server-info.action, or X-Confluence-* headers.",
+          "examples": [
+            "response headers include \"X-Confluence-Request-Time\"",
+            "/server-info.action discloses the Confluence version"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_identified",
+      "description": "Target is fingerprinted as a self-hosted GitLab instance.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "GitLab",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "GitLab-specific sign-in page branding or /help page disclosing version.",
+          "examples": [
+            "/help page footer discloses the GitLab version string"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "laravel_debug_identified",
+      "description": "Target is fingerprinted as a Laravel application running with debug mode (Ignition error page) enabled.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Laravel/Ignition",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Triggering an application error returns the Ignition debug page instead of a generic error.",
+          "examples": [
+            "forcing a 500 error returns a page with \"Ignition\" branding and a stack trace with local file paths"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "struts_identified",
+      "description": "Target is fingerprinted as an Apache Struts 2 application (file upload / .action endpoints).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Apache Struts 2",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "URLs use the .action extension, or a Struts-specific error page/stack trace is triggerable.",
+          "examples": [
+            "endpoint paths end in .action",
+            "malformed request triggers a Struts-branded exception page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_adc_identified",
+      "description": "Target is fingerprinted as a Citrix Application Delivery Controller (ADC) / Gateway appliance.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Citrix ADC/Gateway",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Citrix-branded login portal at the default management path.",
+          "examples": [
+            "/vpn/index.html serves the Citrix Gateway login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "exchange_identified",
+      "description": "Target is fingerprinted as a Microsoft Exchange Server (OWA/ECP reachable).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Microsoft Exchange Server",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "OWA or ECP login portal reachable at the default paths.",
+          "examples": [
+            "/owa/ serves the Outlook Web App login page",
+            "/ecp/ serves the Exchange admin center login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "spring_mvc_ruled_out",
+      "description": "Spring4Shell-style exploitation was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload rejected or had no effect; likely patched, wrong JDK version, or not a WAR/Tomcat deployment.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "confluence_ruled_out",
+      "description": "The Confluence OGNL injection exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Injected OGNL expression was not evaluated; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_ruled_out",
+      "description": "The GitLab ExifTool RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Crafted image processed without triggering an OOB callback; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "laravel_ruled_out",
+      "description": "The Laravel Ignition RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Debug mode is disabled or Ignition is patched -- no Ignition error page reachable.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "struts_ruled_out",
+      "description": "The Struts Jakarta Multipart RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "OGNL payload in Content-Type header had no effect; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_adc_ruled_out",
+      "description": "The Citrix ADC directory traversal / RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Traversal request blocked or returned no file content; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "exchange_ruled_out",
+      "description": "The Exchange ProxyLogon/ProxyShell exploit chain was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Chain failed at the SSRF/authentication-bypass stage; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "log4j_rce_ruled_out",
+      "description": "No JNDI injection callback was observed across the probed input points.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web",
+        "api"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "No OOB callback across all probed input points; Log4j is not in use, is patched, or the vulnerable code path is unreachable.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "spring4shell_confirmed",
+      "description": "Spring4Shell RCE confirmed exploitable via class-loader data binding.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Spring Framework",
+      "cve_refs": [
+        "CVE-2022-22965"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A crafted parameter-binding payload that overwrites the Tomcat AccessLogValve pattern results in a subsequently accessible web shell.",
+          "examples": [
+            "a JSP file appears at a predictable path and executes commands passed via a request parameter"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "confluence_ognl_confirmed",
+      "description": "Confluence OGNL injection RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Atlassian Confluence",
+      "cve_refs": [
+        "CVE-2022-26134"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "An OGNL expression injected via a crafted URL path is evaluated server-side.",
+          "examples": [
+            "response reflects the evaluated result of an injected OGNL arithmetic expression, or an OOB callback fires"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_exiftool_confirmed",
+      "description": "GitLab ExifTool RCE confirmed exploitable via crafted image upload.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "GitLab",
+      "cve_refs": [
+        "CVE-2021-22205"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "An out-of-band callback fires when a crafted image file (malicious DjVu/exiftool metadata) is uploaded as an avatar/attachment.",
+          "examples": [
+            "interactsh logs a hit shortly after the crafted image is uploaded and processed"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "laravel_ignition_confirmed",
+      "description": "Laravel Ignition debug-mode RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Laravel/Ignition",
+      "cve_refs": [
+        "CVE-2021-3129"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A crafted request abusing Ignition's file_get_contents/file_put_contents debug functionality writes and executes a malicious file.",
+          "examples": [
+            "a written file is subsequently retrievable and executes injected PHP code"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "struts_jakarta_confirmed",
+      "description": "Apache Struts Jakarta Multipart parser RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Apache Struts 2",
+      "cve_refs": [
+        "CVE-2017-5638"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "An OGNL payload in the Content-Type header of a multipart upload request is evaluated during exception handling.",
+          "examples": [
+            "response includes the output of an injected OS command, or an OOB callback fires"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_adc_rce_confirmed",
+      "description": "Citrix ADC/Gateway directory traversal to RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Citrix ADC/Gateway",
+      "cve_refs": [
+        "CVE-2019-19781"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A crafted path-traversal request writes a malicious Perl/template file that is then triggered for execution.",
+          "examples": [
+            "a subsequently requested crafted path returns the output of an injected command"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "exchange_rce_confirmed",
+      "description": "Microsoft Exchange Server RCE confirmed exploitable via the ProxyLogon/ProxyShell-family SSRF + authentication-bypass + arbitrary-file-write chain. Modeled here as a single consolidated exploit step; the real chain involves multiple intermediate CVEs (SSRF to bypass auth, then arbitrary file write to drop a web shell).",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Microsoft Exchange Server",
+      "cve_refs": [
+        "CVE-2021-26855",
+        "CVE-2021-34473"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A web shell dropped via the chain is reachable and executes commands.",
+          "examples": [
+            "a .aspx web shell at a predictable OWA-relative path returns command output"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "log4j_jndi_rce_confirmed",
+      "description": "Log4Shell (Log4j2 JNDI injection) RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web",
+        "api"
+      ],
+      "playbook_ref": null,
+      "technology": "Apache Log4j2",
+      "cve_refs": [
+        "CVE-2021-44228"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "An out-of-band LDAP/DNS callback fires after a JNDI lookup payload is submitted in any logged input, and a subsequent weaponized callback achieves class loading.",
+          "examples": [
+            "interactsh/Collaborator logs an LDAP lookup correlated to the injected ${jndi:ldap://...} payload"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "windows_smb_identified",
+      "description": "Target is fingerprinted as a Windows host with SMBv1 enabled and reachable.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows SMB",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "SMB version scan reports SMBv1 support enabled.",
+          "examples": [
+            "nmap --script smb-protocols reports SMBv1 enabled"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "windows_domain_controller_identified",
+      "description": "Target is fingerprinted as a Windows Active Directory Domain Controller (Netlogon RPC reachable).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Active Directory",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Netlogon RPC endpoint (MS-NRPC) responds and host advertises domain controller SRV records.",
+          "examples": [
+            "nmap detects port 135/445 with a Domain Controller service banner"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "windows_print_spooler_identified",
+      "description": "Target is fingerprinted as a Windows host with the Print Spooler service exposed.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Print Spooler",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "RPC endpoint mapper lists the spoolsv/MS-RPRN interface as reachable.",
+          "examples": [
+            "rpcdump.py against the target lists the Print System Remote Protocol interface"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "moveit_identified",
+      "description": "Target is fingerprinted as a Progress MOVEit Transfer instance.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Progress MOVEit Transfer",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "MOVEit-branded login portal or /human.aspx endpoint reachable.",
+          "examples": [
+            "/human.aspx or the MOVEit login page is served at the default path"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "cisco_iosxe_webui_identified",
+      "description": "Target is fingerprinted as a Cisco IOS XE device with the web UI feature enabled.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Cisco IOS XE",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Cisco IOS XE web UI login portal reachable over HTTPS on the management interface.",
+          "examples": [
+            "HTTPS response on the device returns the Cisco IOS XE web UI login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "ivanti_connect_secure_identified",
+      "description": "Target is fingerprinted as an Ivanti Connect Secure / Policy Secure VPN gateway.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web",
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Ivanti Connect Secure",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Ivanti-branded VPN login portal reachable at the default path.",
+          "examples": [
+            "/dana-na/ path serves the Ivanti Connect Secure login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "zerologon_ruled_out",
+      "description": "Zerologon exploitation was not successful against this domain controller.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Netlogon secure channel reset was rejected; target is patched (CVE-2020-1472 fix enforces secure RPC).",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "eternalblue_ruled_out",
+      "description": "EternalBlue exploitation was not successful against this host.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "SMBv1 exploit attempt failed; host is patched or SMBv1 is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "printnightmare_ruled_out",
+      "description": "PrintNightmare exploitation was not successful against this host.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Spooler RPC call was rejected; host is patched or Print Spooler service is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "follina_ruled_out",
+      "description": "Follina exploitation was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Malicious document did not trigger MSDT execution; target is patched or MSDT protocol handler is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "moveit_ruled_out",
+      "description": "The MOVEit SQL injection exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload rejected -- version is patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_bleed_ruled_out",
+      "description": "The Citrix Bleed session token leak was not reproducible against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Crafted request did not leak memory content; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "cisco_iosxe_ruled_out",
+      "description": "The Cisco IOS XE web UI RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload rejected -- version is patched or web UI feature is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "ivanti_connect_secure_ruled_out",
+      "description": "The Ivanti Connect Secure auth-bypass/command-injection chain was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web",
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Chain failed at the auth-bypass stage; version is patched or mitigation applied.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_password_reset_ruled_out",
+      "description": "The GitLab password-reset account-takeover was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Secondary unverified email was not honored for password reset; version is patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "zerologon_confirmed",
+      "description": "Zerologon (Netlogon privilege escalation) confirmed exploitable, yielding domain controller machine account takeover.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Active Directory",
+      "cve_refs": [
+        "CVE-2020-1472"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Repeated zero-value authentication attempts against Netlogon succeed, and the DC machine account password can be reset.",
+          "examples": [
+            "public Zerologon PoC script reports successful authentication bypass"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "eternalblue_confirmed",
+      "description": "EternalBlue (SMBv1 remote code execution) confirmed exploitable, yielding SYSTEM-level code execution.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows SMB",
+      "cve_refs": [
+        "CVE-2017-0144"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "SMBv1 exploit successfully triggers a kernel payload and returns a SYSTEM-level callback.",
+          "examples": [
+            "Metasploit's eternalblue module reports a successful session"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "printnightmare_confirmed",
+      "description": "PrintNightmare (Print Spooler remote code execution) confirmed exploitable, yielding SYSTEM-level code execution.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Print Spooler",
+      "cve_refs": [
+        "CVE-2021-34527"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Malicious driver installation via RpcAddPrinterDriverEx succeeds and executes with SYSTEM privileges.",
+          "examples": [
+            "public PrintNightmare PoC reports a SYSTEM-level callback"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "follina_confirmed",
+      "description": "Follina (MSDT remote code execution via Office) confirmed exploitable against a victim opening the crafted document.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Microsoft Office / MSDT",
+      "cve_refs": [
+        "CVE-2022-30190"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Opening the crafted document triggers MSDT and executes the embedded command as the victim user.",
+          "examples": [
+            "OOB callback received when the victim opens the malicious document"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "moveit_rce_confirmed",
+      "description": "MOVEit Transfer SQL injection confirmed exploitable, chained to remote code execution via a web shell.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Progress MOVEit Transfer",
+      "cve_refs": [
+        "CVE-2023-34362"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Injected SQL payload against the MOVEit endpoint returns evidence of query execution, and a dropped web shell is reachable.",
+          "examples": [
+            "a .aspx web shell dropped via the injection returns command output"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_bleed_confirmed",
+      "description": "Citrix Bleed (NetScaler session token leak) confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Citrix ADC/Gateway",
+      "cve_refs": [
+        "CVE-2023-4966"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Crafted request triggers an out-of-bounds memory read that includes a valid session token in the response.",
+          "examples": [
+            "response body contains a session cookie value not belonging to the requester"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "cisco_iosxe_rce_confirmed",
+      "description": "Cisco IOS XE web UI RCE confirmed exploitable, yielding a privileged implant/account on the device.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Cisco IOS XE",
+      "cve_refs": [
+        "CVE-2023-20198"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Crafted request against the web UI creates a new privilege-15 local user or implant.",
+          "examples": [
+            "an unauthorized local user with privilege level 15 appears in the device configuration"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "ivanti_connect_secure_rce_confirmed",
+      "description": "Ivanti Connect Secure auth-bypass chained with command injection confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web",
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Ivanti Connect Secure",
+      "cve_refs": [
+        "CVE-2023-46805",
+        "CVE-2024-21887"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Auth-bypassed request to the vulnerable web component executes an injected command.",
+          "examples": [
+            "response or OOB callback confirms command execution despite no valid session"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_password_reset_ato_confirmed",
+      "description": "GitLab password-reset account-takeover confirmed exploitable via an attacker-added unverified secondary email.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "GitLab",
+      "cve_refs": [
+        "CVE-2023-7028"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Password reset email is sent to the attacker-added secondary address for an arbitrary target account.",
+          "examples": [
+            "password reset link intended for the victim account is received at the attacker-controlled address"
+          ]
+        }
+      ]
+    }
   ],
   "actions": [
-    {"action_id": "fingerprint_web_stack", "from_state": "web_target_identified", "action": "Fingerprint the technology stack (HTTP headers, error pages, default paths/ports, favicon hash).", "technique": "technology fingerprinting", "tools": ["whatweb", "wappalyzer", "httpx"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "spring", "observation": "Spring Boot/MVC signatures detected.", "likelihood": "rare", "to_state": "spring_mvc_identified", "note": null},
-      {"outcome_id": "confluence", "observation": "Confluence signatures detected.", "likelihood": "rare", "to_state": "confluence_identified", "note": null},
-      {"outcome_id": "gitlab", "observation": "GitLab signatures detected.", "likelihood": "rare", "to_state": "gitlab_identified", "note": null},
-      {"outcome_id": "laravel", "observation": "Laravel debug/Ignition signatures detected.", "likelihood": "rare", "to_state": "laravel_debug_identified", "note": null},
-      {"outcome_id": "struts", "observation": "Apache Struts 2 signatures detected.", "likelihood": "rare", "to_state": "struts_identified", "note": null},
-      {"outcome_id": "citrix", "observation": "Citrix ADC/Gateway portal detected.", "likelihood": "rare", "to_state": "citrix_adc_identified", "note": null},
-      {"outcome_id": "exchange", "observation": "Exchange OWA/ECP portal detected.", "likelihood": "rare", "to_state": "exchange_identified", "note": null},
-      {"outcome_id": "unrecognized", "observation": "No specific fingerprinted technology matches a known chain.", "likelihood": "likely", "to_state": "web_target_identified", "note": "Fall back to the generic vulnerability-class testing chains."}
-    ]},
-
-    {"action_id": "log4j_jndi_injection_web", "from_state": "web_target_identified", "action": "Inject JNDI lookup probes (${jndi:ldap://collaborator/x}) into all reachable input points (headers, params, JSON body fields) and monitor for an out-of-band callback, then weaponize to achieve code execution.", "technique": "blind JNDI injection", "tools": ["interactsh", "log4j-scan"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "OOB callback received and class-loading payload executes.", "likelihood": "rare", "to_state": "log4j_jndi_rce_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "No callback observed across probed input points.", "likelihood": "likely", "to_state": "log4j_rce_ruled_out", "note": "Log4j is not in use, is patched, or the vulnerable code path is not reachable from any tested input."}
-    ]},
-    {"action_id": "log4j_jndi_injection_api", "from_state": "api_target_identified", "action": "Inject JNDI lookup probes into all reachable API input points and monitor for an out-of-band callback, then weaponize to achieve code execution.", "technique": "blind JNDI injection", "tools": ["interactsh", "log4j-scan"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "OOB callback received and class-loading payload executes.", "likelihood": "rare", "to_state": "log4j_jndi_rce_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "No callback observed across probed input points.", "likelihood": "likely", "to_state": "log4j_rce_ruled_out", "note": null}
-    ]},
-
-    {"action_id": "exploit_spring4shell", "from_state": "spring_mvc_identified", "action": "Send a crafted class-loader data-binding payload (CVE-2022-22965) to overwrite the Tomcat access log with a JSP web shell.", "technique": "Spring4Shell exploitation", "tools": ["curl", "public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "Web shell written and reachable.", "likelihood": "possible", "to_state": "spring4shell_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Payload rejected -- likely patched, not a WAR/Tomcat deployment, or JDK < 9.", "likelihood": "likely", "to_state": "spring_mvc_ruled_out", "note": null}
-    ]},
-    {"action_id": "exploit_confluence_ognl", "from_state": "confluence_identified", "action": "Send a crafted URL-path OGNL injection payload (CVE-2022-26134) to achieve code execution.", "technique": "OGNL injection", "tools": ["curl", "public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "Injected command output returned or OOB callback fires.", "likelihood": "possible", "to_state": "confluence_ognl_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Payload rejected -- version is patched.", "likelihood": "likely", "to_state": "confluence_ruled_out", "note": null}
-    ]},
-    {"action_id": "exploit_gitlab_exiftool", "from_state": "gitlab_identified", "action": "Upload a crafted image file abusing ExifTool's DjVu parser (CVE-2021-22205) to achieve code execution.", "technique": "file-parser RCE", "tools": ["public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "OOB callback fires after upload processing.", "likelihood": "possible", "to_state": "gitlab_exiftool_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Upload processed without triggering the vulnerable code path -- likely patched.", "likelihood": "likely", "to_state": "gitlab_ruled_out", "note": null}
-    ]},
-    {"action_id": "exploit_laravel_ignition", "from_state": "laravel_debug_identified", "action": "Send a crafted request abusing Ignition's debug-mode file read/write (CVE-2021-3129) to write and execute a malicious PHP file.", "technique": "debug-mode file write RCE", "tools": ["curl", "public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "Written file executes injected PHP code.", "likelihood": "possible", "to_state": "laravel_ignition_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Debug mode is disabled or Ignition is patched.", "likelihood": "likely", "to_state": "laravel_ruled_out", "note": null}
-    ]},
-    {"action_id": "exploit_struts_jakarta", "from_state": "struts_identified", "action": "Send a multipart file-upload request with an OGNL payload in the Content-Type header (CVE-2017-5638).", "technique": "Jakarta Multipart parser RCE", "tools": ["curl", "public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "Injected command output returned or OOB callback fires.", "likelihood": "possible", "to_state": "struts_jakarta_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Payload rejected -- version is patched.", "likelihood": "likely", "to_state": "struts_ruled_out", "note": null}
-    ]},
-    {"action_id": "exploit_citrix_adc", "from_state": "citrix_adc_identified", "action": "Send a crafted directory-traversal request (CVE-2019-19781) to write a malicious template file, then trigger it for execution.", "technique": "directory traversal to RCE", "tools": ["curl", "public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "Triggered file executes injected command.", "likelihood": "possible", "to_state": "citrix_adc_rce_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Traversal blocked -- version is patched.", "likelihood": "likely", "to_state": "citrix_adc_ruled_out", "note": null}
-    ]},
-    {"action_id": "exploit_exchange_chain", "from_state": "exchange_identified", "action": "Run the SSRF-to-authentication-bypass-to-arbitrary-file-write exploit chain (ProxyLogon/ProxyShell family) to drop a web shell.", "technique": "multi-CVE SSRF+auth-bypass+file-write chain", "tools": ["public PoC scripts"], "playbook_ref": null, "outcomes": [
-      {"outcome_id": "success", "observation": "Web shell written and reachable via OWA-relative path.", "likelihood": "possible", "to_state": "exchange_rce_confirmed", "note": null},
-      {"outcome_id": "failure", "observation": "Chain fails at the SSRF/auth-bypass stage -- version is patched.", "likelihood": "likely", "to_state": "exchange_ruled_out", "note": null}
-    ]},
-
-    {"action_id": "bridge_spring4shell_to_shell", "from_state": "spring4shell_confirmed", "action": "Access the written web shell to establish an interactive session.", "technique": "shell stabilization", "tools": ["curl", "browser"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Web shell responds and executes commands.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_confluence_ognl_to_shell", "from_state": "confluence_ognl_confirmed", "action": "Use the OGNL RCE to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_gitlab_exiftool_to_shell", "from_state": "gitlab_exiftool_confirmed", "action": "Use the ExifTool RCE to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_laravel_ignition_to_shell", "from_state": "laravel_ignition_confirmed", "action": "Access the written PHP web shell to establish an interactive session.", "technique": "shell stabilization", "tools": ["curl", "browser"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Web shell responds and executes commands.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_struts_jakarta_to_shell", "from_state": "struts_jakarta_confirmed", "action": "Use the OGNL RCE to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_citrix_adc_to_shell", "from_state": "citrix_adc_rce_confirmed", "action": "Access the triggered file to establish an interactive session.", "technique": "shell stabilization", "tools": ["curl"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Executed file returns command output.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_exchange_to_shell", "from_state": "exchange_rce_confirmed", "action": "Access the dropped web shell to establish an interactive session.", "technique": "shell stabilization", "tools": ["curl", "browser"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Web shell responds and executes commands.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]},
-    {"action_id": "bridge_log4j_to_shell", "from_state": "log4j_jndi_rce_confirmed", "action": "Use the loaded malicious class to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": null, "outcomes": [{"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null}]}
+    {
+      "action_id": "fingerprint_web_stack",
+      "from_state": "web_target_identified",
+      "action": "Fingerprint the technology stack (HTTP headers, error pages, default paths/ports, favicon hash).",
+      "technique": "technology fingerprinting",
+      "tools": [
+        "whatweb",
+        "wappalyzer",
+        "httpx"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "spring",
+          "observation": "Spring Boot/MVC signatures detected.",
+          "likelihood": "rare",
+          "to_state": "spring_mvc_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "confluence",
+          "observation": "Confluence signatures detected.",
+          "likelihood": "rare",
+          "to_state": "confluence_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "gitlab",
+          "observation": "GitLab signatures detected.",
+          "likelihood": "rare",
+          "to_state": "gitlab_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "laravel",
+          "observation": "Laravel debug/Ignition signatures detected.",
+          "likelihood": "rare",
+          "to_state": "laravel_debug_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "struts",
+          "observation": "Apache Struts 2 signatures detected.",
+          "likelihood": "rare",
+          "to_state": "struts_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "citrix",
+          "observation": "Citrix ADC/Gateway portal detected.",
+          "likelihood": "rare",
+          "to_state": "citrix_adc_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "exchange",
+          "observation": "Exchange OWA/ECP portal detected.",
+          "likelihood": "rare",
+          "to_state": "exchange_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "moveit",
+          "observation": "MOVEit Transfer signatures detected.",
+          "likelihood": "rare",
+          "to_state": "moveit_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "cisco_iosxe",
+          "observation": "Cisco IOS XE web UI signatures detected.",
+          "likelihood": "rare",
+          "to_state": "cisco_iosxe_webui_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "ivanti",
+          "observation": "Ivanti Connect Secure signatures detected.",
+          "likelihood": "rare",
+          "to_state": "ivanti_connect_secure_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "unrecognized",
+          "observation": "No specific fingerprinted technology matches a known chain.",
+          "likelihood": "likely",
+          "to_state": "web_target_identified",
+          "note": "Fall back to the generic vulnerability-class testing chains."
+        }
+      ]
+    },
+    {
+      "action_id": "log4j_jndi_injection_web",
+      "from_state": "web_target_identified",
+      "action": "Inject JNDI lookup probes (${jndi:ldap://collaborator/x}) into all reachable input points (headers, params, JSON body fields) and monitor for an out-of-band callback, then weaponize to achieve code execution.",
+      "technique": "blind JNDI injection",
+      "tools": [
+        "interactsh",
+        "log4j-scan"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "OOB callback received and class-loading payload executes.",
+          "likelihood": "rare",
+          "to_state": "log4j_jndi_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "No callback observed across probed input points.",
+          "likelihood": "likely",
+          "to_state": "log4j_rce_ruled_out",
+          "note": "Log4j is not in use, is patched, or the vulnerable code path is not reachable from any tested input."
+        }
+      ]
+    },
+    {
+      "action_id": "log4j_jndi_injection_api",
+      "from_state": "api_target_identified",
+      "action": "Inject JNDI lookup probes into all reachable API input points and monitor for an out-of-band callback, then weaponize to achieve code execution.",
+      "technique": "blind JNDI injection",
+      "tools": [
+        "interactsh",
+        "log4j-scan"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "OOB callback received and class-loading payload executes.",
+          "likelihood": "rare",
+          "to_state": "log4j_jndi_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "No callback observed across probed input points.",
+          "likelihood": "likely",
+          "to_state": "log4j_rce_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_spring4shell",
+      "from_state": "spring_mvc_identified",
+      "action": "Send a crafted class-loader data-binding payload (CVE-2022-22965) to overwrite the Tomcat access log with a JSP web shell.",
+      "technique": "Spring4Shell exploitation",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell written and reachable.",
+          "likelihood": "possible",
+          "to_state": "spring4shell_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- likely patched, not a WAR/Tomcat deployment, or JDK < 9.",
+          "likelihood": "likely",
+          "to_state": "spring_mvc_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_confluence_ognl",
+      "from_state": "confluence_identified",
+      "action": "Send a crafted URL-path OGNL injection payload (CVE-2022-26134) to achieve code execution.",
+      "technique": "OGNL injection",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Injected command output returned or OOB callback fires.",
+          "likelihood": "possible",
+          "to_state": "confluence_ognl_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "confluence_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_gitlab_exiftool",
+      "from_state": "gitlab_identified",
+      "action": "Upload a crafted image file abusing ExifTool's DjVu parser (CVE-2021-22205) to achieve code execution.",
+      "technique": "file-parser RCE",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "OOB callback fires after upload processing.",
+          "likelihood": "possible",
+          "to_state": "gitlab_exiftool_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Upload processed without triggering the vulnerable code path -- likely patched.",
+          "likelihood": "likely",
+          "to_state": "gitlab_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_laravel_ignition",
+      "from_state": "laravel_debug_identified",
+      "action": "Send a crafted request abusing Ignition's debug-mode file read/write (CVE-2021-3129) to write and execute a malicious PHP file.",
+      "technique": "debug-mode file write RCE",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Written file executes injected PHP code.",
+          "likelihood": "possible",
+          "to_state": "laravel_ignition_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Debug mode is disabled or Ignition is patched.",
+          "likelihood": "likely",
+          "to_state": "laravel_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_struts_jakarta",
+      "from_state": "struts_identified",
+      "action": "Send a multipart file-upload request with an OGNL payload in the Content-Type header (CVE-2017-5638).",
+      "technique": "Jakarta Multipart parser RCE",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Injected command output returned or OOB callback fires.",
+          "likelihood": "possible",
+          "to_state": "struts_jakarta_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "struts_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_citrix_adc",
+      "from_state": "citrix_adc_identified",
+      "action": "Send a crafted directory-traversal request (CVE-2019-19781) to write a malicious template file, then trigger it for execution.",
+      "technique": "directory traversal to RCE",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Triggered file executes injected command.",
+          "likelihood": "possible",
+          "to_state": "citrix_adc_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Traversal blocked -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "citrix_adc_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_exchange_chain",
+      "from_state": "exchange_identified",
+      "action": "Run the SSRF-to-authentication-bypass-to-arbitrary-file-write exploit chain (ProxyLogon/ProxyShell family) to drop a web shell.",
+      "technique": "multi-CVE SSRF+auth-bypass+file-write chain",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell written and reachable via OWA-relative path.",
+          "likelihood": "possible",
+          "to_state": "exchange_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Chain fails at the SSRF/auth-bypass stage -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "exchange_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_spring4shell_to_shell",
+      "from_state": "spring4shell_confirmed",
+      "action": "Access the written web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_confluence_ognl_to_shell",
+      "from_state": "confluence_ognl_confirmed",
+      "action": "Use the OGNL RCE to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_gitlab_exiftool_to_shell",
+      "from_state": "gitlab_exiftool_confirmed",
+      "action": "Use the ExifTool RCE to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_laravel_ignition_to_shell",
+      "from_state": "laravel_ignition_confirmed",
+      "action": "Access the written PHP web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_struts_jakarta_to_shell",
+      "from_state": "struts_jakarta_confirmed",
+      "action": "Use the OGNL RCE to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_citrix_adc_to_shell",
+      "from_state": "citrix_adc_rce_confirmed",
+      "action": "Access the triggered file to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Executed file returns command output.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_exchange_to_shell",
+      "from_state": "exchange_rce_confirmed",
+      "action": "Access the dropped web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_log4j_to_shell",
+      "from_state": "log4j_jndi_rce_confirmed",
+      "action": "Use the loaded malicious class to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "fingerprint_windows_network_services",
+      "from_state": "network_target_identified",
+      "action": "Fingerprint Windows network services (SMB version, RPC endpoints, domain controller role).",
+      "technique": "network service fingerprinting",
+      "tools": [
+        "nmap",
+        "rpcdump.py",
+        "CrackMapExec"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "smb",
+          "observation": "SMBv1 is enabled and reachable.",
+          "likelihood": "rare",
+          "to_state": "windows_smb_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "dc",
+          "observation": "Host is a domain controller with Netlogon RPC reachable.",
+          "likelihood": "rare",
+          "to_state": "windows_domain_controller_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "spooler",
+          "observation": "Print Spooler RPC interface is reachable.",
+          "likelihood": "rare",
+          "to_state": "windows_print_spooler_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "unrecognized",
+          "observation": "No specific fingerprinted Windows service matches a known chain.",
+          "likelihood": "likely",
+          "to_state": "network_target_identified",
+          "note": "Fall back to the generic vulnerability-class testing chains or subdomain_takeover."
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_zerologon",
+      "from_state": "windows_domain_controller_identified",
+      "action": "Send repeated zero-value Netlogon authentication attempts to bypass authentication and reset the DC machine account password (CVE-2020-1472).",
+      "technique": "Zerologon exploitation",
+      "tools": [
+        "public PoC scripts",
+        "impacket"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Machine account password reset succeeds; DC credentials can be dumped.",
+          "likelihood": "possible",
+          "to_state": "zerologon_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Authentication bypass rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "zerologon_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_eternalblue",
+      "from_state": "windows_smb_identified",
+      "action": "Send the crafted SMBv1 packet sequence to trigger the kernel buffer overflow (CVE-2017-0144).",
+      "technique": "EternalBlue exploitation",
+      "tools": [
+        "Metasploit",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Kernel payload executes, returning a SYSTEM-level session.",
+          "likelihood": "possible",
+          "to_state": "eternalblue_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Exploit attempt crashes the target or fails silently -- version is patched or SMBv1 disabled.",
+          "likelihood": "likely",
+          "to_state": "eternalblue_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_printnightmare",
+      "from_state": "windows_print_spooler_identified",
+      "action": "Call RpcAddPrinterDriverEx with a malicious driver to trigger SYSTEM-level code execution (CVE-2021-34527).",
+      "technique": "PrintNightmare exploitation",
+      "tools": [
+        "public PoC scripts",
+        "impacket"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Malicious driver loads and executes with SYSTEM privileges.",
+          "likelihood": "possible",
+          "to_state": "printnightmare_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Driver installation rejected -- version is patched or Point and Print restricted.",
+          "likelihood": "likely",
+          "to_state": "printnightmare_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_follina",
+      "from_state": "web_target_identified",
+      "action": "Host a crafted Office document exploiting the MSDT URL protocol handler (CVE-2022-30190) and deliver it to a target user.",
+      "technique": "Follina exploitation",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Victim opens the document and the embedded command executes via MSDT.",
+          "likelihood": "rare",
+          "to_state": "follina_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Victim does not open the document, or target is patched.",
+          "likelihood": "likely",
+          "to_state": "follina_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_moveit",
+      "from_state": "moveit_identified",
+      "action": "Send the crafted SQL injection payload against the MOVEit Transfer API endpoint to write and access a web shell (CVE-2023-34362).",
+      "technique": "SQLi-to-RCE exploitation",
+      "tools": [
+        "public PoC scripts",
+        "curl"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell written and reachable.",
+          "likelihood": "possible",
+          "to_state": "moveit_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "moveit_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_citrix_bleed",
+      "from_state": "citrix_adc_identified",
+      "action": "Send a crafted request to trigger the out-of-bounds memory read and leak an active session token (CVE-2023-4966).",
+      "technique": "memory disclosure exploitation",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Response leaks a valid session token belonging to another user.",
+          "likelihood": "possible",
+          "to_state": "citrix_bleed_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "No token leaked in the response -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "citrix_bleed_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_cisco_iosxe",
+      "from_state": "cisco_iosxe_webui_identified",
+      "action": "Send the crafted web UI request to create a privileged local user or implant (CVE-2023-20198).",
+      "technique": "web UI RCE exploitation",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A new privilege-15 local user or implant is created on the device.",
+          "likelihood": "possible",
+          "to_state": "cisco_iosxe_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Request rejected -- version is patched or web UI feature disabled.",
+          "likelihood": "likely",
+          "to_state": "cisco_iosxe_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_ivanti_connect_secure",
+      "from_state": "ivanti_connect_secure_identified",
+      "action": "Chain the authentication bypass with the command injection vulnerability to execute commands without valid credentials (CVE-2023-46805 + CVE-2024-21887).",
+      "technique": "auth-bypass-to-RCE chain exploitation",
+      "tools": [
+        "public PoC scripts",
+        "curl"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Injected command executes despite no valid session.",
+          "likelihood": "possible",
+          "to_state": "ivanti_connect_secure_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Chain fails at the auth-bypass stage -- version is patched or mitigated.",
+          "likelihood": "likely",
+          "to_state": "ivanti_connect_secure_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "exploit_gitlab_password_reset",
+      "from_state": "gitlab_identified",
+      "action": "Add a secondary unverified email address and trigger a password reset for an arbitrary target account (CVE-2023-7028).",
+      "technique": "password-reset account takeover",
+      "tools": [
+        "curl",
+        "Burp Repeater"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Password reset email for the target account is sent to the attacker-added address.",
+          "likelihood": "possible",
+          "to_state": "gitlab_password_reset_ato_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Reset rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "gitlab_password_reset_ruled_out",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_zerologon_to_full_host",
+      "from_state": "zerologon_confirmed",
+      "action": "Use the reset machine account credentials to dump domain credentials (DCSync) and obtain domain admin access.",
+      "technique": "credential dumping",
+      "tools": [
+        "impacket secretsdump"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Domain admin credentials obtained.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_eternalblue_to_full_host",
+      "from_state": "eternalblue_confirmed",
+      "action": "Use the SYSTEM-level session obtained via EternalBlue.",
+      "technique": "session stabilization",
+      "tools": [
+        "Metasploit"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Stable SYSTEM-level access confirmed.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_printnightmare_to_full_host",
+      "from_state": "printnightmare_confirmed",
+      "action": "Use the SYSTEM-level code execution obtained via PrintNightmare.",
+      "technique": "session stabilization",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Stable SYSTEM-level access confirmed.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_follina_to_shell",
+      "from_state": "follina_confirmed",
+      "action": "Use the code execution obtained via Follina to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects as the victim user.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_moveit_to_shell",
+      "from_state": "moveit_rce_confirmed",
+      "action": "Access the dropped web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_citrix_bleed_to_session",
+      "from_state": "citrix_bleed_confirmed",
+      "action": "Replay the leaked session token.",
+      "technique": "session hijacking",
+      "tools": [
+        "Burp Suite",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Leaked session token is accepted.",
+          "likelihood": "likely",
+          "to_state": "session_cookie_theft_possible",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_cisco_iosxe_to_full_host",
+      "from_state": "cisco_iosxe_rce_confirmed",
+      "action": "Authenticate using the newly created privileged local user.",
+      "technique": "session stabilization",
+      "tools": [
+        "curl",
+        "SSH"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Privileged access to the device confirmed.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_ivanti_to_shell",
+      "from_state": "ivanti_connect_secure_rce_confirmed",
+      "action": "Use the command injection to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ]
+    },
+    {
+      "action_id": "bridge_gitlab_reset_to_session",
+      "from_state": "gitlab_password_reset_ato_confirmed",
+      "action": "Intercept the reset email at the attacker-added address and complete the password reset for the target account.",
+      "technique": "account takeover completion",
+      "tools": [
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Target account's password is successfully reset and a session is obtained.",
+          "likelihood": "likely",
+          "to_state": "privileged_session_obtained",
+          "note": null
+        }
+      ]
+    }
   ]
 }

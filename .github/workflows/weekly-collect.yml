@@ -1,0 +1,87 @@
+name: Weekly full writeup collection
+
+# The complete pipeline: HackerOne's full disclosed-report pull, curated
+# GitHub lists, and the GitHub-repo-scanning collectors (CTF/HackTheBox/
+# TryHackMe). These involve many more API calls and take several minutes,
+# so weekly is the right cadence -- repos and disclosed-report counts don't
+# change fast enough to justify running this daily (that's what
+# daily-collect.yml, RSS feeds + blogs, is for instead).
+
+on:
+  schedule:
+    - cron: "0 4 * * 0"  # 04:00 UTC every Sunday
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}  # authenticates `gh api` calls in the collectors for higher rate limits
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Reassemble scenarios.jsonl from committed chunks
+        run: cat data/scenarios/chunks/scenarios.part*.jsonl > data/scenarios/scenarios.jsonl
+
+      - name: Collect from every source
+        run: |
+          cd scripts
+          python3 collect_hackerone.py --pages 260 --out ../data/raw/hackerone.jsonl
+          python3 collect_pentesterland.py --limit 0 --out ../data/raw/pentesterland.jsonl
+          python3 collect_curated_lists.py --out ../data/raw/curated_lists.jsonl
+          python3 collect_rss_feeds.py --out ../data/raw/rss_feeds.jsonl
+          python3 collect_blogs.py --out ../data/raw/blogs.jsonl
+          python3 collect_ctf.py --repos-per-topic 70 --max-files-per-repo 300 --out ../data/raw/ctf.jsonl
+          python3 collect_tryhackme.py --repos-per-topic 60 --max-files-per-repo 400 --out ../data/raw/tryhackme.jsonl
+          python3 collect_hackthebox.py --repos-per-topic 60 --max-files-per-repo 400 --out ../data/raw/hackthebox.jsonl
+
+      - name: Fold in any community submissions
+        run: |
+          if [ -s knowledge/community_submissions.jsonl ]; then
+            cp knowledge/community_submissions.jsonl data/raw/community_submissions.jsonl
+          fi
+
+      - name: Normalize, validate, and re-chunk
+        run: |
+          cd scripts
+          python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
+          python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
+          python3 chunk_scenarios.py --data ../data/scenarios/scenarios.jsonl --out-dir ../data/scenarios/chunks --records-per-chunk 2000
+
+      - name: Rebuild the balanced fine-tuning sample
+        run: |
+          cd scripts
+          python3 sample_balanced.py --data ../data/scenarios/scenarios.jsonl --max-per-class 20 --min-confidence medium --out ../data/scenarios/balanced_sample.jsonl
+
+      - name: Rebuild graph episodes (only meaningful if knowledge/ changed, but cheap either way)
+        run: |
+          cd scripts
+          python3 build_graph.py --playbooks ../knowledge/vulnerability_playbooks.json --bridges ../knowledge/graph/bridges.json --tech-bridges ../knowledge/graph/technology_bridges.json --ai-bridges ../knowledge/graph/ai_bridges.json --out ../data/graph/attack_graph.json
+          python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../schema/graph.schema.json
+          python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 3000 --policy random --out ../data/graph/episodes_random.jsonl --seed 42
+          python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl --seed 42
+          python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy epsilon_greedy --out ../data/graph/episodes_epsilon_greedy.jsonl --seed 42
+
+      - name: Commit and push if the dataset changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/scenarios/chunks data/scenarios/balanced_sample.jsonl data/graph/attack_graph.json data/graph/episodes_*.jsonl
+          if git diff --cached --quiet; then
+            echo "No new records this week -- nothing to commit."
+          else
+            new_count=$(python3 -c "import json; print(json.load(open('data/scenarios/chunks/manifest.json'))['total_records'])")
+            git commit -m "Weekly full collection ($new_count total records)" -m "Automated by .github/workflows/weekly-collect.yml"
+            git push
+          fi

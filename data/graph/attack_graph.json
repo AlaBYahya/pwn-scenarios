@@ -534,6 +534,69 @@
       ]
     },
     {
+      "state_id": "cisco_iosxe_rce_confirmed",
+      "description": "Cisco IOS XE web UI RCE confirmed exploitable, yielding a privileged implant/account on the device.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Cisco IOS XE",
+      "cve_refs": [
+        "CVE-2023-20198"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Crafted request against the web UI creates a new privilege-15 local user or implant.",
+          "examples": [
+            "an unauthorized local user with privilege level 15 appears in the device configuration"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "cisco_iosxe_ruled_out",
+      "description": "The Cisco IOS XE web UI RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload rejected -- version is patched or web UI feature is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "cisco_iosxe_webui_identified",
+      "description": "Target is fingerprinted as a Cisco IOS XE device with the web UI feature enabled.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Cisco IOS XE",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Cisco IOS XE web UI login portal reachable over HTTPS on the management interface.",
+          "examples": [
+            "HTTPS response on the device returns the Cisco IOS XE web UI login page"
+          ]
+        }
+      ]
+    },
+    {
       "state_id": "citrix_adc_identified",
       "description": "Target is fingerprinted as a Citrix Application Delivery Controller (ADC) / Gateway appliance.",
       "tier": "recon",
@@ -592,6 +655,48 @@
         {
           "signal_type": "manual_judgment",
           "description": "Traversal request blocked or returned no file content; version is likely patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_bleed_confirmed",
+      "description": "Citrix Bleed (NetScaler session token leak) confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Citrix ADC/Gateway",
+      "cve_refs": [
+        "CVE-2023-4966"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Crafted request triggers an out-of-bounds memory read that includes a valid session token in the response.",
+          "examples": [
+            "response body contains a session cookie value not belonging to the requester"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_bleed_ruled_out",
+      "description": "The Citrix Bleed session token leak was not reproducible against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Crafted request did not leak memory content; version is likely patched.",
           "examples": []
         }
       ]
@@ -1222,6 +1327,46 @@
       ]
     },
     {
+      "state_id": "eternalblue_confirmed",
+      "description": "EternalBlue (SMBv1 remote code execution) confirmed exploitable, yielding SYSTEM-level code execution.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows SMB",
+      "cve_refs": [
+        "CVE-2017-0144"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "SMBv1 exploit successfully triggers a kernel payload and returns a SYSTEM-level callback.",
+          "examples": [
+            "Metasploit's eternalblue module reports a successful session"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "eternalblue_ruled_out",
+      "description": "EternalBlue exploitation was not successful against this host.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "SMBv1 exploit attempt failed; host is patched or SMBv1 is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
       "state_id": "excessive_agency_after_step1",
       "description": "Step 1 of Excessive Agency testing succeeded: List of available tools and their effective permission scope",
       "tier": "recon",
@@ -1364,6 +1509,46 @@
       ]
     },
     {
+      "state_id": "follina_confirmed",
+      "description": "Follina (MSDT remote code execution via Office) confirmed exploitable against a victim opening the crafted document.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Microsoft Office / MSDT",
+      "cve_refs": [
+        "CVE-2022-30190"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Opening the crafted document triggers MSDT and executes the embedded command as the victim user.",
+          "examples": [
+            "OOB callback received when the victim opens the malicious document"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "follina_ruled_out",
+      "description": "Follina exploitation was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Malicious document did not trigger MSDT execution; target is patched or MSDT protocol handler is disabled.",
+          "examples": []
+        }
+      ]
+    },
+    {
       "state_id": "full_application_compromise",
       "description": "Full administrative control over the application: all data and all user/admin functionality.",
       "tier": "full_compromise",
@@ -1467,6 +1652,46 @@
           "examples": [
             "/help page footer discloses the GitLab version string"
           ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_password_reset_ato_confirmed",
+      "description": "GitLab password-reset account-takeover confirmed exploitable via an attacker-added unverified secondary email.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "GitLab",
+      "cve_refs": [
+        "CVE-2023-7028"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Password reset email is sent to the attacker-added secondary address for an arbitrary target account.",
+          "examples": [
+            "password reset link intended for the victim account is received at the attacker-controlled address"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_password_reset_ruled_out",
+      "description": "The GitLab password-reset account-takeover was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Secondary unverified email was not honored for password reset; version is patched.",
+          "examples": []
         }
       ]
     },
@@ -2035,6 +2260,70 @@
       ]
     },
     {
+      "state_id": "ivanti_connect_secure_identified",
+      "description": "Target is fingerprinted as an Ivanti Connect Secure / Policy Secure VPN gateway.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web",
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Ivanti Connect Secure",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Ivanti-branded VPN login portal reachable at the default path.",
+          "examples": [
+            "/dana-na/ path serves the Ivanti Connect Secure login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "ivanti_connect_secure_rce_confirmed",
+      "description": "Ivanti Connect Secure auth-bypass chained with command injection confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web",
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Ivanti Connect Secure",
+      "cve_refs": [
+        "CVE-2023-46805",
+        "CVE-2024-21887"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Auth-bypassed request to the vulnerable web component executes an injected command.",
+          "examples": [
+            "response or OOB callback confirms command execution despite no valid session"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "ivanti_connect_secure_ruled_out",
+      "description": "The Ivanti Connect Secure auth-bypass/command-injection chain was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web",
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Chain failed at the auth-bypass stage; version is patched or mitigation applied.",
+          "examples": []
+        }
+      ]
+    },
+    {
       "state_id": "jwt_vulnerabilities_after_step1",
       "description": "Step 1 of JWT / Token Vulnerabilities testing succeeded: Algorithm (HS256/RS256/none) and any embedded key/kid claim visible",
       "tier": "recon",
@@ -2545,6 +2834,66 @@
       ]
     },
     {
+      "state_id": "moveit_identified",
+      "description": "Target is fingerprinted as a Progress MOVEit Transfer instance.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Progress MOVEit Transfer",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "MOVEit-branded login portal or /human.aspx endpoint reachable.",
+          "examples": [
+            "/human.aspx or the MOVEit login page is served at the default path"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "moveit_rce_confirmed",
+      "description": "MOVEit Transfer SQL injection confirmed exploitable, chained to remote code execution via a web shell.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Progress MOVEit Transfer",
+      "cve_refs": [
+        "CVE-2023-34362"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Injected SQL payload against the MOVEit endpoint returns evidence of query execution, and a dropped web shell is reachable.",
+          "examples": [
+            "a .aspx web shell dropped via the injection returns command output"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "moveit_ruled_out",
+      "description": "The MOVEit SQL injection exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload rejected -- version is patched.",
+          "examples": []
+        }
+      ]
+    },
+    {
       "state_id": "network_target_identified",
       "description": "A network target has been identified and is in scope for testing.",
       "tier": "entry",
@@ -2813,6 +3162,46 @@
         {
           "signal_type": "manual_judgment",
           "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "printnightmare_confirmed",
+      "description": "PrintNightmare (Print Spooler remote code execution) confirmed exploitable, yielding SYSTEM-level code execution.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Print Spooler",
+      "cve_refs": [
+        "CVE-2021-34527"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Malicious driver installation via RpcAddPrinterDriverEx succeeds and executes with SYSTEM privileges.",
+          "examples": [
+            "public PrintNightmare PoC reports a SYSTEM-level callback"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "printnightmare_ruled_out",
+      "description": "PrintNightmare exploitation was not successful against this host.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Spooler RPC call was rejected; host is patched or Print Spooler service is disabled.",
+          "examples": []
         }
       ]
     },
@@ -4139,6 +4528,66 @@
       ]
     },
     {
+      "state_id": "windows_domain_controller_identified",
+      "description": "Target is fingerprinted as a Windows Active Directory Domain Controller (Netlogon RPC reachable).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Active Directory",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Netlogon RPC endpoint (MS-NRPC) responds and host advertises domain controller SRV records.",
+          "examples": [
+            "nmap detects port 135/445 with a Domain Controller service banner"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "windows_print_spooler_identified",
+      "description": "Target is fingerprinted as a Windows host with the Print Spooler service exposed.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Print Spooler",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "RPC endpoint mapper lists the spoolsv/MS-RPRN interface as reachable.",
+          "examples": [
+            "rpcdump.py against the target lists the Print System Remote Protocol interface"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "windows_smb_identified",
+      "description": "Target is fingerprinted as a Windows host with SMBv1 enabled and reachable.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows SMB",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "SMB version scan reports SMBv1 support enabled.",
+          "examples": [
+            "nmap --script smb-protocols reports SMBv1 enabled"
+          ]
+        }
+      ]
+    },
+    {
       "state_id": "xss_dom_after_step1",
       "description": "Step 1 of DOM-based Cross-Site Scripting (XSS) testing succeeded: List of sources the app reads on page load or event",
       "tier": "recon",
@@ -4487,6 +4936,46 @@
         {
           "signal_type": "manual_judgment",
           "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "zerologon_confirmed",
+      "description": "Zerologon (Netlogon privilege escalation) confirmed exploitable, yielding domain controller machine account takeover.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "technology": "Windows Active Directory",
+      "cve_refs": [
+        "CVE-2020-1472"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Repeated zero-value authentication attempts against Netlogon succeed, and the DC machine account password can be reset.",
+          "examples": [
+            "public Zerologon PoC script reports successful authentication bypass"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "zerologon_ruled_out",
+      "description": "Zerologon exploitation was not successful against this domain controller.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Netlogon secure channel reset was rejected; target is patched (CVE-2020-1472 fix enforces secure RPC).",
+          "examples": []
         }
       ]
     }
@@ -4954,6 +5443,27 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_cisco_iosxe_to_full_host",
+      "from_state": "cisco_iosxe_rce_confirmed",
+      "action": "Authenticate using the newly created privileged local user.",
+      "technique": "session stabilization",
+      "tools": [
+        "curl",
+        "SSH"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Privileged access to the device confirmed.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_citrix_adc_to_shell",
       "from_state": "citrix_adc_rce_confirmed",
       "action": "Access the triggered file to establish an interactive session.",
@@ -4968,6 +5478,27 @@
           "observation": "Executed file returns command output.",
           "likelihood": "likely",
           "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_citrix_bleed_to_session",
+      "from_state": "citrix_bleed_confirmed",
+      "action": "Replay the leaked session token.",
+      "technique": "session hijacking",
+      "tools": [
+        "Burp Suite",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Leaked session token is accepted.",
+          "likelihood": "likely",
+          "to_state": "session_cookie_theft_possible",
           "note": null
         }
       ],
@@ -5297,6 +5828,26 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_eternalblue_to_full_host",
+      "from_state": "eternalblue_confirmed",
+      "action": "Use the SYSTEM-level session obtained via EternalBlue.",
+      "technique": "session stabilization",
+      "tools": [
+        "Metasploit"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Stable SYSTEM-level access confirmed.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_excessive_agency_to_shell",
       "from_state": "excessive_agency_confirmed",
       "action": "Invoke an over-scoped tool that has file-system or code-execution capability.",
@@ -5401,6 +5952,26 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_follina_to_shell",
+      "from_state": "follina_confirmed",
+      "action": "Use the code execution obtained via Follina to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects as the victim user.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_gitlab_exiftool_to_shell",
       "from_state": "gitlab_exiftool_confirmed",
       "action": "Use the ExifTool RCE to establish an interactive or reverse shell.",
@@ -5415,6 +5986,26 @@
           "observation": "Reverse/bind shell connects successfully.",
           "likelihood": "likely",
           "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_gitlab_reset_to_session",
+      "from_state": "gitlab_password_reset_ato_confirmed",
+      "action": "Intercept the reset email at the attacker-added address and complete the password reset for the target account.",
+      "technique": "account takeover completion",
+      "tools": [
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Target account's password is successfully reset and a session is obtained.",
+          "likelihood": "likely",
+          "to_state": "privileged_session_obtained",
           "note": null
         }
       ],
@@ -5497,6 +6088,26 @@
           "likelihood": "possible",
           "to_state": "information_disclosure_confirmed",
           "note": "Use the internal details to inform further targeted testing of other vulnerability classes."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_ivanti_to_shell",
+      "from_state": "ivanti_connect_secure_rce_confirmed",
+      "action": "Use the command injection to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
         }
       ],
       "is_bridge": true
@@ -5678,6 +6289,27 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_moveit_to_shell",
+      "from_state": "moveit_rce_confirmed",
+      "action": "Access the dropped web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_oauth_to_session",
       "from_state": "oauth_misconfiguration_confirmed",
       "action": "Complete the OAuth flow abuse to obtain an authenticated session as another identity.",
@@ -5796,6 +6428,26 @@
           "observation": "Files read do not directly contain credentials.",
           "likelihood": "likely",
           "to_state": "arbitrary_file_read_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_printnightmare_to_full_host",
+      "from_state": "printnightmare_confirmed",
+      "action": "Use the SYSTEM-level code execution obtained via PrintNightmare.",
+      "technique": "session stabilization",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Stable SYSTEM-level access confirmed.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
           "note": null
         }
       ],
@@ -6444,6 +7096,26 @@
           "likelihood": "likely",
           "to_state": "xxe_confirmed",
           "note": "Internal reconnaissance achieved; use discovered internal services to inform further testing."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_zerologon_to_full_host",
+      "from_state": "zerologon_confirmed",
+      "action": "Use the reset machine account credentials to dump domain credentials (DCSync) and obtain domain admin access.",
+      "technique": "credential dumping",
+      "tools": [
+        "impacket secretsdump"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Domain admin credentials obtained.",
+          "likelihood": "likely",
+          "to_state": "full_host_compromise",
+          "note": null
         }
       ],
       "is_bridge": true
@@ -7544,6 +8216,34 @@
       ]
     },
     {
+      "action_id": "exploit_cisco_iosxe",
+      "from_state": "cisco_iosxe_webui_identified",
+      "action": "Send the crafted web UI request to create a privileged local user or implant (CVE-2023-20198).",
+      "technique": "web UI RCE exploitation",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A new privilege-15 local user or implant is created on the device.",
+          "likelihood": "possible",
+          "to_state": "cisco_iosxe_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Request rejected -- version is patched or web UI feature disabled.",
+          "likelihood": "likely",
+          "to_state": "cisco_iosxe_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "exploit_citrix_adc",
       "from_state": "citrix_adc_identified",
       "action": "Send a crafted directory-traversal request (CVE-2019-19781) to write a malicious template file, then trigger it for execution.",
@@ -7566,6 +8266,34 @@
           "observation": "Traversal blocked -- version is patched.",
           "likelihood": "likely",
           "to_state": "citrix_adc_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_citrix_bleed",
+      "from_state": "citrix_adc_identified",
+      "action": "Send a crafted request to trigger the out-of-bounds memory read and leak an active session token (CVE-2023-4966).",
+      "technique": "memory disclosure exploitation",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Response leaks a valid session token belonging to another user.",
+          "likelihood": "possible",
+          "to_state": "citrix_bleed_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "No token leaked in the response -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "citrix_bleed_ruled_out",
           "note": null
         }
       ],
@@ -7600,6 +8328,34 @@
       "is_bridge": true
     },
     {
+      "action_id": "exploit_eternalblue",
+      "from_state": "windows_smb_identified",
+      "action": "Send the crafted SMBv1 packet sequence to trigger the kernel buffer overflow (CVE-2017-0144).",
+      "technique": "EternalBlue exploitation",
+      "tools": [
+        "Metasploit",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Kernel payload executes, returning a SYSTEM-level session.",
+          "likelihood": "possible",
+          "to_state": "eternalblue_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Exploit attempt crashes the target or fails silently -- version is patched or SMBv1 disabled.",
+          "likelihood": "likely",
+          "to_state": "eternalblue_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "exploit_exchange_chain",
       "from_state": "exchange_identified",
       "action": "Run the SSRF-to-authentication-bypass-to-arbitrary-file-write exploit chain (ProxyLogon/ProxyShell family) to drop a web shell.",
@@ -7621,6 +8377,33 @@
           "observation": "Chain fails at the SSRF/auth-bypass stage -- version is patched.",
           "likelihood": "likely",
           "to_state": "exchange_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_follina",
+      "from_state": "web_target_identified",
+      "action": "Host a crafted Office document exploiting the MSDT URL protocol handler (CVE-2022-30190) and deliver it to a target user.",
+      "technique": "Follina exploitation",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Victim opens the document and the embedded command executes via MSDT.",
+          "likelihood": "rare",
+          "to_state": "follina_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Victim does not open the document, or target is patched.",
+          "likelihood": "likely",
+          "to_state": "follina_ruled_out",
           "note": null
         }
       ],
@@ -7654,6 +8437,62 @@
       "is_bridge": true
     },
     {
+      "action_id": "exploit_gitlab_password_reset",
+      "from_state": "gitlab_identified",
+      "action": "Add a secondary unverified email address and trigger a password reset for an arbitrary target account (CVE-2023-7028).",
+      "technique": "password-reset account takeover",
+      "tools": [
+        "curl",
+        "Burp Repeater"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Password reset email for the target account is sent to the attacker-added address.",
+          "likelihood": "possible",
+          "to_state": "gitlab_password_reset_ato_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Reset rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "gitlab_password_reset_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_ivanti_connect_secure",
+      "from_state": "ivanti_connect_secure_identified",
+      "action": "Chain the authentication bypass with the command injection vulnerability to execute commands without valid credentials (CVE-2023-46805 + CVE-2024-21887).",
+      "technique": "auth-bypass-to-RCE chain exploitation",
+      "tools": [
+        "public PoC scripts",
+        "curl"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Injected command executes despite no valid session.",
+          "likelihood": "possible",
+          "to_state": "ivanti_connect_secure_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Chain fails at the auth-bypass stage -- version is patched or mitigated.",
+          "likelihood": "likely",
+          "to_state": "ivanti_connect_secure_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "exploit_laravel_ignition",
       "from_state": "laravel_debug_identified",
       "action": "Send a crafted request abusing Ignition's debug-mode file read/write (CVE-2021-3129) to write and execute a malicious PHP file.",
@@ -7676,6 +8515,62 @@
           "observation": "Debug mode is disabled or Ignition is patched.",
           "likelihood": "likely",
           "to_state": "laravel_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_moveit",
+      "from_state": "moveit_identified",
+      "action": "Send the crafted SQL injection payload against the MOVEit Transfer API endpoint to write and access a web shell (CVE-2023-34362).",
+      "technique": "SQLi-to-RCE exploitation",
+      "tools": [
+        "public PoC scripts",
+        "curl"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell written and reachable.",
+          "likelihood": "possible",
+          "to_state": "moveit_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "moveit_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_printnightmare",
+      "from_state": "windows_print_spooler_identified",
+      "action": "Call RpcAddPrinterDriverEx with a malicious driver to trigger SYSTEM-level code execution (CVE-2021-34527).",
+      "technique": "PrintNightmare exploitation",
+      "tools": [
+        "public PoC scripts",
+        "impacket"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Malicious driver loads and executes with SYSTEM privileges.",
+          "likelihood": "possible",
+          "to_state": "printnightmare_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Driver installation rejected -- version is patched or Point and Print restricted.",
+          "likelihood": "likely",
+          "to_state": "printnightmare_ruled_out",
           "note": null
         }
       ],
@@ -7732,6 +8627,34 @@
           "observation": "Payload rejected -- version is patched.",
           "likelihood": "likely",
           "to_state": "struts_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_zerologon",
+      "from_state": "windows_domain_controller_identified",
+      "action": "Send repeated zero-value Netlogon authentication attempts to bypass authentication and reset the DC machine account password (CVE-2020-1472).",
+      "technique": "Zerologon exploitation",
+      "tools": [
+        "public PoC scripts",
+        "impacket"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Machine account password reset succeeds; DC credentials can be dumped.",
+          "likelihood": "possible",
+          "to_state": "zerologon_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Authentication bypass rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "zerologon_ruled_out",
           "note": null
         }
       ],
@@ -7799,11 +8722,75 @@
           "note": null
         },
         {
+          "outcome_id": "moveit",
+          "observation": "MOVEit Transfer signatures detected.",
+          "likelihood": "rare",
+          "to_state": "moveit_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "cisco_iosxe",
+          "observation": "Cisco IOS XE web UI signatures detected.",
+          "likelihood": "rare",
+          "to_state": "cisco_iosxe_webui_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "ivanti",
+          "observation": "Ivanti Connect Secure signatures detected.",
+          "likelihood": "rare",
+          "to_state": "ivanti_connect_secure_identified",
+          "note": null
+        },
+        {
           "outcome_id": "unrecognized",
           "observation": "No specific fingerprinted technology matches a known chain.",
           "likelihood": "likely",
           "to_state": "web_target_identified",
           "note": "Fall back to the generic vulnerability-class testing chains."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "fingerprint_windows_network_services",
+      "from_state": "network_target_identified",
+      "action": "Fingerprint Windows network services (SMB version, RPC endpoints, domain controller role).",
+      "technique": "network service fingerprinting",
+      "tools": [
+        "nmap",
+        "rpcdump.py",
+        "CrackMapExec"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "smb",
+          "observation": "SMBv1 is enabled and reachable.",
+          "likelihood": "rare",
+          "to_state": "windows_smb_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "dc",
+          "observation": "Host is a domain controller with Netlogon RPC reachable.",
+          "likelihood": "rare",
+          "to_state": "windows_domain_controller_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "spooler",
+          "observation": "Print Spooler RPC interface is reachable.",
+          "likelihood": "rare",
+          "to_state": "windows_print_spooler_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "unrecognized",
+          "observation": "No specific fingerprinted Windows service matches a known chain.",
+          "likelihood": "likely",
+          "to_state": "network_target_identified",
+          "note": "Fall back to the generic vulnerability-class testing chains or subdomain_takeover."
         }
       ],
       "is_bridge": true

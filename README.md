@@ -3,10 +3,11 @@
 A dataset of penetration testing / bug bounty **scenarios** -- generalized,
 reusable condition → step → impact → remediation processes for common
 vulnerability classes, each grounded in a real, publicly disclosed report or
-writeup -- plus the scripts used to collect and produce it.
+writeup -- plus an **attack decision graph** for chaining them, and the
+scripts used to collect and produce both.
 
 Built to be AI-ready: structured, schema-validated JSON Lines, suitable as
-fine-tuning/instruction data, a RAG knowledge base, or seed playbooks for an
+a RAG knowledge base, fine-tuning ingredient, or seed playbooks for an
 autonomous pentesting/bug-bounty agent.
 
 ```json
@@ -25,501 +26,202 @@ autonomous pentesting/bug-bounty agent.
 }
 ```
 
-Full field reference: [`docs/SCHEMA.md`](docs/SCHEMA.md).
+Full field reference: [`docs/SCHEMA.md`](docs/SCHEMA.md). Each record pairs
+an originally-authored generic playbook (the reusable "how do you find/fix
+this") with a real disclosed instance's metadata and a link back to it --
+never the writeup's full text. See [`DATA_LICENSE`](DATA_LICENSE) for
+exactly what is and isn't reproduced from original sources.
 
-## Beyond a flat list: the attack decision graph
+## The attack decision graph
 
-The scenario dataset above answers "how do I find/fix vulnerability class X."
 [`data/graph/attack_graph.json`](data/graph/attack_graph.json) answers a
-different question: **given what I've established so far, what should I try
-next, and where might it lead** -- the same shape of reasoning a chess engine
-uses to evaluate candidate moves and their resulting positions.
+different question than the flat scenario list: **given what I've
+established so far, what should I try next, and where might it lead** --
+the same shape of reasoning a chess engine uses to evaluate candidate moves.
 
-States are conditions/capabilities ("`idor_confirmed`",
-"`low_priv_shell_obtained`", "`full_host_compromise`"); actions are moves
-that branch into qualitatively-scored outcomes leading to new states. 35
-generic vulnerability classes, 8 real specific CVE chains (Log4Shell,
-Spring4Shell, the Confluence/GitLab/Struts/Citrix/Exchange/Laravel RCEs --
-CVE IDs and CVSS scores verified against NVD), and 9 AI/LLM classes (prompt
-injection, excessive agency, insecure output handling, ...) all converge and
-chain through a shared vocabulary of hand-authored bridge states -- e.g.
-every RCE-capable class or CVE converges on `low_priv_shell_obtained`, SSRF
-can chain into `cloud_metadata_reachable -> cloud_credentials_obtained ->
-full_cloud_account_compromise`, and -- the interesting one -- a prompt
-injection that abuses an over-scoped agent tool converges on the exact same
-`unauthorized_privileged_action_possible` state that IDOR or mass assignment
-reach: AI-specific and classic web vulnerabilities landing on the same
-attacker objective through different paths, not two separate graphs bolted
-together. Each state also carries `detection_signals`: authored hints (not
-a working classifier) for recognizing it from real tool output -- e.g. what
-a metadata credentials response actually looks like, or what a root shell's
-`id` output looks like.
+States are conditions/capabilities (`idor_confirmed`,
+`low_priv_shell_obtained`, `full_host_compromise`); actions branch into
+qualitatively-scored outcomes leading to new states. 35 generic
+vulnerability classes, 17 real CVE chains (Log4Shell, Spring4Shell,
+Zerologon, EternalBlue, PrintNightmare, MOVEit, and more -- CVE IDs/CVSS
+verified against NVD), and 9 AI/LLM classes all converge through a shared
+vocabulary of states, so e.g. a prompt injection that abuses an
+over-scoped agent tool lands on the exact same `unauthorized_privileged_action_possible`
+state that IDOR does.
 
 ```bash
 cd scripts
-python3 query_graph.py --from web_target_identified                                    # candidate first moves
+python3 query_graph.py --from web_target_identified                                          # candidate first moves
 python3 query_graph.py --best-path --from ssrf_confirmed --to full_cloud_account_compromise   # a strong path to a goal
 ```
 
-**Turning the static graph into training data**: `scripts/simulate_graph.py`
-samples synthetic episodes from it -- repeatedly walking the graph from an
-entry state, sampling outcomes by their authored likelihood, scoring with a
-proper Bellman value function (not just 1-step lookahead, which is flat
-across most early recon states) -- and logs full (state, action, outcome,
-reward) trajectories:
-
-```bash
-python3 simulate_graph.py --episodes 3000 --policy random --out ../data/graph/episodes_random.jsonl
-python3 simulate_graph.py --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl
-```
-
-On the current graph, the value-iteration-informed greedy policy reaches a
-`full_compromise` state **13.1%** of the time vs **5.3%** for a uniformly
-random policy -- a real, if modest, measurable gap. This is still bootstrapped
-from the graph's own authored priors, not ground truth (see caveat below and
-in `docs/GRAPH.md`) -- but it's a materially different artifact than the
-static graph: many diverse, complete trajectories rather than one structure.
-
-Full design + more examples: [`docs/GRAPH.md`](docs/GRAPH.md).
-
-## Why the scenario dataset has this shape
-
-Bug bounty writeups typically show the *destination* (the final working
-payload) but not the *journey* (the failed attempts, the discovery process).
-Rather than try to scrape and paraphrase thousands of third-party writeups'
-prose at scale -- which is both legally messy and unreliable to automate --
-this project separates the two things that are actually reusable:
-
-1. **The generic process.** For ~35 vulnerability classes, [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
-   defines an originally-authored preconditions/steps/impact/remediation
-   playbook -- the reusable "how do you generally find and fix this."
-2. **The grounding instance.** Public metadata (title, vulnerability class,
-   severity, program, disclosure date, and a link) from a real disclosed
-   report or writeup, sourced from public APIs/feeds that already publish
-   this metadata for reuse.
-
-Every record in the dataset merges one of each into a single, self-contained,
-schema-validated JSON object. See [`DATA_LICENSE`](DATA_LICENSE) for exactly
-what is and isn't reproduced from the original sources.
+`scripts/simulate_graph.py` samples synthetic (state, action, outcome,
+reward) episodes from it for RL/behavior-cloning use -- a value-iteration
+greedy policy reaches a `full_compromise` state 18.1% of the time vs 6.7%
+for random. Full design, detection signals, and the simulator: [`docs/GRAPH.md`](docs/GRAPH.md).
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **28,280 records**, one JSON object per line.
+**30,293 records** across **42 vulnerability classes**.
 
 | Source | Platform | Records |
 |---|---|---|
 | HackerOne public Hacktivity (GraphQL API) | `hackerone` | 10,977 |
-| GitHub CTF-writeup repos (file-level, not repo-level) | `ctf` | 7,377 |
-| Pentester Land + 3 curated GitHub lists + 4 RSS feeds + 3 researcher blogs | `aggregated_writeup` | 6,040 |
-| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,386 |
-| GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,500 |
+| GitHub CTF-writeup repos | `ctf` | 8,454 |
+| Pentester Land + curated GitHub lists + RSS feeds + researcher blogs | `aggregated_writeup` | 6,106 |
+| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,956 |
+| GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,800 |
 
-**Real bug bounty vs. lab/CTF content**: an explicit ask this round was
-more real bug bounty reports relative to CTF/lab writeups. The highest-leverage
-fix needed no new scraping at all: 3,080 of the 12,386 HackerOne reports
-already collected were sitting unclassified because their `weakness` value
-(HackerOne's own CWE-based taxonomy string, e.g. "Improper Access Control -
-Generic", "Cryptographic Issues - Generic") didn't match any alias in
-`knowledge/vulnerability_playbooks.json`. Added ~50 new aliases across 10
-existing playbooks plus one new playbook (`cryptographic_issues`, CWE-310 --
-weak algorithms, broken certificate validation, predictable randomness; 211
-records) to cover the actual distribution of HackerOne's taxonomy, not just
-the terms bug hunters happen to use in writeup titles. Real bug bounty
-(`hackerone` + `aggregated_writeup`) went from 55.2% to **60.2%** of the
-dataset as a direct result -- purely from classifying data already sitting
-in `data/raw/hackerone.jsonl`, nothing new fetched.
-
-**The CTF and HackTheBox jump was the previous round's story.** Both
-collectors originally indexed *repositories* (one record per repo --
-`ctf` was 169 records total). The `ctf-writeups` GitHub topic alone spans
-1,800+ repos, each often containing dozens of individual challenge
-writeups -- indexing at the repo level was leaving nearly all of that on
-the table. Both collectors now walk each repo's file tree and extract one
-record per challenge/machine writeup file (same pattern
-`collect_tryhackme.py` already used), title derived from the file/parent-dir
-name, cross-repo deduplication by normalized title so the same popular box
-("Blue", "Legacy") isn't counted once per repo that covers it. HackTheBox
-writeups are commonly PDFs, not markdown, so both extensions are collected
-(link + derived title only, the PDF is never fetched for content).
-
-Two real bugs turned up building this: GitHub's own `.github/ISSUE_TEMPLATE/*.md`
-files were slipping through as fake "writeup titles" (fixed by excluding
-`.github` from the path walk), and repos using sequential numbering
-(`1.md`, `2.md`, ...) instead of descriptive filenames produced content-free
-titles like "1" and "2" (fixed by dropping purely-numeric titles). Both
-fixes are in the collectors now, not just patched after the fact.
-
-`scripts/collect_rss_feeds.py` pulls from each publisher's own RSS `/feed`:
-three Medium publications (InfoSec Write-ups, System Weakness, OSINT Team)
-plus the **Intigriti** platform blog (a mix of company posts, a "Bug Bytes"
-digest, and real technical research -- non-writeup posts just don't match
-any vulnerability-class alias and get dropped automatically, same
-self-cleaning behavior relied on everywhere else). These feeds only return
-the ~10-20 most recent posts per fetch; re-running the collector
-periodically accumulates more as new articles publish, deduped
-automatically by URL. `bugbountydaily.com` was also checked and skipped --
-a client-rendered React/Supabase app with no feed, sitemap, or robots.txt,
-same category of problem as `writeups.io`.
-
-`scripts/collect_blogs.py` adds three individual researcher blogs:
-**Embrace The Red** (Johann Rehberger's AI/LLM security research -- 213
-posts, sitemap + per-page `og:title` extraction), **Evan Connelly** (bug
-bounty writeups, 6 posts), and **Chybeta** (CTF/pentest writeups via atom
-feed, 20 posts). Both sitemap-based sites explicitly allow crawling
-(`robots.txt: Allow: /`) and publish their sitemap for discovery; only each
-page's own `og:title` metadata is read, never the article body. Adding
-Embrace The Red directly strengthened the AI/LLM classes added last round
--- `prompt_injection` grounded instances went from 22 to 48.
-
-**insecrez/Bug-bounty-Writeups** (a third curated GitHub list, 783 links)
-was initially misjudged as tools-only and skipped -- its writeup content
-uses `<a href="url">Title</a>` inside markdown tables rather than the
-`[Title](url)` list format the collector was originally built to parse, so
-the first pass found zero matches and looked empty. `collect_curated_lists.py`
-now handles both formats; the corrected pass recovered 783 real links
-across sections that map closely to this project's own vulnerability
-classes, including a dedicated "AI Hacking" section.
-
-Several more candidate sites and platforms were evaluated and not
-integrated, for concrete reasons rather than being skipped silently -- see
-"A note on scale" below.
-
-HackerOne is now a **full pull of every currently disclosed report**
-(12,386 fetched, ~4,489 didn't match a recognized vulnerability class and
-were dropped rather than force-classified). 46 vulnerability classes total
-(35 generic + 9 AI/LLM, see below), see
+Records per vulnerability class (all 42; also in
 [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
-for the full list.
+or `python3 scripts/query.py` with no filters):
 
-74% of records are `confidence: "high"` classification matches; see
-[`docs/SCHEMA.md`](docs/SCHEMA.md#confidence-levels) to filter for precision.
-TryHackMe room titles are often thematic ("Blue", "Ice") rather than
-vulnerability-descriptive, so most of them fall back to the generic
-`tryhackme_room_generic` playbook (`confidence: "low"`) rather than a specific
-vulnerability class -- filter to `confidence: "high"` if you only want
-precisely classified records.
+| Class | Records | | Class | Records |
+|---|---:|---|---|---:|
+| CTF challenge (general) | 8,250 | | Stored XSS | 184 |
+| TryHackMe room (general) | 2,815 | | Insecure Deserialization | 182 |
+| Reflected XSS | 2,650 | | Clickjacking | 176 |
+| Sensitive Information Disclosure | 2,265 | | Subdomain Takeover | 152 |
+| Broken Access Control | 1,919 | | Unrestricted File Upload | 132 |
+| HackTheBox machine (general) | 1,770 | | Race Condition | 100 |
+| Business Logic Flaw | 1,304 | | XXE | 94 |
+| Authentication Bypass | 1,018 | | CORS Misconfiguration | 74 |
+| Memory Corruption | 920 | | Prototype Pollution | 68 |
+| Remote Code Execution | 793 | | Cache Poisoning | 66 |
+| Denial of Service | 661 | | DOM XSS | 64 |
+| CSRF | 598 | | OAuth Misconfiguration | 64 |
+| IDOR | 598 | | Prompt Injection (AI/LLM) | 61 |
+| Account Takeover | 509 | | GraphQL Abuse | 53 |
+| SSRF | 506 | | 2FA Bypass | 51 |
+| SQL Injection | 472 | | SSTI | 38 |
+| Path Traversal | 413 | | JWT Vulnerabilities | 19 |
+| Open Redirect | 407 | | Mass Assignment | 14 |
+| Command Injection | 375 | | Hardcoded Secrets | 13 |
+| HTTP Request Smuggling | 232 | | Training Data Poisoning (AI/LLM) | 1 |
+| Cryptographic Issues | 211 | | Model Denial of Service (AI/LLM) | 1 |
 
-**Cross-source deduplication**: Pentester Land and the curated GitHub lists
-sometimes link to the same HackerOne report we already pulled directly.
-`normalize.py` dedups by URL *across* platforms (not just within one),
-preferring the more precisely-classified HackerOne-native record when both
-exist -- 1,628 cross-platform duplicates were dropped this way, on top of the
-usual per-source dedup.
+54% of records are `confidence: "high"` classification matches (see
+[`docs/SCHEMA.md`](docs/SCHEMA.md#confidence-levels)); the "general" rooms
+above are thematically-named CTF/lab challenges that fell back to a generic
+solving playbook rather than a specific vulnerability class.
 
-### AI/LLM vulnerability classes
+## Using this dataset
 
-9 new playbooks cover the [OWASP Top 10 for LLM Applications (2025)](https://genai.owasp.org/llm-top-10/)
-(all except LLM09 Misinformation, which isn't a testable technical
-vulnerability the way the others are): prompt injection (CWE-1427),
-sensitive information disclosure, supply chain, data/model poisoning,
-improper output handling (CWE-1426), excessive agency, system prompt
-leakage, vector/embedding weaknesses, and unbounded consumption. They're
-fully wired into the attack graph (see below) -- but honestly, real-world
-grounded instances are scarce right now: only **prompt injection (55
-records)** and **model DoS (1 record)** matched anything in the sources
-above, because "Prompt Injection" is only just emerging as a tag bug
-hunters actually use; the other 8 classes have zero grounded instances yet.
-The playbooks and graph chains are ready the moment real writeups start
-using this terminology, or via community submission (see below).
+`scenarios.jsonl` repeats a relatively small library of authored playbook
+texts (48 classes) across 30k+ records with different source-metadata
+wrappers. That's good for **retrieval** -- look up "what do I know about
+SSRF," get back the playbook plus real grounding links. It's a poor fit for
+**supervised fine-tuning as a raw dump**, since training on it directly
+would mostly teach memorization of ~48 canned answers, not generalization.
 
-### A note on scale
+- **RAG pipeline**: run `python3 scripts/build_views.py` once, then use
+  `data/index.sqlite3` or `data/scenarios/by_class/` directly, keyed by
+  CWE/class/tag.
+- **Fine-tuning anyway** (e.g. one ingredient in a larger SFT mix, or an
+  eval set): `scripts/sample_balanced.py` caps records per class and
+  prefers higher-confidence matches:
+  ```bash
+  python3 scripts/sample_balanced.py --max-per-class 20 --min-confidence medium --out data/scenarios/balanced_sample.jsonl
+  ```
+- **Decision-making/RL data**: the [attack graph](#the-attack-decision-graph)
+  and its simulator are the better starting point.
 
-An earlier ask for this project was "extend this to 100k unique writeups."
-Here's the honest accounting: pushing every legitimate source available as
-far as it goes -- a full pull of HackerOne's disclosed reports (not a
-sample), Pentester Land's complete index, two more curated GitHub
-writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
-dataset from 7,342 to **28,280** unique records. That's real growth, not
-padding (every record is schema-validated, source-linked, and deduplicated
-by URL across sources). It's not 100k.
+## Finding records
 
-Platforms that could plausibly have gotten closer were checked and ruled
-out rather than worked around:
-- **Open Bug Bounty** sits behind a Cloudflare bot-detection challenge --
-  bypassing that isn't something this project will do.
-- **Intigriti**'s disclosed-*reports* API requires an authenticated account;
-  there's no public, unauthenticated equivalent to HackerOne's Hacktivity
-  API. (Their platform *blog* does have a public RSS feed, since added --
-  see below. Different thing from a disclosure archive.)
-- **Bugcrowd**'s public `crowdstream` is a live *submission-acceptance*
-  feed, not a disclosure archive -- almost none of it has `disclosed` set,
-  so there's little actual writeup content to collect from it.
-- **Weekly Infosec Writeups** (weekly.infosecwriteups.com) publishes weekly
-  *digest* posts bundling summaries of other sites' writeups, not individual
-  writeups itself -- extracting the embedded links would mean parsing full
-  digest bodies, and the content it bundles is largely already covered by
-  Pentester Land/InfoSec Write-ups directly. Also appears inactive since
-  November 2024.
-- **bugbountyhunting.com** ("Bug Bounty Hunting")'s sitemap only exposes
-  search-query pages (`?q=xss`, `?q=idor`, ...) -- it's a search index over
-  other people's writeups, not a primary source with its own posts.
-- **bugbountyhunter.com/disclosed** links almost entirely to
-  `hackerone.com/reports/*` -- URLs we already collect completely and
-  directly via the HackerOne API. Near-zero unique incremental value.
-- **writeups.io** and **bugbountydaily.com** are both client-side-rendered
-  apps (Next.js and React/Supabase respectively) with no discoverable public
-  API, feed, or sitemap; their content isn't reachable the way every other
-  source here is without executing JavaScript or reverse-engineering a
-  private backend.
+A single 30k-record JSONL file isn't practical to download/upload/browse
+whole. It ships as fixed-size chunks instead:
 
-Reaching 100k for real would mean either scraping full writeup bodies from
-thousands of individual blogs at scale (the copyright problem this project
-has deliberately avoided since day one -- see `DATA_LICENSE`) or padding
-with low-relevance filler, which would break the "trusted good writeups"
-bar this was supposed to meet. The contribution mechanism below is the
-actual intended path past this ceiling: platform disclosure counts grow
-over time on their own, and every real submission adds a record no
-automated collector could have found.
+1. **`data/scenarios/chunks/`** (committed, ~5MB per chunk +
+   `manifest.json` with a SHA256 checksum) -- what you actually clone.
+2. **`data/scenarios/scenarios.jsonl`** (gitignored, reassemble locally):
+   ```bash
+   cat data/scenarios/chunks/*.jsonl > data/scenarios/scenarios.jsonl
+   ```
+3. **`data/scenarios/by_class/<playbook_id>.jsonl`** and
+   **`data/index.sqlite3`** (both gitignored, build locally with
+   `python3 scripts/build_views.py`) -- per-class files and an indexed,
+   full-text-searchable SQLite view.
+
+Query the SQLite index directly, or via the bundled CLI:
+
+```bash
+cd scripts
+python3 query.py --cwe CWE-89                          # by CWE
+python3 query.py --playbook ssrf --severity high        # by class + severity
+python3 query.py --search "cache poisoning"             # full-text search
+python3 query.py                                        # no filters -> lists all playbook_ids/platforms
+```
 
 ## Contributing a writeup
 
 Anyone can submit a writeup link without touching JSON or the schema:
 [open an issue using the "Submit a writeup" template](../../issues/new?template=submit-writeup.yml).
 It asks for the URL, title, author, program, and vulnerability tags --
-metadata only, same policy as every other source in this dataset (see
-`DATA_LICENSE`): we link to your writeup, we don't copy it.
+metadata only, same policy as every source in this dataset: we link to your
+writeup, we don't copy it. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how
+submissions get folded in, plus how to add a vulnerability class, a data
+source, or a graph chain.
 
-For maintainers processing a submission:
+The dataset also grows on its own via scheduled collection:
+[`daily-collect.yml`](.github/workflows/daily-collect.yml) (RSS feeds +
+blogs) and [`weekly-collect.yml`](.github/workflows/weekly-collect.yml)
+(the full pipeline) run automatically and commit new records.
+
+## Regenerating locally
 
 ```bash
+pip install -r requirements.txt
 cd scripts
-python3 ingest_submissions.py --from-issue 42   # parses the issue form via `gh issue view`
-# or manually:
-python3 ingest_submissions.py --url https://... --title "..." --tags "IDOR,SSRF"
-
-# fold it into the published dataset:
-cp ../knowledge/community_submissions.jsonl ../data/raw/community_submissions.jsonl
-python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
-python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
-python3 build_views.py    # rebuilds by_class/ + index.sqlite3
-python3 chunk_scenarios.py   # re-splits scenarios.jsonl into the committed chunks/
+./pipeline.sh          # full run (~20 min): every collector -> normalize -> validate -> views -> graph -> chunks
+./pipeline.sh 10 0 20 10   # smaller numbers for a quick local test
 ```
 
-Unlike `data/raw/*.jsonl` from the API/feed collectors (ephemeral,
-re-fetchable, gitignored), `knowledge/community_submissions.jsonl` is
-committed directly -- it's real human contribution, not something a script
-can regenerate. Every PR that touches the dataset or graph is checked by
-[`.github/workflows/validate.yml`](.github/workflows/validate.yml): schema
-validation, referential integrity, a check that the committed
-`attack_graph.json` actually matches what its source files would
-regenerate, and a check that `data/scenarios/chunks/` reassembles to the
-SHA256 recorded in its own `manifest.json`.
-
-## Using this dataset: RAG, not raw fine-tuning
-
-`scenarios.jsonl` repeats a relatively small library of authored playbook
-texts (48 vulnerability classes) across 28,280 records with different
-source-metadata wrappers. That's fine, even good, for
-**retrieval** -- look up "what do I know about SSRF," get back the playbook
-plus real grounding links. It's a poor fit for **supervised fine-tuning as
-a raw dump**: training on it directly would mostly teach a model to
-memorize ~35 canned answers repeated thousands of times, not to generalize.
-
-If you're building a RAG pipeline: run `python3 scripts/build_views.py`
-once, then use `data/index.sqlite3` or `data/scenarios/by_class/` directly,
-keyed by CWE/class/tag as needed.
-
-If you want fine-tuning data anyway (e.g. as one ingredient in a larger SFT
-mix, or an eval set): `scripts/sample_balanced.py` caps how many records any
-one vulnerability class can contribute and prefers higher-confidence
-matches, instead of naively oversampling whatever source collected the most
-raw records:
-
-```bash
-cd scripts
-python3 sample_balanced.py --max-per-class 20 --min-confidence medium --out ../data/scenarios/balanced_sample.jsonl
-```
-
-For anything closer to actual **decision-making/RL training data**, the
-[attack graph](#beyond-a-flat-list-the-attack-decision-graph) and its
-simulator are the better starting point -- see below.
-
-## Finding records: how the dataset is shipped and consumed
-
-A single 28,280-line, ~80MB JSONL file isn't practical to download, upload,
-or browse by hand. Nothing that large is committed as one file -- here's
-what actually is:
-
-1. **`data/scenarios/chunks/scenarios.part001.jsonl` ... `part015.jsonl`**
-   (committed, ~5MB each) -- the dataset split into fixed-size,
-   sequentially-numbered chunks via `scripts/chunk_scenarios.py`. This is
-   the thing you actually clone/download/upload. Grab one chunk to sample
-   the data, or all of them for the full set. A `manifest.json` alongside
-   them records the total record count and a SHA256 of the reassembled
-   file, so you can verify nothing got corrupted or truncated in transit.
-2. **`data/scenarios/scenarios.jsonl`** (git-ignored, local working file)
-   -- reassemble it from the chunks with a single command, whenever you
-   want the whole thing as one stream:
-   ```bash
-   cat data/scenarios/chunks/*.jsonl > data/scenarios/scenarios.jsonl
-   ```
-   This is what every downstream script (`build_views.py`,
-   `sample_balanced.py`, `normalize.py`'s own output) reads/writes locally
-   -- it's the canonical form, just not the committed form.
-3. **`data/scenarios/by_class/<playbook_id>.jsonl`** and **`data/index.sqlite3`**
-   (both git-ignored, build locally) -- same records split per
-   vulnerability class, and an indexed SQLite database (CWE, severity,
-   platform, playbook_id, target_type, confidence, plus FTS5 full-text)
-   for actual filtering. Build (or rebuild) both, plus the chunks, in one
-   step from a reassembled `scenarios.jsonl`:
-   ```bash
-   cd scripts
-   python3 build_views.py
-   python3 chunk_scenarios.py
-   ```
-
-Then query the SQLite index directly with `sqlite3`, or use the bundled CLI:
-
-```bash
-python3 query.py --cwe CWE-89                          # by CWE
-python3 query.py --playbook ssrf --severity high        # by class + severity
-python3 query.py --platform tryhackme --playbook sqli   # by source + class
-python3 query.py --search "cache poisoning"             # full-text search
-python3 query.py --cwe CWE-639 --json                   # full record JSON out
-python3 query.py                                        # no filters -> lists all playbook_ids/platforms
-```
-
-**Why chunk instead of shipping one file**: `by_class/` and `index.sqlite3`
-are 100% mechanically derived from `scenarios.jsonl`, so they were dropped
-from git entirely (regenerate locally, see above) -- that fixed the repo's
-overall size. But `scenarios.jsonl` itself is the canonical *source*, not a
-derived duplicate, so it can't just be gitignored-and-regenerated the same
-way; it has to be shipped somehow. At 28,280 records (~80MB) it tripped
-GitHub's 50MB single-file warning on its own. Splitting it into ~5MB chunks
-solves the actual complaint (awkward to download/upload/read) without
-losing anything -- `cat`-ing them back together reproduces the original
-byte-for-byte, which CI verifies via the manifest's SHA256 on every push.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for extending the dataset (new
+vulnerability classes, data sources, or graph chains) and
+[`docs/GRAPH.md`](docs/GRAPH.md) / [`docs/SCHEMA.md`](docs/SCHEMA.md) for
+full field and design references. Engineering history (what changed each
+round, sources evaluated and rejected, and why) lives in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Repo layout
 
 ```
-.github/ISSUE_TEMPLATE/submit-writeup.yml  Structured writeup-submission issue form
-.github/workflows/validate.yml     CI: schema/graph validation on every push and PR
-schema/scenario.schema.json        Canonical JSON Schema for one scenario record
-schema/graph.schema.json           Canonical JSON Schema for the attack graph
-knowledge/vulnerability_playbooks.json   Authored generic + AI/LLM playbooks (the "process" library)
-knowledge/graph/bridges.json       Authored cross-class chaining states/actions (the graph's design work)
-knowledge/graph/technology_bridges.json  Authored real-CVE technology chains (Log4Shell, Spring4Shell, etc.)
-knowledge/graph/ai_bridges.json    Authored AI/LLM chaining actions (reuse existing capability states, add none)
+schema/                            JSON Schemas for scenario records and the attack graph
+knowledge/vulnerability_playbooks.json   Authored playbooks (the "process" library)
+knowledge/graph/                   Authored graph chaining logic (generic, technology/CVE, AI/LLM bridges)
 knowledge/community_submissions.jsonl    Committed log of writeups submitted via the issue template
-scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
-scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
-scripts/collect_curated_lists.py   Additional curated GitHub writeup-list collectors
-scripts/collect_rss_feeds.py    Medium publication RSS feed collector (InfoSec Write-ups, etc.)
-scripts/collect_blogs.py           Individual researcher blog collector (atom feeds + sitemap+og:title)
-scripts/collect_ctf.py             GitHub CTF-writeup collector (file-level, cross-repo dedup)
-scripts/collect_hackthebox.py      GitHub HackTheBox-writeup collector (file-level, md+pdf, cross-repo dedup)
-scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cross-repo dedup)
+scripts/collect_*.py               One collector per source (see CONTRIBUTING.md)
+scripts/normalize.py               Classifies raw records against playbooks, emits unified schema
+scripts/validate.py / validate_graph.py   Schema + integrity validation
+scripts/build_views.py             Builds by_class/ split and the SQLite index
+scripts/build_graph.py             Generates the attack graph from playbooks + bridge files
+scripts/query.py / query_graph.py  CLIs for filtering the dataset / traversing the graph
+scripts/simulate_graph.py          Samples synthetic RL episodes from the graph
+scripts/chunk_scenarios.py         Splits scenarios.jsonl into git-friendly chunks
+scripts/sample_balanced.py         Class-balanced subset for fine-tuning use
 scripts/ingest_submissions.py      Converts an issue-form submission into community_submissions.jsonl
-scripts/normalize.py               Classifies raw records against playbooks, emits unified schema (cross-platform URL dedup)
-scripts/validate.py                JSON Schema + dedup validation
-scripts/build_views.py             Builds the by-class split and the SQLite index
-scripts/query.py                   CLI for filtering/searching the scenario dataset via the SQLite index
-scripts/sample_balanced.py         Class-balanced, confidence-preferring subset for fine-tuning use
-scripts/build_graph.py             Generates per-class graph chains from playbooks, merges in the bridge files
-scripts/validate_graph.py          Graph schema + referential integrity + reachability validation
-scripts/query_graph.py             CLI for traversing the graph / finding candidate attack paths
-scripts/simulate_graph.py          Samples synthetic (state, action, outcome, reward) episodes from the graph
-scripts/chunk_scenarios.py         Splits scenarios.jsonl into fixed-size chunks for git
-scripts/pipeline.sh                Runs the full chain: collect -> normalize -> validate -> build_views -> build_graph -> chunk
-data/scenarios/chunks/              The committed dataset: scenarios.jsonl split into ~5MB chunks + manifest.json
-data/scenarios/scenarios.jsonl     Reassembled working file (gitignored -- `cat chunks/*.jsonl >` this)
-data/scenarios/by_class/           Same records, split per vulnerability class (gitignored, `build_views.py`)
-data/scenarios/balanced_sample.jsonl   Class-balanced subset (see "Using this dataset")
-data/index.sqlite3                 Indexed + full-text-searchable SQLite view (gitignored, `build_views.py`)
-data/graph/attack_graph.json       The generated attack decision graph (states + actions)
-data/graph/episodes_*.jsonl        Simulated episodes per policy (random / greedy / epsilon_greedy)
-data/raw/                          Ephemeral collector output (gitignored, regenerate locally)
-docs/SCHEMA.md                     Scenario record field-by-field reference
-docs/GRAPH.md                      Attack graph design, detection signals, technology chains, simulator
+scripts/pipeline.sh                Runs the full chain end to end
+data/scenarios/chunks/             The committed dataset
+data/graph/attack_graph.json       The generated attack decision graph
+data/graph/episodes_*.jsonl        Simulated episodes per policy
+docs/SCHEMA.md, docs/GRAPH.md      Field and design references
 ```
-
-## Regenerating / extending the dataset
-
-```bash
-pip install -r requirements.txt   # jsonschema (stdlib urllib/sqlite3 handle the rest)
-cd scripts
-./pipeline.sh                      # defaults reproduce the full ~16.2k-record run (takes a few minutes)
-./pipeline.sh 10 0 20 10           # or pass smaller numbers for a quick local test: hackerone_pages, pentesterland_limit(0=all), ctf_per_page, thm_repos_per_topic
-```
-
-Each collector can also be run standalone and re-normalized independently --
-see the docstring at the top of each `scripts/*.py` file. After changing
-`data/scenarios/scenarios.jsonl` by hand or via `normalize.py`, re-run
-`python3 build_views.py` to keep `by_class/` and `index.sqlite3` in sync.
-
-### Avoiding duplicates across many small repos (TryHackMe)
-
-Unlike HackerOne/Pentester Land (one canonical URL per report/writeup),
-dozens of independent GitHub repos write up the same popular TryHackMe room
-("Blue", "Ice", ...). `collect_tryhackme.py` dedups by **normalized room
-title**, not just by URL: repos are processed most-starred-first, and only
-the first occurrence of each room title is kept, so a room is attributed to
-its most reputable available source instead of appearing dozens of times.
-
-### Adding a vulnerability class
-
-Add an entry to `knowledge/vulnerability_playbooks.json` with a unique
-`playbook_id`, `aliases` (the tag/keyword strings that should match it), and
-the four `scenario` sub-fields. Re-run `normalize.py` -- previously
-unclassified raw records may now match. Re-run `build_graph.py` too: the new
-class's linear chain is generated automatically, but it won't connect to
-anything else in the graph until you also add bridge action(s) for it in
-`knowledge/graph/bridges.json` (see [`docs/GRAPH.md`](docs/GRAPH.md)).
-
-### Adding a chain to the attack graph
-
-Edit `knowledge/graph/bridges.json`: add any new shared state(s) to `states`,
-and an action to `actions` with `from_state` set to an existing
-`{playbook_id}_confirmed` state (or another bridge state) and one or more
-`outcomes` pointing at `to_state`s. Then:
-
-```bash
-python3 build_graph.py
-python3 validate_graph.py   # checks schema + that every from_state/to_state exists + reachability
-```
-
-### Adding a data source
-
-Write a new `scripts/collect_<source>.py` that writes one JSON object per
-line to `data/raw/<source>.jsonl`, following the field conventions of the
-existing collectors (`source_platform`, `title`, `url` are the minimum).
-`normalize.py` picks up any `*.jsonl` file in `data/raw/` automatically --
-you'll also need a small classification branch in `build_record()` for the
-new platform's field names.
-
-**Roadmap / not yet implemented:** Bugcrowd disclosed-report scraping (no
-stable public API found; would need a robots.txt-respecting HTML collector),
-and deeper full-text extraction for higher-fidelity, per-instance steps
-(would require an LLM-assisted normalization pass -- `normalize.py` is
-structured so a `--llm` mode could be added without changing the schema).
 
 ## Known limitations
 
 - `scenario.process` is a generic playbook per vulnerability class, not a
-  transcription of the specific instance's actual steps -- see "Why this
-  shape" above. This is a deliberate trade-off for legal safety and
-  automation at scale, not a bug.
-- Severity is `"unknown"` for ~95% of records: HackerOne's severity rating
-  requires authentication to read for most reports, and Pentester Land's feed
-  doesn't carry a severity field at all.
-- Classification is keyword/alias-based, not semantic -- see `confidence` in
-  each record.
-- 8 of the 9 new AI/LLM classes have zero real grounded instances yet
-  (only prompt injection and model DoS matched anything) -- see "AI/LLM
-  vulnerability classes" above.
-- Not 100k records -- see "A note on scale" above for exactly which sources
-  were tried, which were ruled out, and why.
-- **Repo size**: `data/index.sqlite3` and `data/scenarios/by_class/` are no
-  longer committed (they're 100% derived from `scenarios.jsonl` --
-  regenerate with `python3 scripts/build_views.py`). `scenarios.jsonl`
-  itself crossed GitHub's 50MB single-file warning as it grew past ~25k
-  records; it's now shipped as ~5MB chunks under `data/scenarios/chunks/`
-  instead (`scripts/chunk_scenarios.py`), reassembled locally with `cat`.
-  The chunks will keep growing with every new source and community
-  submission, which is expected and fine -- it's real, non-duplicated data,
-  and chunking (unlike the derived-views fix) scales indefinitely without
-  needing a bigger lever like Git LFS.
+  transcription of that specific instance's actual steps -- a deliberate
+  trade-off for legal safety and automation at scale (see
+  [`DATA_LICENSE`](DATA_LICENSE)), not a bug.
+- Severity is `"unknown"` for most records -- most sources don't expose it
+  publicly.
+- Classification is keyword/alias-based, not semantic; filter on
+  `provenance.confidence` if you need precision.
+- 6 of the 9 AI/LLM classes have zero real grounded instances yet (only
+  `prompt_injection`, `model_denial_of_service`, and
+  `training_data_poisoning` matched anything so far) -- the playbooks and
+  graph chains are ready as soon as more real writeups use this
+  terminology.
 
 ## License
 

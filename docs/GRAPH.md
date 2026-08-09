@@ -68,21 +68,35 @@ it from real tool output -- see below), and technology-specific states carry
    the generic playbooks are deliberately technology-agnostic ("test for
    SQLi"), which misses where a lot of real bug bounty value actually
    concentrates -- specific, known-critical CVEs in specific software. This
-   layer adds 8 real, patched-for-years CVE chains with CVE IDs and CVSS
-   scores verified against NVD: **Log4Shell** (CVE-2021-44228, CVSS 10.0),
+   layer adds **17 real, patched CVE chains** with CVE IDs and CVSS scores
+   verified against NVD: **Log4Shell** (CVE-2021-44228, CVSS 10.0),
    **Spring4Shell** (CVE-2022-22965, 9.8), **Confluence OGNL injection**
    (CVE-2022-26134, 9.8), **GitLab ExifTool RCE** (CVE-2021-22205, 10.0),
    **Laravel Ignition debug RCE** (CVE-2021-3129, 9.8), **Apache Struts
    Jakarta Multipart RCE** (CVE-2017-5638, 9.8 -- the Equifax breach cause),
-   **Citrix ADC directory traversal** (CVE-2019-19781, 9.8), and the
-   **Exchange ProxyLogon/ProxyShell family** (CVE-2021-26855 +
-   CVE-2021-34473, modeled as one consolidated step -- the real chain
-   involves multiple intermediate CVEs). A `fingerprint_web_stack` action
-   fans out from `web_target_identified` into per-technology recon states;
-   Log4Shell skips fingerprinting entirely and is tried directly via blind
-   JNDI injection, matching real-world practice. All 8 confirmed-CVE states
-   bridge into the same `low_priv_shell_obtained` capability state the
-   generic RCE-capable classes use.
+   **Citrix ADC directory traversal** (CVE-2019-19781, 9.8), the **Exchange
+   ProxyLogon/ProxyShell family** (CVE-2021-26855 + CVE-2021-34473, modeled
+   as one consolidated step -- the real chain involves multiple intermediate
+   CVEs), **Zerologon** (CVE-2020-1472, 5.5, netlogon auth bypass to domain
+   admin), **EternalBlue** (CVE-2017-0144, 8.8, the WannaCry/NotPetya SMB
+   worm), **PrintNightmare** (CVE-2021-34527, 8.8), **Follina** (CVE-2022-30190,
+   7.8, MSDT RCE via Office), **MOVEit Transfer** (CVE-2023-34362, 9.8, the
+   Cl0p mass-exploitation chain), **Citrix Bleed** (CVE-2023-4966, 9.4,
+   session-token leak from the same ADC fingerprint state Citrix traversal
+   uses), **Cisco IOS XE web UI RCE** (CVE-2023-20198, 10.0), the **Ivanti
+   Connect Secure chain** (CVE-2023-46805 auth bypass + CVE-2023-21887
+   command injection), and a **GitLab unauthenticated password-reset account
+   takeover** (CVE-2023-7028, 10.0, reusing the existing GitLab fingerprint
+   state). A `fingerprint_web_stack` action fans out from
+   `web_target_identified` into per-technology recon states, and a
+   `fingerprint_windows_network_services` action fans out from
+   `network_target_identified` into SMB/domain-controller/print-spooler
+   states for the Windows-network CVEs; Log4Shell skips fingerprinting
+   entirely and is tried directly via blind JNDI injection, matching
+   real-world practice. All confirmed-CVE states bridge into the same
+   `low_priv_shell_obtained` (or, for the AD-focused chains, directly into
+   higher-value domain-compromise) capability states the generic
+   RCE-capable classes use.
 
 4. **Hand-authored AI/LLM bridges** (`knowledge/graph/ai_bridges.json`): the
    9 OWASP LLM Top 10 (2025) classes -- prompt injection, excessive agency,
@@ -198,9 +212,13 @@ Three policies:
 - **epsilon_greedy** -- greedy with probability `1-epsilon` random exploration.
 
 On the current graph (3000/1000/1000 episodes, seed 42): random reaches a
-`full_compromise` state **5.3%** of the time, epsilon_greedy **10.3%**,
-greedy **13.1%** -- a real, measurable gap that also sanity-checks the graph
+`full_compromise` state **6.7%** of the time, epsilon_greedy **14.4%**,
+greedy **18.1%** -- a real, measurable gap that also sanity-checks the graph
 itself (if greedy couldn't beat random, that would flag a bridge-chain gap).
+The jump from the previous round's 5.3%/10.3%/13.1% tracks directly to the
+CVE-chain expansion below: several of the new chains grant a high-value
+capability state (domain admin, SYSTEM) in a single confirmed step, which
+value iteration now correctly steers greedy toward.
 
 Each episode:
 
@@ -221,10 +239,10 @@ Each episode:
 
 ## Stats
 
-264 states, 248 actions: 226 generated from the 44 vulnerability playbooks
+293 states, 271 actions: 226 generated from the 44 vulnerability playbooks
 (35 generic + 9 AI/LLM) plus 5 shared target-type entry states, 15 net-new
 hand-authored generic-bridge states (21 defined, 6 are detection-signal
-overrides of already-generated states) / 45 generic-bridge actions, 23
-technology states / 18 technology actions covering 8 real CVEs, and 8
+overrides of already-generated states) / 45 generic-bridge actions, 47
+technology states / 37 technology actions covering 17 real CVEs, and 8
 AI-bridge actions adding zero new states. Validated with zero schema
 errors, zero unreachable states (`scripts/validate_graph.py`).

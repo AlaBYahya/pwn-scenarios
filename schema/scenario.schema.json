@@ -125,7 +125,7 @@
       "properties": {
         "platform": {
           "type": "string",
-          "enum": ["hackerone", "aggregated_writeup", "ctf", "other"]
+          "enum": ["hackerone", "aggregated_writeup", "ctf", "tryhackme", "other"]
         },
         "url": {"type": "string", "format": "uri"},
         "program": {"type": ["string", "null"]},

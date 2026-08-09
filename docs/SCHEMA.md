@@ -49,7 +49,7 @@ writeup link, or a CTF writeup repository).
   },
 
   "source": {
-    "platform": "hackerone",            // hackerone | aggregated_writeup | ctf | other
+    "platform": "hackerone",            // hackerone | aggregated_writeup | ctf | tryhackme | other
     "url": "https://hackerone.com/reports/...",
     "program": "...",
     "author": null,

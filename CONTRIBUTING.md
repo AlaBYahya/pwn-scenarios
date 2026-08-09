@@ -13,10 +13,12 @@ Issues and PRs welcome. A few useful entry points:
 - **Takedown request**: if you're the author of a linked writeup and want its
   metadata removed, open an issue with the `source.url`.
 
-Before submitting a PR that touches `data/scenarios/scenarios.jsonl`, run:
+Before submitting a PR that touches `data/scenarios/scenarios.jsonl`, run the
+full chain so `by_class/` and `index.sqlite3` stay in sync with it:
 
 ```bash
 cd scripts
 python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
 python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
+python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir ../data/scenarios/by_class --db ../data/index.sqlite3
 ```

@@ -125,6 +125,16 @@ def build_record(raw, playbook_id, confidence, playbooks_by_id, collector_name):
         tags = ["ctf", raw.get("topic_matched")]
         stars = raw.get("stars")
         summary = f"Curated CTF writeup collection ({stars} stars on GitHub): {raw.get('description') or title}."
+    elif platform == "tryhackme":
+        title = raw.get("title") or pb["vulnerability_class"]
+        severity = "unknown"
+        program = "TryHackMe"
+        author = None
+        disclosed_at = None
+        bounty = None
+        stars = raw.get("repo_stars")
+        tags = ["tryhackme"]
+        summary = f"TryHackMe room writeup ('{title}') covering {pb['vulnerability_class']}."
     else:
         raise ValueError(f"unknown platform {platform}")
 
@@ -209,6 +219,9 @@ def main():
                     elif platform == "ctf":
                         text_fields = ["ctf writeups"]
                         tag_field = "ctf"
+                    elif platform == "tryhackme":
+                        text_fields = [raw.get("title")]
+                        tag_field = raw.get("title")
                     else:
                         continue
 
@@ -219,6 +232,12 @@ def main():
                         playbook_id, confidence = classify(text_fields, alias_map)
                         if playbook_id:
                             confidence = "low"
+
+                    # TryHackMe room titles are often thematic (e.g. "Blue", "Ice") rather
+                    # than vulnerability-descriptive; fall back to the generic room-solving
+                    # playbook instead of dropping the record.
+                    if not playbook_id and platform == "tryhackme":
+                        playbook_id, confidence = "tryhackme_room_generic", "low"
 
                     if not playbook_id:
                         total_skipped += 1

@@ -49,22 +49,56 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **5,975 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **7,342 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
-| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 393 |
 | Pentester Land curated writeup index | `aggregated_writeup` | 5,498 |
+| GitHub TryHackMe room-writeup repos | `tryhackme` | 1,367 |
+| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 393 |
 | GitHub CTF writeup repositories | `ctf` | 84 |
 
-Top vulnerability classes by record count: Broken Access Control (729),
-Sensitive Information Disclosure (684), Reflected XSS (653), Account Takeover
-(416), RCE (353), IDOR (285), Business Logic Flaws (265), SSRF (235) -- 36
-classes total, see [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
+Top vulnerability classes by record count: TryHackMe general room-solving
+process (1,280 -- see note below), Broken Access Control (735), Sensitive
+Information Disclosure (692), Reflected XSS (660), Account Takeover (416),
+RCE (354), IDOR (287), Business Logic Flaws (265), SSRF (239) -- 37 classes
+total, see [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
 for the full list.
 
-90% of records (5,362) are `confidence: "high"` classification matches; see
+74% of records (5,451) are `confidence: "high"` classification matches; see
 [`docs/SCHEMA.md`](docs/SCHEMA.md#confidence-levels) to filter for precision.
+TryHackMe room titles are often thematic ("Blue", "Ice") rather than
+vulnerability-descriptive, so most of them fall back to the generic
+`tryhackme_room_generic` playbook (`confidence: "low"`) rather than a specific
+vulnerability class -- filter to `confidence: "high"` if you only want
+precisely classified records.
+
+## Finding records: three ways to consume the dataset
+
+A single 7,342-line JSONL file isn't practical to browse or filter by hand,
+so the dataset ships in three forms, all derived from the same source of
+truth:
+
+1. **`data/scenarios/scenarios.jsonl`** -- the canonical file, one record per
+   line. Best for bulk loading (e.g. `datasets.load_dataset("json", data_files=...)`
+   in Python) or streaming the whole thing.
+2. **`data/scenarios/by_class/<playbook_id>.jsonl`** -- the same records
+   split per vulnerability class (37 files), so you can open or download just
+   `by_class/sqli.jsonl` or `by_class/ssrf.jsonl` directly.
+3. **`data/index.sqlite3`** -- a pre-built, indexed SQLite database (indexed
+   on CWE, severity, platform, playbook_id, target_type, confidence, plus an
+   FTS5 full-text index) for actual filtering. Query it directly with `sqlite3`,
+   or use the bundled CLI:
+
+   ```bash
+   cd scripts
+   python3 query.py --cwe CWE-89                          # by CWE
+   python3 query.py --playbook ssrf --severity high        # by class + severity
+   python3 query.py --platform tryhackme --playbook sqli   # by source + class
+   python3 query.py --search "cache poisoning"             # full-text search
+   python3 query.py --cwe CWE-639 --json                   # full record JSON out
+   python3 query.py                                        # no filters -> lists all playbook_ids/platforms
+   ```
 
 ## Repo layout
 
@@ -74,10 +108,15 @@ knowledge/vulnerability_playbooks.json   Authored generic playbooks (the "proces
 scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
+scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cross-repo dedup)
 scripts/normalize.py               Classifies raw records against playbooks, emits unified schema
 scripts/validate.py                JSON Schema + dedup validation
-scripts/pipeline.sh                Runs collect -> normalize -> validate end to end
-data/scenarios/scenarios.jsonl     The published dataset
+scripts/build_views.py             Builds the by-class split and the SQLite index
+scripts/query.py                   CLI for filtering/searching via the SQLite index
+scripts/pipeline.sh                Runs collect -> normalize -> validate -> build_views end to end
+data/scenarios/scenarios.jsonl     The canonical published dataset
+data/scenarios/by_class/           Same records, split per vulnerability class
+data/index.sqlite3                 Indexed + full-text-searchable SQLite view
 data/raw/                          Ephemeral collector output (gitignored, regenerate locally)
 docs/SCHEMA.md                     Field-by-field reference
 ```
@@ -85,13 +124,24 @@ docs/SCHEMA.md                     Field-by-field reference
 ## Regenerating / extending the dataset
 
 ```bash
-pip install -r requirements.txt   # jsonschema (stdlib urllib handles HTTP)
+pip install -r requirements.txt   # jsonschema (stdlib urllib/sqlite3 handle the rest)
 cd scripts
-./pipeline.sh 15 0 30              # hackerone_pages, pentesterland_limit(0=all), ctf_per_page
+./pipeline.sh 15 0 30 20           # hackerone_pages, pentesterland_limit(0=all), ctf_per_page, thm_repos_per_topic
 ```
 
 Each collector can also be run standalone and re-normalized independently --
-see the docstring at the top of each `scripts/*.py` file.
+see the docstring at the top of each `scripts/*.py` file. After changing
+`data/scenarios/scenarios.jsonl` by hand or via `normalize.py`, re-run
+`python3 build_views.py` to keep `by_class/` and `index.sqlite3` in sync.
+
+### Avoiding duplicates across many small repos (TryHackMe)
+
+Unlike HackerOne/Pentester Land (one canonical URL per report/writeup),
+dozens of independent GitHub repos write up the same popular TryHackMe room
+("Blue", "Ice", ...). `collect_tryhackme.py` dedups by **normalized room
+title**, not just by URL: repos are processed most-starred-first, and only
+the first occurrence of each room title is kept, so a room is attributed to
+its most reputable available source instead of appearing dozens of times.
 
 ### Adding a vulnerability class
 

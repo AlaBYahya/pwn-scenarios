@@ -35,7 +35,11 @@ Two node/edge types, validated against [`schema/graph.schema.json`](../schema/gr
 }
 ```
 
-## Two layers
+Optionally, a state also carries `detection_signals` (hints for recognizing
+it from real tool output -- see below), and technology-specific states carry
+`technology` and `cve_refs`.
+
+## Three layers
 
 1. **Generated per-class chains** (`scripts/build_graph.py`, mechanical):
    each of the 35 real vulnerability playbooks in
@@ -44,22 +48,66 @@ Two node/edge types, validated against [`schema/graph.schema.json`](../schema/gr
    every step also branching to a `{playbook_id}_ruled_out` dead end on
    failure. (`ctf_challenge_generic` and `tryhackme_room_generic` are
    excluded -- they're meta-processes, not a vulnerability class to chain
-   from.)
+   from.) Each generated state gets a mechanically-derived `detection_signals`
+   entry from the underlying playbook step's `expected_observation`.
 
-2. **Hand-authored bridges** (`knowledge/graph/bridges.json`, the actual
-   design work): 15 shared capability/privileged_access/full_compromise
-   states and 45 actions connecting per-class `_confirmed` states into that
-   shared vocabulary -- and into each other. This is what makes it a graph
-   instead of 35 disconnected trees: six different RCE-capable classes
-   (command injection, deserialization, SSTI, file upload, generic RCE,
-   memory corruption) all converge on `low_priv_shell_obtained`; SSRF can
-   reach `cloud_metadata_reachable` -> `cloud_credentials_obtained` ->
-   `full_cloud_account_compromise`; a leaked secret
-   (`hardcoded_secrets_confirmed`) can grant either app-level or cloud
+2. **Hand-authored generic bridges** (`knowledge/graph/bridges.json`, the
+   core design work): 21 shared capability/privileged_access/full_compromise
+   states (15 new + 6 detection-signal-enriched overrides of the highest-value
+   `_confirmed` states) and 45 actions connecting per-class `_confirmed`
+   states into that shared vocabulary -- and into each other. This is what
+   makes it a graph instead of 35 disconnected trees: six different
+   RCE-capable classes (command injection, deserialization, SSTI, file
+   upload, generic RCE, memory corruption) all converge on
+   `low_priv_shell_obtained`; SSRF can reach `cloud_metadata_reachable` ->
+   `cloud_credentials_obtained` -> `full_cloud_account_compromise`; a leaked
+   secret (`hardcoded_secrets_confirmed`) can grant either app-level or cloud
    access depending on what it validates against.
 
+3. **Hand-authored technology/CVE bridges** (`knowledge/graph/technology_bridges.json`):
+   the generic playbooks are deliberately technology-agnostic ("test for
+   SQLi"), which misses where a lot of real bug bounty value actually
+   concentrates -- specific, known-critical CVEs in specific software. This
+   layer adds 8 real, patched-for-years CVE chains with CVE IDs and CVSS
+   scores verified against NVD: **Log4Shell** (CVE-2021-44228, CVSS 10.0),
+   **Spring4Shell** (CVE-2022-22965, 9.8), **Confluence OGNL injection**
+   (CVE-2022-26134, 9.8), **GitLab ExifTool RCE** (CVE-2021-22205, 10.0),
+   **Laravel Ignition debug RCE** (CVE-2021-3129, 9.8), **Apache Struts
+   Jakarta Multipart RCE** (CVE-2017-5638, 9.8 -- the Equifax breach cause),
+   **Citrix ADC directory traversal** (CVE-2019-19781, 9.8), and the
+   **Exchange ProxyLogon/ProxyShell family** (CVE-2021-26855 +
+   CVE-2021-34473, modeled as one consolidated step -- the real chain
+   involves multiple intermediate CVEs). A `fingerprint_web_stack` action
+   fans out from `web_target_identified` into per-technology recon states;
+   Log4Shell skips fingerprinting entirely and is tried directly via blind
+   JNDI injection, matching real-world practice. All 8 confirmed-CVE states
+   bridge into the same `low_priv_shell_obtained` capability state the
+   generic RCE-capable classes use.
+
 Run `scripts/build_graph.py` to regenerate the merged output after editing
-either source file.
+any of the three source files.
+
+## Detection signals: authored hints, not a working classifier
+
+Every state can carry `detection_signals` -- what you'd actually look for in
+real tool output to recognize you've reached it:
+
+```jsonc
+{"state_id": "cloud_credentials_obtained", ...,
+ "detection_signals": [{
+   "signal_type": "http_response",
+   "description": "The metadata/credentials endpoint returns a JSON object with access key / secret key / session token fields.",
+   "examples": ["response body contains \"AccessKeyId\", \"SecretAccessKey\", \"Token\" (AWS)", "..."]
+ }]}
+```
+
+This is a real gap being narrowed, not closed: these are still authored
+judgment calls about what a signal looks like, not a working parser/regex an
+agent can run unattended. What it adds over plain prose is a `signal_type`
+(`http_response` / `timing` / `tool_output` / `file_system` / `network` /
+`manual_judgment`) an agent can use to decide *how* to check -- inspect a
+response, time a request, read a tool's output -- before it has any
+target-specific detection logic of its own.
 
 ## Using it: `scripts/query_graph.py`
 
@@ -104,8 +152,62 @@ over cumulative score, bounded by `--max-expansions`/`--max-depth`, not an
 exhaustive optimal-path solver. Treat its output as "a reasonable candidate
 path a competent tester might take," not a provably best attack plan.
 
+## Turning the static graph into training data: `scripts/simulate_graph.py`
+
+A static graph is a prior, not evidence -- nobody has run it against a real
+target. `simulate_graph.py` samples synthetic episodes from it: repeatedly
+walk the graph from an entry state, sample which outcome occurs at each step
+according to its `likelihood` (rare/possible/likely converted to sampling
+weights), assign a shaped reward from the change in state `value` (+5 bonus
+for reaching a `full_compromise` state), and log the full trajectory. This
+does not create real signal about what works against real targets -- it's
+still bootstrapped from the same authored judgments as the graph -- but it
+is a materially different artifact: many diverse, complete (state, action,
+outcome, reward) sequences, suitable as synthetic RL rollouts or a
+policy-comparison sandbox, instead of one static structure.
+
+```bash
+python3 simulate_graph.py --episodes 3000 --policy random --out ../data/graph/episodes_random.jsonl
+python3 simulate_graph.py --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl
+python3 simulate_graph.py --episodes 1000 --policy epsilon_greedy --epsilon 0.2 --out ../data/graph/episodes_epsilon_greedy.jsonl
+```
+
+Three policies:
+- **random** -- uniformly picks among available actions at each state.
+- **greedy** -- picks the action maximizing Q(s,a) under a proper Bellman
+  value function (`compute_value_function`, gamma=0.9, 200 value-iteration
+  sweeps over the whole graph). A naive 1-step-lookahead greedy policy
+  turned out to be statistically indistinguishable from random here: nearly
+  every early-chain "recon" state has the same generic `value: "low"`, so
+  1-ply expected value ties across almost all first moves. Value iteration
+  looks past that flat first hop to where a chain actually leads.
+- **epsilon_greedy** -- greedy with probability `1-epsilon` random exploration.
+
+On the current graph (3000/1000/1000 episodes, seed 42): random reaches a
+`full_compromise` state **6.1%** of the time, epsilon_greedy **10.8%**,
+greedy **13.1%** -- a real, measurable gap that also sanity-checks the graph
+itself (if greedy couldn't beat random, that would flag a bridge-chain gap).
+
+Each episode:
+
+```jsonc
+{
+  "policy": "greedy", "start_state": "web_target_identified",
+  "steps": [
+    {"t": 0, "state": "web_target_identified", "action_id": "log4j_jndi_injection_web",
+     "outcome_id": "success", "to_state": "log4j_jndi_rce_confirmed", "likelihood": "rare", "reward": 4.0},
+    {"t": 1, "state": "log4j_jndi_rce_confirmed", "action_id": "bridge_log4j_to_shell",
+     "outcome_id": "success", "to_state": "low_priv_shell_obtained", "likelihood": "likely", "reward": 3.0},
+    "..."
+  ],
+  "end_state": "full_host_compromise", "end_tier": "full_compromise",
+  "total_reward": 21.0, "reached_goal": true, "terminated_reason": "terminal_state"
+}
+```
+
 ## Stats
 
-199 states, 189 actions (144 generated from playbooks + 15 bridge states /
-45 bridge actions hand-authored). Validated with zero schema errors, zero
-unreachable states (`scripts/validate_graph.py`).
+222 states, 207 actions: 144 generated from the 35 generic playbooks, 21
+hand-authored generic-bridge states / 45 generic-bridge actions, 23
+technology states / 18 technology actions covering 8 real CVEs. Validated
+with zero schema errors, zero unreachable states (`scripts/validate_graph.py`).

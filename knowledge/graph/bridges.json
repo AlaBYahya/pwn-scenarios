@@ -1,21 +1,70 @@
 {
   "_comment": "Hand-authored cross-class chaining knowledge. States: shared capability/privileged_access/full_compromise nodes that multiple vulnerability classes converge on or diverge from. Actions: the bridge edges connecting a class's mechanically-generated `{playbook_id}_confirmed` state into this shared vocabulary, plus edges among the shared states themselves toward terminal objectives. This is what turns 35 separate linear playbooks into one attack graph -- see scripts/build_graph.py for how it's merged with the per-class generated states/actions.",
   "states": [
-    {"state_id": "low_priv_shell_obtained", "description": "An interactive or non-interactive shell has been obtained on the target host, at low privilege.", "tier": "capability", "value": "high", "target_types": ["web", "api", "network", "binary"], "playbook_ref": null},
-    {"state_id": "full_host_compromise", "description": "Root/Administrator-level control of the target host has been obtained.", "tier": "full_compromise", "value": "critical", "target_types": ["web", "api", "network", "binary"], "playbook_ref": null},
-    {"state_id": "valid_credentials_found", "description": "A working credential, API key, or session-granting secret has been recovered.", "tier": "capability", "value": "high", "target_types": [], "playbook_ref": null},
-    {"state_id": "privileged_session_obtained", "description": "An authenticated session with elevated (admin-adjacent or full-admin) privilege has been obtained.", "tier": "privileged_access", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
-    {"state_id": "unauthorized_privileged_action_possible", "description": "A specific privileged action can be performed without full administrative session control (e.g. via a single access-control gap).", "tier": "privileged_access", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
-    {"state_id": "full_application_compromise", "description": "Full administrative control over the application: all data and all user/admin functionality.", "tier": "full_compromise", "value": "critical", "target_types": ["web", "api"], "playbook_ref": null},
-    {"state_id": "cloud_metadata_reachable", "description": "The server-side request forgery primitive can reach the cloud instance metadata service.", "tier": "capability", "value": "high", "target_types": ["web", "api", "cloud"], "playbook_ref": null},
-    {"state_id": "cloud_credentials_obtained", "description": "Temporary or long-lived cloud IAM credentials have been obtained from the metadata service or a leaked secret.", "tier": "capability", "value": "critical", "target_types": ["cloud"], "playbook_ref": null},
-    {"state_id": "cloud_storage_read_access", "description": "Read access to cloud storage (buckets/objects) has been confirmed using obtained cloud credentials.", "tier": "privileged_access", "value": "high", "target_types": ["cloud"], "playbook_ref": null},
-    {"state_id": "full_cloud_account_compromise", "description": "Broad IAM permissions confirmed, amounting to full control of the cloud account/environment.", "tier": "full_compromise", "value": "critical", "target_types": ["cloud"], "playbook_ref": null},
-    {"state_id": "arbitrary_file_read_obtained", "description": "Arbitrary local file read has been confirmed, without yet having found embedded credentials.", "tier": "capability", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
-    {"state_id": "database_full_read_obtained", "description": "Full or near-full read access to the application database has been confirmed.", "tier": "capability", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
-    {"state_id": "trusted_origin_control_obtained", "description": "Attacker-controlled content is being served from a trusted origin (a taken-over subdomain).", "tier": "capability", "value": "high", "target_types": ["network", "web"], "playbook_ref": null},
-    {"state_id": "session_cookie_theft_possible", "description": "A path exists to obtain a victim's live session cookie or token.", "tier": "capability", "value": "high", "target_types": ["web"], "playbook_ref": null},
-    {"state_id": "sensitive_data_exfiltrated", "description": "Sensitive data has been confirmed extractable at scale -- a reportable data breach objective, independent of further host/app/cloud compromise.", "tier": "full_compromise", "value": "high", "target_types": [], "playbook_ref": null}
+    {"state_id": "low_priv_shell_obtained", "description": "An interactive or non-interactive shell has been obtained on the target host, at low privilege.", "tier": "capability", "value": "high", "target_types": ["web", "api", "network", "binary"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "tool_output", "description": "A listener/handler receives a connection and shell commands return expected output rather than an error.", "examples": ["nc -lvnp <port> shows 'connection from ...'", "`id` returns uid=1000(www-data) instead of a connection error", "webshell endpoint returns command output in its HTTP response body"]}
+    ]},
+    {"state_id": "full_host_compromise", "description": "Root/Administrator-level control of the target host has been obtained.", "tier": "full_compromise", "value": "critical", "target_types": ["web", "api", "network", "binary"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "tool_output", "description": "A privilege-check command shows root/SYSTEM/Administrator rather than the original low-privilege identity.", "examples": ["`id` -> uid=0(root)", "`whoami` -> nt authority\\system", "`whoami /priv` shows SeDebugPrivilege/SeImpersonatePrivilege enabled and successfully used"]}
+    ]},
+    {"state_id": "valid_credentials_found", "description": "A working credential, API key, or session-granting secret has been recovered.", "tier": "capability", "value": "high", "target_types": [], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "tool_output", "description": "A recovered secret matches a known credential/key format and is not yet validated against a live service.", "examples": ["string matching AKIA[0-9A-Z]{16} (AWS access key)", "string matching a bcrypt/md5 hash next to a username column", "a JSON blob containing \"password\" or \"api_key\" fields with plausible values"]}
+    ]},
+    {"state_id": "privileged_session_obtained", "description": "An authenticated session with elevated (admin-adjacent or full-admin) privilege has been obtained.", "tier": "privileged_access", "value": "high", "target_types": ["web", "api"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "An authenticated request to a privileged/admin-only endpoint returns 200 with admin-scoped data, using the obtained session.", "examples": ["GET /admin/users returns 200 with a user list instead of 403", "response includes a role/scope claim of \"admin\" or \"superuser\""]}
+    ]},
+    {"state_id": "unauthorized_privileged_action_possible", "description": "A specific privileged action can be performed without full administrative session control (e.g. via a single access-control gap).", "tier": "privileged_access", "value": "high", "target_types": ["web", "api"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "A single privileged endpoint/action succeeds from a low-privilege session, while general admin functionality remains inaccessible.", "examples": ["POST to a role-change endpoint returns 200 and the role visibly changes, but /admin/dashboard still 403s"]}
+    ]},
+    {"state_id": "full_application_compromise", "description": "Full administrative control over the application: all data and all user/admin functionality.", "tier": "full_compromise", "value": "critical", "target_types": ["web", "api"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "All observed admin-only functionality (user management, data export, configuration) is reachable and functional.", "examples": ["admin dashboard fully loads and every linked admin action succeeds"]}
+    ]},
+    {"state_id": "cloud_metadata_reachable", "description": "The server-side request forgery primitive can reach the cloud instance metadata service.", "tier": "capability", "value": "high", "target_types": ["web", "api", "cloud"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "The SSRF-driven request to the metadata IP returns a metadata-service-shaped body rather than a connection error.", "examples": ["response body from 169.254.169.254 lists IAM role names (AWS)", "response body from metadata.google.internal returns a service account list (GCP)"]}
+    ]},
+    {"state_id": "cloud_credentials_obtained", "description": "Temporary or long-lived cloud IAM credentials have been obtained from the metadata service or a leaked secret.", "tier": "capability", "value": "critical", "target_types": ["cloud"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "The metadata/credentials endpoint returns a JSON object with access key / secret key / session token fields.", "examples": ["response body contains \"AccessKeyId\", \"SecretAccessKey\", \"Token\" (AWS)", "response body contains \"access_token\" and \"expires_in\" (GCP)"]}
+    ]},
+    {"state_id": "cloud_storage_read_access", "description": "Read access to cloud storage (buckets/objects) has been confirmed using obtained cloud credentials.", "tier": "privileged_access", "value": "high", "target_types": ["cloud"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "tool_output", "description": "A storage list/get command succeeds and returns object listings or content using the obtained credentials.", "examples": ["`aws s3 ls s3://<bucket> --profile stolen` returns an object listing instead of AccessDenied"]}
+    ]},
+    {"state_id": "full_cloud_account_compromise", "description": "Broad IAM permissions confirmed, amounting to full control of the cloud account/environment.", "tier": "full_compromise", "value": "critical", "target_types": ["cloud"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "tool_output", "description": "IAM policy simulation/enumeration shows administrator-equivalent permissions for the obtained credentials.", "examples": ["`aws iam simulate-principal-policy` returns \"allowed\" for iam:*, ec2:*, etc.", "pacu/ScoutSuite flags the credential set as admin-equivalent"]}
+    ]},
+    {"state_id": "arbitrary_file_read_obtained", "description": "Arbitrary local file read has been confirmed, without yet having found embedded credentials.", "tier": "capability", "value": "high", "target_types": ["web", "api"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "A known-content system file is returned verbatim in the response.", "examples": ["response body contains the exact contents of /etc/passwd or win.ini"]}
+    ]},
+    {"state_id": "database_full_read_obtained", "description": "Full or near-full read access to the application database has been confirmed.", "tier": "capability", "value": "high", "target_types": ["web", "api"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "tool_output", "description": "A dump/extraction tool successfully enumerates table names and row contents beyond the originally targeted table.", "examples": ["sqlmap --dump lists multiple tables with row counts and sample data"]}
+    ]},
+    {"state_id": "trusted_origin_control_obtained", "description": "Attacker-controlled content is being served from a trusted origin (a taken-over subdomain).", "tier": "capability", "value": "high", "target_types": ["network", "web"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "http_response", "description": "The subdomain resolves and serves attacker-uploaded content instead of the provider's \"not claimed\" page.", "examples": ["GET https://takenover.victim.com returns the attacker's own page content"]}
+    ]},
+    {"state_id": "session_cookie_theft_possible", "description": "A path exists to obtain a victim's live session cookie or token.", "tier": "capability", "value": "high", "target_types": ["web"], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "network", "description": "An attacker-controlled endpoint receives a request containing a session cookie/token value from a victim's browser context.", "examples": ["Collaborator/interactsh log shows a GET with a Cookie or token query parameter matching the app's session format"]}
+    ]},
+    {"state_id": "sensitive_data_exfiltrated", "description": "Sensitive data has been confirmed extractable at scale -- a reportable data breach objective, independent of further host/app/cloud compromise.", "tier": "full_compromise", "value": "high", "target_types": [], "playbook_ref": null, "detection_signals": [
+      {"signal_type": "manual_judgment", "description": "Extracted data volume and sensitivity (PII, financial, credentials-adjacent) is sufficient to constitute a reportable breach on its own.", "examples": []}
+    ]},
+
+    {"state_id": "rce_generic_confirmed", "description": "Remote Code Execution (RCE) confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": "rce_generic", "detection_signals": [
+      {"signal_type": "tool_output", "description": "An out-of-band callback fires, or a benign command's output is reflected/observable, proving arbitrary code execution.", "examples": ["interactsh/Collaborator logs a DNS or HTTP hit correlated to the injected payload", "response includes the output of a harmless command like `id` or `whoami`"]}
+    ]},
+    {"state_id": "command_injection_confirmed", "description": "OS Command Injection confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": "command_injection", "detection_signals": [
+      {"signal_type": "timing", "description": "A time-based blind payload (sleep/ping -c) delays the response by the injected duration.", "examples": ["response time increases by ~10s when `; sleep 10` is injected, vs baseline"]}
+    ]},
+    {"state_id": "insecure_deserialization_confirmed", "description": "Insecure Deserialization confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": "insecure_deserialization", "detection_signals": [
+      {"signal_type": "tool_output", "description": "A gadget-chain payload triggers an out-of-band callback or observable side effect upon deserialization.", "examples": ["interactsh logs a DNS hit when a ysoserial-generated payload is submitted as the serialized object"]}
+    ]},
+    {"state_id": "ssti_confirmed", "description": "Server-Side Template Injection (SSTI) confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": "ssti", "detection_signals": [
+      {"signal_type": "http_response", "description": "A math expression payload is evaluated by the template engine rather than reflected literally.", "examples": ["input `${7*7}` or `{{7*7}}` renders as \"49\" in the response instead of the literal payload text"]}
+    ]},
+    {"state_id": "sqli_confirmed", "description": "SQL Injection confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": "sqli", "detection_signals": [
+      {"signal_type": "http_response", "description": "Boolean-true/false or UNION-based payloads produce a consistent, controllable difference in response content/status/length.", "examples": ["`' OR '1'='1` vs `' OR '1'='2` produce different result sets or HTTP status codes", "UNION SELECT payload returns injected marker values in the response"]}
+    ]},
+    {"state_id": "unrestricted_file_upload_confirmed", "description": "Unrestricted File Upload confirmed exploitable.", "tier": "vulnerability_confirmed", "value": "critical", "target_types": ["web"], "playbook_ref": "unrestricted_file_upload", "detection_signals": [
+      {"signal_type": "http_response", "description": "An uploaded script file is reachable at a predictable URL and executes when requested.", "examples": ["GET request to the uploaded file's guessed path returns the output of the embedded script rather than raw source or a 404"]}
+    ]}
   ],
   "actions": [
     {"action_id": "bridge_rce_to_shell", "from_state": "rce_generic_confirmed", "action": "Use the confirmed code execution to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat", "socat"], "playbook_ref": "rce_generic", "outcomes": [

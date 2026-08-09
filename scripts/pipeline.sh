@@ -36,7 +36,15 @@ echo "== Building searchable views (by-class split + SQLite index) ==" >&2
 python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir ../data/scenarios/by_class --db ../data/index.sqlite3
 
 echo "== Building the attack decision graph ==" >&2
-python3 build_graph.py --playbooks ../knowledge/vulnerability_playbooks.json --bridges ../knowledge/graph/bridges.json --out ../data/graph/attack_graph.json
+python3 build_graph.py --playbooks ../knowledge/vulnerability_playbooks.json --bridges ../knowledge/graph/bridges.json --tech-bridges ../knowledge/graph/technology_bridges.json --out ../data/graph/attack_graph.json
 python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../schema/graph.schema.json
 
-echo "Done. Canonical: ../data/scenarios/scenarios.jsonl | Browsable: ../data/scenarios/by_class/ | Queryable: ../data/index.sqlite3 | Graph: ../data/graph/attack_graph.json" >&2
+echo "== Building a class-balanced fine-tuning sample ==" >&2
+python3 sample_balanced.py --data ../data/scenarios/scenarios.jsonl --max-per-class 20 --min-confidence medium --out ../data/scenarios/balanced_sample.jsonl
+
+echo "== Sampling synthetic graph episodes ==" >&2
+python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 3000 --policy random --out ../data/graph/episodes_random.jsonl
+python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl
+python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy epsilon_greedy --out ../data/graph/episodes_epsilon_greedy.jsonl
+
+echo "Done. Canonical: ../data/scenarios/scenarios.jsonl | Browsable: ../data/scenarios/by_class/ | Queryable: ../data/index.sqlite3 | Graph: ../data/graph/attack_graph.json | Episodes: ../data/graph/episodes_*.jsonl" >&2

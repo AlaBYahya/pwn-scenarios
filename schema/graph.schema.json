@@ -43,6 +43,32 @@
         "playbook_ref": {
           "type": ["string", "null"],
           "description": "vulnerability_playbooks.json playbook_id this state was derived from, if any."
+        },
+        "detection_signals": {
+          "type": "array",
+          "description": "Machine-actionable-ish hints for recognizing this state from real tool output, not a working automated classifier -- authored guidance only.",
+          "items": {
+            "type": "object",
+            "required": ["signal_type", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "signal_type": {
+                "type": "string",
+                "enum": ["http_response", "timing", "tool_output", "file_system", "network", "manual_judgment"]
+              },
+              "description": {"type": "string"},
+              "examples": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "cve_refs": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$"},
+          "description": "Specific CVE(s) this state represents, for technology-specific states."
+        },
+        "technology": {
+          "type": ["string", "null"],
+          "description": "Specific technology/framework/product this state applies to, for technology-specific states (null for generic states)."
         }
       }
     },

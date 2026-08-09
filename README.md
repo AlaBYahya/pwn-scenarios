@@ -38,16 +38,41 @@ uses to evaluate candidate moves and their resulting positions.
 States are conditions/capabilities ("`idor_confirmed`",
 "`low_priv_shell_obtained`", "`full_host_compromise`"); actions are moves
 that branch into qualitatively-scored outcomes leading to new states. 35
-vulnerability classes converge and chain through a shared vocabulary of 15
-hand-authored bridge states -- e.g. six different RCE-capable classes all
-converge on `low_priv_shell_obtained`, and SSRF can chain into
-`cloud_metadata_reachable -> cloud_credentials_obtained -> full_cloud_account_compromise`.
+generic vulnerability classes plus 8 real, specific CVE chains (Log4Shell,
+Spring4Shell, the Confluence/GitLab/Struts/Citrix/Exchange/Laravel RCEs --
+CVE IDs and CVSS scores verified against NVD) converge and chain through a
+shared vocabulary of hand-authored bridge states -- e.g. every RCE-capable
+class or CVE all converge on `low_priv_shell_obtained`, and SSRF can chain
+into `cloud_metadata_reachable -> cloud_credentials_obtained -> full_cloud_account_compromise`.
+Each state also carries `detection_signals`: authored hints (not a working
+classifier) for recognizing it from real tool output -- e.g. what a metadata
+credentials response actually looks like, or what a root shell's `id` output
+looks like.
 
 ```bash
 cd scripts
 python3 query_graph.py --from web_target_identified                                    # candidate first moves
 python3 query_graph.py --best-path --from ssrf_confirmed --to full_cloud_account_compromise   # a strong path to a goal
 ```
+
+**Turning the static graph into training data**: `scripts/simulate_graph.py`
+samples synthetic episodes from it -- repeatedly walking the graph from an
+entry state, sampling outcomes by their authored likelihood, scoring with a
+proper Bellman value function (not just 1-step lookahead, which is flat
+across most early recon states) -- and logs full (state, action, outcome,
+reward) trajectories:
+
+```bash
+python3 simulate_graph.py --episodes 3000 --policy random --out ../data/graph/episodes_random.jsonl
+python3 simulate_graph.py --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl
+```
+
+On the current graph, the value-iteration-informed greedy policy reaches a
+`full_compromise` state **13.1%** of the time vs **6.1%** for a uniformly
+random policy -- a real, if modest, measurable gap. This is still bootstrapped
+from the graph's own authored priors, not ground truth (see caveat below and
+in `docs/GRAPH.md`) -- but it's a materially different artifact than the
+static graph: many diverse, complete trajectories rather than one structure.
 
 Full design + more examples: [`docs/GRAPH.md`](docs/GRAPH.md).
 
@@ -97,6 +122,33 @@ vulnerability-descriptive, so most of them fall back to the generic
 vulnerability class -- filter to `confidence: "high"` if you only want
 precisely classified records.
 
+## Using this dataset: RAG, not raw fine-tuning
+
+`scenarios.jsonl` repeats the same ~35 authored playbook texts across 7,342
+records with different source-metadata wrappers. That's fine, even good, for
+**retrieval** -- look up "what do I know about SSRF," get back the playbook
+plus real grounding links. It's a poor fit for **supervised fine-tuning as
+a raw dump**: training on it directly would mostly teach a model to
+memorize ~35 canned answers repeated thousands of times, not to generalize.
+
+If you're building a RAG pipeline: use `data/index.sqlite3` or
+`data/scenarios/by_class/` directly, keyed by CWE/class/tag as needed.
+
+If you want fine-tuning data anyway (e.g. as one ingredient in a larger SFT
+mix, or an eval set): `scripts/sample_balanced.py` caps how many records any
+one vulnerability class can contribute and prefers higher-confidence
+matches, instead of naively oversampling whatever source collected the most
+raw records:
+
+```bash
+cd scripts
+python3 sample_balanced.py --max-per-class 20 --min-confidence medium --out ../data/scenarios/balanced_sample.jsonl
+```
+
+For anything closer to actual **decision-making/RL training data**, the
+[attack graph](#beyond-a-flat-list-the-attack-decision-graph) and its
+simulator are the better starting point -- see below.
+
 ## Finding records: three ways to consume the dataset
 
 A single 7,342-line JSONL file isn't practical to browse or filter by hand,
@@ -131,6 +183,7 @@ schema/scenario.schema.json        Canonical JSON Schema for one scenario record
 schema/graph.schema.json           Canonical JSON Schema for the attack graph
 knowledge/vulnerability_playbooks.json   Authored generic playbooks (the "process" library)
 knowledge/graph/bridges.json       Authored cross-class chaining states/actions (the graph's design work)
+knowledge/graph/technology_bridges.json  Authored real-CVE technology chains (Log4Shell, Spring4Shell, etc.)
 scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
@@ -139,17 +192,21 @@ scripts/normalize.py               Classifies raw records against playbooks, emi
 scripts/validate.py                JSON Schema + dedup validation
 scripts/build_views.py             Builds the by-class split and the SQLite index
 scripts/query.py                   CLI for filtering/searching the scenario dataset via the SQLite index
-scripts/build_graph.py             Generates per-class graph chains from playbooks, merges in bridges.json
+scripts/sample_balanced.py         Class-balanced, confidence-preferring subset for fine-tuning use
+scripts/build_graph.py             Generates per-class graph chains from playbooks, merges in the bridge files
 scripts/validate_graph.py          Graph schema + referential integrity + reachability validation
 scripts/query_graph.py             CLI for traversing the graph / finding candidate attack paths
+scripts/simulate_graph.py          Samples synthetic (state, action, outcome, reward) episodes from the graph
 scripts/pipeline.sh                Runs the full chain: collect -> normalize -> validate -> build_views -> build_graph
 data/scenarios/scenarios.jsonl     The canonical published scenario dataset
 data/scenarios/by_class/           Same records, split per vulnerability class
+data/scenarios/balanced_sample.jsonl   Class-balanced subset (see "Using this dataset")
 data/index.sqlite3                 Indexed + full-text-searchable SQLite view of the scenario dataset
 data/graph/attack_graph.json       The generated attack decision graph (states + actions)
+data/graph/episodes_*.jsonl        Simulated episodes per policy (random / greedy / epsilon_greedy)
 data/raw/                          Ephemeral collector output (gitignored, regenerate locally)
 docs/SCHEMA.md                     Scenario record field-by-field reference
-docs/GRAPH.md                      Attack graph design + query_graph.py usage
+docs/GRAPH.md                      Attack graph design, detection signals, technology chains, simulator
 ```
 
 ## Regenerating / extending the dataset

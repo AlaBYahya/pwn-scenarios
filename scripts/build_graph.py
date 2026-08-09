@@ -50,6 +50,26 @@ CONFIRMED_VALUE = {
 }
 
 
+HTTP_TOOLS = {"burp suite", "burp repeater", "burp intruder", "burp collaborator", "curl", "browser", "ffuf", "postman", "fetch api"}
+TOOL_OUTPUT_TOOLS = {
+    "gdb", "pwntools", "valgrind", "addresssanitizer", "afl++", "libfuzzer", "honggfuzz", "ida", "ghidra",
+    "linpeas", "winpeas", "enum4linux", "sqlmap", "jwt_tool", "tplmap", "hashcat", "trufflehog", "gitleaks",
+    "aws-cli", "pacu", "scoutsuite",
+}
+
+
+def classify_signal_type(tools, action_text, observation_text):
+    tools_lower = {t.lower() for t in (tools or [])}
+    text = f"{action_text} {observation_text}".lower()
+    if any(t in TOOL_OUTPUT_TOOLS for t in tools_lower):
+        return "tool_output"
+    if "time" in text or "sleep" in text or "delay" in text or "timing" in text:
+        return "timing"
+    if tools_lower & HTTP_TOOLS:
+        return "http_response"
+    return "manual_judgment"
+
+
 def build_per_class(playbooks):
     states, actions = {}, {}
     target_types_seen = set()
@@ -72,11 +92,16 @@ def build_per_class(playbooks):
             "value": "none",
             "target_types": [target_type],
             "playbook_ref": pb_id,
+            "detection_signals": [{
+                "signal_type": "manual_judgment",
+                "description": "Expected result absent across the attempted variations of this technique.",
+            }],
         }
 
         prev_state = entry_state
         for i, step in enumerate(process, start=1):
             is_last = i == n_steps
+            signal_type = classify_signal_type(step.get("tools"), step["action"], step["expected_observation"])
             success_state_id = f"{pb_id}_confirmed" if is_last else f"{pb_id}_after_step{i}"
             if success_state_id not in states:
                 if is_last:
@@ -87,6 +112,10 @@ def build_per_class(playbooks):
                         "value": CONFIRMED_VALUE.get(pb_id, "medium"),
                         "target_types": [target_type],
                         "playbook_ref": pb_id,
+                        "detection_signals": [{
+                            "signal_type": signal_type,
+                            "description": step["expected_observation"],
+                        }],
                     }
                 else:
                     states[success_state_id] = {
@@ -96,6 +125,10 @@ def build_per_class(playbooks):
                         "value": "low",
                         "target_types": [target_type],
                         "playbook_ref": pb_id,
+                        "detection_signals": [{
+                            "signal_type": signal_type,
+                            "description": step["expected_observation"],
+                        }],
                     }
 
             action_id = f"{pb_id}_step{i}"
@@ -135,6 +168,10 @@ def build_per_class(playbooks):
             "value": "none",
             "target_types": [t],
             "playbook_ref": None,
+            "detection_signals": [{
+                "signal_type": "manual_judgment",
+                "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document).",
+            }],
         }
 
     return states, actions
@@ -158,6 +195,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--playbooks", default="../knowledge/vulnerability_playbooks.json")
     ap.add_argument("--bridges", default="../knowledge/graph/bridges.json")
+    ap.add_argument("--tech-bridges", default="../knowledge/graph/technology_bridges.json")
     ap.add_argument("--out", default="../data/graph/attack_graph.json")
     args = ap.parse_args()
 
@@ -165,9 +203,12 @@ def main():
         playbooks = json.load(f)
     with open(args.bridges) as f:
         bridges = json.load(f)
+    with open(args.tech_bridges) as f:
+        tech_bridges = json.load(f)
 
     states, actions = build_per_class(playbooks)
     states, actions = merge_bridges(states, actions, bridges)
+    states, actions = merge_bridges(states, actions, tech_bridges)
 
     graph = {
         "schema_version": SCHEMA_VERSION,

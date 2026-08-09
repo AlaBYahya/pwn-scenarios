@@ -587,7 +587,14 @@
         "network",
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Traversal request blocked or returned no file content; version is likely patched.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "clickjacking_after_step1",
@@ -865,7 +872,14 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Injected OGNL expression was not evaluated; version is likely patched.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "cors_misconfiguration_after_step1",
@@ -1180,7 +1194,14 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Chain failed at the SSRF/authentication-bypass stage; version is likely patched.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "full_application_compromise",
@@ -1297,7 +1318,14 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Crafted image processed without triggering an OOB callback; version is likely patched.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "graphql_abuse_after_step1",
@@ -1929,7 +1957,14 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Debug mode is disabled or Ignition is patched -- no Ignition error page reachable.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "log4j_jndi_rce_confirmed",
@@ -1964,7 +1999,14 @@
         "web",
         "api"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "No OOB callback across all probed input points; Log4j is not in use, is patched, or the vulnerable code path is unreachable.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "low_priv_shell_obtained",
@@ -2757,7 +2799,14 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Payload rejected or had no effect; likely patched, wrong JDK version, or not a WAR/Tomcat deployment.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "sqli_after_step1",
@@ -3090,7 +3139,14 @@
       "target_types": [
         "web"
       ],
-      "playbook_ref": null
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "OGNL payload in Content-Type header had no effect; version is likely patched.",
+          "examples": []
+        }
+      ]
     },
     {
       "state_id": "subdomain_takeover_after_step1",

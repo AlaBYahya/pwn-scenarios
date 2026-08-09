@@ -73,6 +73,14 @@ jobs:
           python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy greedy --out ../data/graph/episodes_greedy.jsonl --seed 42
           python3 simulate_graph.py --graph ../data/graph/attack_graph.json --episodes 1000 --policy epsilon_greedy --out ../data/graph/episodes_epsilon_greedy.jsonl --seed 42
 
+      - name: Sync the Hugging Face Hub mirror (aeby/pwn-scenarios)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install -q huggingface_hub pyarrow
+          cd scripts
+          python3 push_to_hf.py --data ../data/scenarios/scenarios.jsonl --graph ../data/graph/attack_graph.json --episodes-dir ../data/graph --repo-id aeby/pwn-scenarios
+
       - name: Commit and push if the dataset changed
         run: |
           git config user.name "github-actions[bot]"

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="pwn-scenarios — IT sec for fun and profit">
+  <rect x="0" y="0" width="1280" height="640" fill="#0d1117"/>
+  <text x="640" y="330" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace" font-size="96" font-weight="700">
+    <tspan fill="#39d9c0">pwn</tspan><tspan fill="#e6edf3">-scenarios</tspan>
+  </text>
+  <rect x="450" y="368" width="380" height="5" fill="#39d9c0"/>
+  <text x="640" y="418" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace" font-size="26" letter-spacing="3" fill="#8b949e">IT SEC FOR FUN AND PROFIT</text>
+  <text x="640" y="470" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace" font-size="18" fill="#57606a">30k+ AI-ready pentest &amp; bug bounty scenarios · attack decision graph · real CVE chains</text>
+</svg>

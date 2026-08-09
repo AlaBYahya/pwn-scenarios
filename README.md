@@ -27,7 +27,31 @@ autonomous pentesting/bug-bounty agent.
 
 Full field reference: [`docs/SCHEMA.md`](docs/SCHEMA.md).
 
-## Why this shape
+## Beyond a flat list: the attack decision graph
+
+The scenario dataset above answers "how do I find/fix vulnerability class X."
+[`data/graph/attack_graph.json`](data/graph/attack_graph.json) answers a
+different question: **given what I've established so far, what should I try
+next, and where might it lead** -- the same shape of reasoning a chess engine
+uses to evaluate candidate moves and their resulting positions.
+
+States are conditions/capabilities ("`idor_confirmed`",
+"`low_priv_shell_obtained`", "`full_host_compromise`"); actions are moves
+that branch into qualitatively-scored outcomes leading to new states. 35
+vulnerability classes converge and chain through a shared vocabulary of 15
+hand-authored bridge states -- e.g. six different RCE-capable classes all
+converge on `low_priv_shell_obtained`, and SSRF can chain into
+`cloud_metadata_reachable -> cloud_credentials_obtained -> full_cloud_account_compromise`.
+
+```bash
+cd scripts
+python3 query_graph.py --from web_target_identified                                    # candidate first moves
+python3 query_graph.py --best-path --from ssrf_confirmed --to full_cloud_account_compromise   # a strong path to a goal
+```
+
+Full design + more examples: [`docs/GRAPH.md`](docs/GRAPH.md).
+
+## Why the scenario dataset has this shape
 
 Bug bounty writeups typically show the *destination* (the final working
 payload) but not the *journey* (the failed attempts, the discovery process).
@@ -103,8 +127,10 @@ truth:
 ## Repo layout
 
 ```
-schema/scenario.schema.json        Canonical JSON Schema for one record
+schema/scenario.schema.json        Canonical JSON Schema for one scenario record
+schema/graph.schema.json           Canonical JSON Schema for the attack graph
 knowledge/vulnerability_playbooks.json   Authored generic playbooks (the "process" library)
+knowledge/graph/bridges.json       Authored cross-class chaining states/actions (the graph's design work)
 scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
@@ -112,13 +138,18 @@ scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cros
 scripts/normalize.py               Classifies raw records against playbooks, emits unified schema
 scripts/validate.py                JSON Schema + dedup validation
 scripts/build_views.py             Builds the by-class split and the SQLite index
-scripts/query.py                   CLI for filtering/searching via the SQLite index
-scripts/pipeline.sh                Runs collect -> normalize -> validate -> build_views end to end
-data/scenarios/scenarios.jsonl     The canonical published dataset
+scripts/query.py                   CLI for filtering/searching the scenario dataset via the SQLite index
+scripts/build_graph.py             Generates per-class graph chains from playbooks, merges in bridges.json
+scripts/validate_graph.py          Graph schema + referential integrity + reachability validation
+scripts/query_graph.py             CLI for traversing the graph / finding candidate attack paths
+scripts/pipeline.sh                Runs the full chain: collect -> normalize -> validate -> build_views -> build_graph
+data/scenarios/scenarios.jsonl     The canonical published scenario dataset
 data/scenarios/by_class/           Same records, split per vulnerability class
-data/index.sqlite3                 Indexed + full-text-searchable SQLite view
+data/index.sqlite3                 Indexed + full-text-searchable SQLite view of the scenario dataset
+data/graph/attack_graph.json       The generated attack decision graph (states + actions)
 data/raw/                          Ephemeral collector output (gitignored, regenerate locally)
-docs/SCHEMA.md                     Field-by-field reference
+docs/SCHEMA.md                     Scenario record field-by-field reference
+docs/GRAPH.md                      Attack graph design + query_graph.py usage
 ```
 
 ## Regenerating / extending the dataset
@@ -148,7 +179,22 @@ its most reputable available source instead of appearing dozens of times.
 Add an entry to `knowledge/vulnerability_playbooks.json` with a unique
 `playbook_id`, `aliases` (the tag/keyword strings that should match it), and
 the four `scenario` sub-fields. Re-run `normalize.py` -- previously
-unclassified raw records may now match.
+unclassified raw records may now match. Re-run `build_graph.py` too: the new
+class's linear chain is generated automatically, but it won't connect to
+anything else in the graph until you also add bridge action(s) for it in
+`knowledge/graph/bridges.json` (see [`docs/GRAPH.md`](docs/GRAPH.md)).
+
+### Adding a chain to the attack graph
+
+Edit `knowledge/graph/bridges.json`: add any new shared state(s) to `states`,
+and an action to `actions` with `from_state` set to an existing
+`{playbook_id}_confirmed` state (or another bridge state) and one or more
+`outcomes` pointing at `to_state`s. Then:
+
+```bash
+python3 build_graph.py
+python3 validate_graph.py   # checks schema + that every from_state/to_state exists + reachability
+```
 
 ### Adding a data source
 

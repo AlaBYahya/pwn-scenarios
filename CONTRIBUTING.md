@@ -7,6 +7,9 @@ Issues and PRs welcome. A few useful entry points:
   `python3 scripts/normalize.py` and `python3 scripts/validate.py` to confirm
   it still validates.
 - **New data source**: see the "Adding a data source" section in the README.
+- **New attack-graph chain / bridge**: edit `knowledge/graph/bridges.json`,
+  then run `python3 scripts/build_graph.py` and
+  `python3 scripts/validate_graph.py`. See [`docs/GRAPH.md`](docs/GRAPH.md).
 - **Bad classification / wrong playbook match**: open an issue with the
   record's `id` and `source.url`; classification is keyword-based
   (`scripts/normalize.py`) and easy to get wrong on ambiguous tags.

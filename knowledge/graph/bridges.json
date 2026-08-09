@@ -1,0 +1,209 @@
+{
+  "_comment": "Hand-authored cross-class chaining knowledge. States: shared capability/privileged_access/full_compromise nodes that multiple vulnerability classes converge on or diverge from. Actions: the bridge edges connecting a class's mechanically-generated `{playbook_id}_confirmed` state into this shared vocabulary, plus edges among the shared states themselves toward terminal objectives. This is what turns 35 separate linear playbooks into one attack graph -- see scripts/build_graph.py for how it's merged with the per-class generated states/actions.",
+  "states": [
+    {"state_id": "low_priv_shell_obtained", "description": "An interactive or non-interactive shell has been obtained on the target host, at low privilege.", "tier": "capability", "value": "high", "target_types": ["web", "api", "network", "binary"], "playbook_ref": null},
+    {"state_id": "full_host_compromise", "description": "Root/Administrator-level control of the target host has been obtained.", "tier": "full_compromise", "value": "critical", "target_types": ["web", "api", "network", "binary"], "playbook_ref": null},
+    {"state_id": "valid_credentials_found", "description": "A working credential, API key, or session-granting secret has been recovered.", "tier": "capability", "value": "high", "target_types": [], "playbook_ref": null},
+    {"state_id": "privileged_session_obtained", "description": "An authenticated session with elevated (admin-adjacent or full-admin) privilege has been obtained.", "tier": "privileged_access", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
+    {"state_id": "unauthorized_privileged_action_possible", "description": "A specific privileged action can be performed without full administrative session control (e.g. via a single access-control gap).", "tier": "privileged_access", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
+    {"state_id": "full_application_compromise", "description": "Full administrative control over the application: all data and all user/admin functionality.", "tier": "full_compromise", "value": "critical", "target_types": ["web", "api"], "playbook_ref": null},
+    {"state_id": "cloud_metadata_reachable", "description": "The server-side request forgery primitive can reach the cloud instance metadata service.", "tier": "capability", "value": "high", "target_types": ["web", "api", "cloud"], "playbook_ref": null},
+    {"state_id": "cloud_credentials_obtained", "description": "Temporary or long-lived cloud IAM credentials have been obtained from the metadata service or a leaked secret.", "tier": "capability", "value": "critical", "target_types": ["cloud"], "playbook_ref": null},
+    {"state_id": "cloud_storage_read_access", "description": "Read access to cloud storage (buckets/objects) has been confirmed using obtained cloud credentials.", "tier": "privileged_access", "value": "high", "target_types": ["cloud"], "playbook_ref": null},
+    {"state_id": "full_cloud_account_compromise", "description": "Broad IAM permissions confirmed, amounting to full control of the cloud account/environment.", "tier": "full_compromise", "value": "critical", "target_types": ["cloud"], "playbook_ref": null},
+    {"state_id": "arbitrary_file_read_obtained", "description": "Arbitrary local file read has been confirmed, without yet having found embedded credentials.", "tier": "capability", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
+    {"state_id": "database_full_read_obtained", "description": "Full or near-full read access to the application database has been confirmed.", "tier": "capability", "value": "high", "target_types": ["web", "api"], "playbook_ref": null},
+    {"state_id": "trusted_origin_control_obtained", "description": "Attacker-controlled content is being served from a trusted origin (a taken-over subdomain).", "tier": "capability", "value": "high", "target_types": ["network", "web"], "playbook_ref": null},
+    {"state_id": "session_cookie_theft_possible", "description": "A path exists to obtain a victim's live session cookie or token.", "tier": "capability", "value": "high", "target_types": ["web"], "playbook_ref": null},
+    {"state_id": "sensitive_data_exfiltrated", "description": "Sensitive data has been confirmed extractable at scale -- a reportable data breach objective, independent of further host/app/cloud compromise.", "tier": "full_compromise", "value": "high", "target_types": [], "playbook_ref": null}
+  ],
+  "actions": [
+    {"action_id": "bridge_rce_to_shell", "from_state": "rce_generic_confirmed", "action": "Use the confirmed code execution to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat", "socat"], "playbook_ref": "rce_generic", "outcomes": [
+      {"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Outbound connection is blocked by egress filtering.", "likelihood": "possible", "to_state": "rce_generic_confirmed", "note": "Try a web shell, DNS-based exfiltration, or a bind shell on an already-open port instead of a reverse shell."}
+    ]},
+    {"action_id": "bridge_command_injection_to_shell", "from_state": "command_injection_confirmed", "action": "Use the command injection to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": "command_injection", "outcomes": [
+      {"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Outbound connection is blocked by egress filtering.", "likelihood": "possible", "to_state": "command_injection_confirmed", "note": "Try a bind shell or write a web shell to a served directory instead."}
+    ]},
+    {"action_id": "bridge_deserialization_to_shell", "from_state": "insecure_deserialization_confirmed", "action": "Use the deserialization gadget chain to establish an interactive or reverse shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": "insecure_deserialization", "outcomes": [
+      {"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Outbound connection is blocked by egress filtering.", "likelihood": "possible", "to_state": "insecure_deserialization_confirmed", "note": "Try a gadget chain that writes a web shell to disk instead."}
+    ]},
+    {"action_id": "bridge_ssti_to_shell", "from_state": "ssti_confirmed", "action": "Escalate the template injection to OS command execution and establish a shell.", "technique": "shell stabilization", "tools": ["netcat"], "playbook_ref": "ssti", "outcomes": [
+      {"outcome_id": "success", "observation": "Reverse/bind shell connects successfully.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Outbound connection is blocked by egress filtering.", "likelihood": "possible", "to_state": "ssti_confirmed", "note": "Try a bind shell instead of a reverse shell."}
+    ]},
+    {"action_id": "bridge_file_upload_to_shell", "from_state": "unrestricted_file_upload_confirmed", "action": "Access the uploaded web shell to establish an interactive session.", "technique": "shell stabilization", "tools": ["curl", "browser"], "playbook_ref": "unrestricted_file_upload", "outcomes": [
+      {"outcome_id": "success", "observation": "Web shell responds and executes commands.", "likelihood": "likely", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Uploaded file is not reachable/executable as expected.", "likelihood": "possible", "to_state": "unrestricted_file_upload_confirmed", "note": "Retry with a different storage path guess or extension bypass."}
+    ]},
+    {"action_id": "bridge_memory_corruption_to_shell", "from_state": "memory_corruption_confirmed", "action": "Weaponize the memory corruption primitive into a shellcode/ROP-chain execution and establish a shell.", "technique": "exploit development", "tools": ["pwntools"], "playbook_ref": "memory_corruption", "outcomes": [
+      {"outcome_id": "success", "observation": "Shell obtained via the exploit.", "likelihood": "possible", "to_state": "low_priv_shell_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Mitigations (ASLR/DEP/CFI) prevent reliable exploitation.", "likelihood": "possible", "to_state": "memory_corruption_confirmed", "note": "May still be usable as an information leak or denial of service if full exploitation is infeasible."}
+    ]},
+    {"action_id": "bridge_shell_to_full_host", "from_state": "low_priv_shell_obtained", "action": "Enumerate and exploit local privilege escalation vectors (kernel exploits, misconfigured services, SUID binaries, credential reuse).", "technique": "privilege escalation", "tools": ["linpeas", "winpeas"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "success", "observation": "Root/Administrator shell obtained.", "likelihood": "possible", "to_state": "full_host_compromise", "note": null},
+      {"outcome_id": "no_vector", "observation": "No local privilege escalation vector found yet.", "likelihood": "possible", "to_state": "low_priv_shell_obtained", "note": "Use the foothold for lateral movement/persistence instead, or retry with a different enumeration technique."}
+    ]},
+
+    {"action_id": "bridge_sqli_to_creds", "from_state": "sqli_confirmed", "action": "Extract database contents via the confirmed injection and search for stored credentials or session tokens.", "technique": "data extraction", "tools": ["sqlmap"], "playbook_ref": "sqli", "outcomes": [
+      {"outcome_id": "creds_found", "observation": "Credential hashes or plaintext credentials recovered from a users/auth table.", "likelihood": "likely", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "data_only", "observation": "Data extracted but no credentials found in it.", "likelihood": "possible", "to_state": "database_full_read_obtained", "note": null}
+    ]},
+    {"action_id": "bridge_db_read_to_creds", "from_state": "database_full_read_obtained", "action": "Search the extracted dataset for embedded credentials, API keys, or session tokens.", "technique": "data analysis", "tools": ["grep", "trufflehog"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "found", "observation": "Credentials or keys found within the extracted data.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "not_found", "observation": "No credentials in the dataset, but it contains sensitive PII/business data.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null}
+    ]},
+    {"action_id": "bridge_info_disclosure_to_creds", "from_state": "information_disclosure_confirmed", "action": "Review the disclosed data for credentials, tokens, or internal implementation details.", "technique": "data analysis", "tools": ["manual review"], "playbook_ref": "information_disclosure", "outcomes": [
+      {"outcome_id": "creds_found", "observation": "A credential or token was present in the disclosed data.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "info_only", "observation": "Only internal implementation details (paths, versions, hostnames) were disclosed.", "likelihood": "possible", "to_state": "information_disclosure_confirmed", "note": "Use the internal details to inform further targeted testing of other vulnerability classes."}
+    ]},
+    {"action_id": "bridge_secrets_to_creds", "from_state": "hardcoded_secrets_confirmed", "action": "Validate the discovered secret and enumerate what it grants access to.", "technique": "credential validation", "tools": ["provider API"], "playbook_ref": "hardcoded_secrets", "outcomes": [
+      {"outcome_id": "app_access", "observation": "Secret grants access to an application-level service or API.", "likelihood": "likely", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "cloud_access", "observation": "Secret is a cloud provider credential (AWS/GCP/Azure key).", "likelihood": "possible", "to_state": "cloud_credentials_obtained", "note": null}
+    ]},
+    {"action_id": "bridge_path_traversal_to_creds", "from_state": "path_traversal_confirmed", "action": "Read sensitive local files (config files, credential stores, source code).", "technique": "targeted file read", "tools": ["Burp Repeater"], "playbook_ref": "path_traversal", "outcomes": [
+      {"outcome_id": "creds_found", "observation": "Config file or credential store contains usable credentials.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "no_creds", "observation": "Files read do not directly contain credentials.", "likelihood": "likely", "to_state": "arbitrary_file_read_obtained", "note": null}
+    ]},
+    {"action_id": "bridge_xxe_to_file_read", "from_state": "xxe_confirmed", "action": "Use the XXE to read local files.", "technique": "entity injection file read", "tools": ["Burp Repeater"], "playbook_ref": "xxe", "outcomes": [
+      {"outcome_id": "creds_found", "observation": "A read file contains usable credentials.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "no_creds", "observation": "Files read do not directly contain credentials.", "likelihood": "possible", "to_state": "arbitrary_file_read_obtained", "note": null}
+    ]},
+    {"action_id": "bridge_xxe_to_ssrf", "from_state": "xxe_confirmed", "action": "Pivot the XXE into SSRF against internal or cloud services.", "technique": "XXE-to-SSRF pivot", "tools": ["Burp Repeater"], "playbook_ref": "xxe", "outcomes": [
+      {"outcome_id": "cloud_reached", "observation": "The XXE-driven request reaches the cloud metadata service.", "likelihood": "possible", "to_state": "cloud_metadata_reachable", "note": null},
+      {"outcome_id": "internal_only", "observation": "Only internal network resources (non-cloud-metadata) are reachable.", "likelihood": "likely", "to_state": "xxe_confirmed", "note": "Internal reconnaissance achieved; use discovered internal services to inform further testing."}
+    ]},
+    {"action_id": "bridge_file_read_to_creds", "from_state": "arbitrary_file_read_obtained", "action": "Search retrieved files for credentials, secrets, or API keys.", "technique": "data analysis", "tools": ["grep", "trufflehog"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "found", "observation": "A credential or secret was found in a retrieved file.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "not_found", "observation": "No credentials in the files read so far.", "likelihood": "likely", "to_state": "arbitrary_file_read_obtained", "note": "Try reading other known sensitive paths (SSH keys, cloud CLI config, CI/CD secrets files)."}
+    ]},
+
+    {"action_id": "bridge_creds_to_session", "from_state": "valid_credentials_found", "action": "Test found credentials against login/admin panels and other services (credential reuse).", "technique": "credential stuffing/reuse", "tools": ["Burp Suite"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "success", "observation": "Credentials authenticate successfully somewhere reachable.", "likelihood": "possible", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "failure", "observation": "Credentials do not work on any tested service.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": "Try password variations, other discovered accounts, or other internal services."}
+    ]},
+
+    {"action_id": "bridge_auth_bypass_to_session", "from_state": "auth_bypass_confirmed", "action": "Use the authentication bypass to obtain a privileged session.", "technique": "session establishment", "tools": ["Burp Suite"], "playbook_ref": "auth_bypass", "outcomes": [
+      {"outcome_id": "success", "observation": "Privileged session established.", "likelihood": "likely", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "failure", "observation": "Bypass works but does not grant a durable session.", "likelihood": "possible", "to_state": "auth_bypass_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_ato_to_session", "from_state": "account_takeover_confirmed", "action": "Complete the takeover flow to obtain the victim account's session.", "technique": "session establishment", "tools": ["browser"], "playbook_ref": "account_takeover", "outcomes": [
+      {"outcome_id": "success", "observation": "Full control of the victim account obtained.", "likelihood": "likely", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "failure", "observation": "Takeover succeeds but victim account has limited privilege.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null}
+    ]},
+    {"action_id": "bridge_jwt_to_session", "from_state": "jwt_vulnerabilities_confirmed", "action": "Forge a token with elevated privilege claims and use it to authenticate.", "technique": "token forgery", "tools": ["jwt_tool"], "playbook_ref": "jwt_vulnerabilities", "outcomes": [
+      {"outcome_id": "success", "observation": "Forged token is accepted with elevated privileges.", "likelihood": "likely", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "failure", "observation": "Forged token accepted but privilege claim is not honored server-side.", "likelihood": "possible", "to_state": "jwt_vulnerabilities_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_oauth_to_session", "from_state": "oauth_misconfiguration_confirmed", "action": "Complete the OAuth flow abuse to obtain an authenticated session as another identity.", "technique": "identity confusion exploitation", "tools": ["browser", "Burp Suite"], "playbook_ref": "oauth_misconfiguration", "outcomes": [
+      {"outcome_id": "success", "observation": "Session obtained as the victim identity.", "likelihood": "possible", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "failure", "observation": "Flow abuse works but session scope is limited.", "likelihood": "possible", "to_state": "oauth_misconfiguration_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_2fa_bypass_to_session", "from_state": "2fa_bypass_confirmed", "action": "Complete login having bypassed the second factor.", "technique": "session establishment", "tools": ["Burp Suite"], "playbook_ref": "2fa_bypass", "outcomes": [
+      {"outcome_id": "success", "observation": "Fully authenticated session obtained without a valid second factor.", "likelihood": "likely", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "failure", "observation": "Second factor bypassed but a further check blocks session issuance.", "likelihood": "rare", "to_state": "2fa_bypass_confirmed", "note": null}
+    ]},
+
+    {"action_id": "bridge_session_to_full_app", "from_state": "privileged_session_obtained", "action": "Access and exercise full administrative functionality using the privileged session.", "technique": "impact confirmation", "tools": ["browser", "Burp Suite"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "full_admin", "observation": "Full administrative functionality is accessible.", "likelihood": "likely", "to_state": "full_application_compromise", "note": null},
+      {"outcome_id": "restricted", "observation": "Session has elevated but not full administrative scope.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": "Look for further privilege escalation within the app (mass assignment, IDOR on admin objects)."}
+    ]},
+
+    {"action_id": "bridge_idor_to_privileged_action", "from_state": "idor_confirmed", "action": "Exploit the write/delete IDOR against another user's or an administrative object.", "technique": "authorization matrix testing", "tools": ["Burp Repeater"], "playbook_ref": "idor", "outcomes": [
+      {"outcome_id": "success", "observation": "Unauthorized write/delete against a privileged object succeeds.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "read_only", "observation": "Only unauthorized read access is possible, not write.", "likelihood": "likely", "to_state": "idor_confirmed", "note": "Still reportable; check for read-only sensitive data exposure (see information_disclosure chain)."}
+    ]},
+    {"action_id": "bridge_bac_to_privileged_action", "from_state": "broken_access_control_confirmed", "action": "Access administrative/privileged functionality directly.", "technique": "forced browsing", "tools": ["Burp Repeater"], "playbook_ref": "broken_access_control", "outcomes": [
+      {"outcome_id": "success", "observation": "Privileged functionality executes successfully.", "likelihood": "likely", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "failure", "observation": "Functionality is reachable but performs a no-op without real privilege.", "likelihood": "rare", "to_state": "broken_access_control_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_mass_assignment_to_privileged_action", "from_state": "mass_assignment_confirmed", "action": "Self-assign an administrative role or privileged attribute via the mass assignment.", "technique": "field injection", "tools": ["Burp Repeater"], "playbook_ref": "mass_assignment", "outcomes": [
+      {"outcome_id": "success", "observation": "Privileged field is successfully modified.", "likelihood": "likely", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "failure", "observation": "Field accepted but not honored by downstream logic.", "likelihood": "rare", "to_state": "mass_assignment_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_logic_flaw_to_privileged_action", "from_state": "business_logic_flaw_confirmed", "action": "Chain the logic flaw to reach an unauthorized privileged end-state (e.g. order marked fulfilled, role auto-upgraded).", "technique": "workflow abuse", "tools": ["Burp Suite"], "playbook_ref": "business_logic_flaw", "outcomes": [
+      {"outcome_id": "success", "observation": "An unauthorized privileged end-state is reached.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "financial_only", "observation": "Flaw only yields financial abuse (free/discounted purchase), not privilege.", "likelihood": "likely", "to_state": "business_logic_flaw_confirmed", "note": "Still a valid, reportable financial-impact finding on its own."}
+    ]},
+    {"action_id": "bridge_privileged_action_to_session", "from_state": "unauthorized_privileged_action_possible", "action": "Chain repeated unauthorized privileged actions to fully escalate (e.g. self-assign admin role, then re-authenticate).", "technique": "escalation chaining", "tools": ["Burp Suite"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "success", "observation": "Full privileged session obtained as a result of the chained actions.", "likelihood": "possible", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Scope stays limited to the specific action(s) already confirmed.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": "Still reportable as a broken access control finding even without further escalation."}
+    ]},
+
+    {"action_id": "bridge_ssrf_to_cloud_metadata", "from_state": "ssrf_confirmed", "action": "Redirect the SSRF toward the cloud instance metadata service.", "technique": "internal pivoting", "tools": ["curl", "Burp Repeater"], "playbook_ref": "ssrf", "outcomes": [
+      {"outcome_id": "success", "observation": "Metadata service responds through the SSRF.", "likelihood": "possible", "to_state": "cloud_metadata_reachable", "note": null},
+      {"outcome_id": "blocked", "observation": "Metadata service requires an IMDSv2 token header the simple SSRF cannot add, or is network-segmented.", "likelihood": "possible", "to_state": "ssrf_confirmed", "note": "Try internal service enumeration instead, or a full-request-forgery-capable SSRF variant."}
+    ]},
+    {"action_id": "bridge_cloud_metadata_to_creds", "from_state": "cloud_metadata_reachable", "action": "Query the metadata service's security-credentials endpoint.", "technique": "credential harvesting", "tools": ["curl"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "success", "observation": "Temporary IAM credentials returned.", "likelihood": "likely", "to_state": "cloud_credentials_obtained", "note": null},
+      {"outcome_id": "blocked", "observation": "Endpoint requires a token the current SSRF primitive cannot supply.", "likelihood": "possible", "to_state": "cloud_metadata_reachable", "note": null}
+    ]},
+    {"action_id": "bridge_cloud_creds_to_access", "from_state": "cloud_credentials_obtained", "action": "Enumerate IAM permissions and accessible resources for the obtained cloud credentials.", "technique": "IAM enumeration", "tools": ["aws-cli", "pacu", "ScoutSuite"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "broad", "observation": "Credentials have broad/administrative IAM permissions.", "likelihood": "possible", "to_state": "full_cloud_account_compromise", "note": null},
+      {"outcome_id": "scoped", "observation": "Credentials have limited but usable permissions (e.g. S3 read).", "likelihood": "likely", "to_state": "cloud_storage_read_access", "note": null}
+    ]},
+    {"action_id": "bridge_cloud_storage_to_data", "from_state": "cloud_storage_read_access", "action": "Enumerate and read accessible cloud storage buckets/objects.", "technique": "storage enumeration", "tools": ["aws-cli", "cloud_enum"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "secrets_found", "observation": "Bucket contents include further credentials or secrets.", "likelihood": "possible", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "data_only", "observation": "Bucket contents are sensitive business/user data without further credentials.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null}
+    ]},
+
+    {"action_id": "bridge_subdomain_takeover_to_trust", "from_state": "subdomain_takeover_confirmed", "action": "Serve attacker-controlled content from the claimed subdomain and abuse the trust relationship (cookie scope, CORS/CSP allow-list, SSO trust).", "technique": "trust relationship abuse", "tools": ["browser"], "playbook_ref": "subdomain_takeover", "outcomes": [
+      {"outcome_id": "success", "observation": "A concrete trust relationship (cookie scope, allow-listed origin) is abusable.", "likelihood": "likely", "to_state": "trusted_origin_control_obtained", "note": null},
+      {"outcome_id": "limited", "observation": "Takeover confirmed but no exploitable trust relationship found.", "likelihood": "possible", "to_state": "subdomain_takeover_confirmed", "note": "Still usable for phishing/brand abuse."}
+    ]},
+    {"action_id": "bridge_trust_to_cookie_theft", "from_state": "trusted_origin_control_obtained", "action": "Harvest session cookies/tokens scoped to the parent domain from victims visiting the takeover page.", "technique": "cookie harvesting", "tools": ["browser", "custom logger"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "success", "observation": "Parent-domain-scoped cookies are received.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": null},
+      {"outcome_id": "blocked", "observation": "Cookies are not scoped to this subdomain (Domain attribute), or are HttpOnly and not otherwise usable.", "likelihood": "possible", "to_state": "trusted_origin_control_obtained", "note": null}
+    ]},
+    {"action_id": "bridge_cookie_theft_to_session", "from_state": "session_cookie_theft_possible", "action": "Replay a stolen session cookie/token.", "technique": "session hijacking", "tools": ["browser", "Burp Suite"], "playbook_ref": null, "outcomes": [
+      {"outcome_id": "success", "observation": "Replayed session is accepted.", "likelihood": "likely", "to_state": "privileged_session_obtained", "note": null},
+      {"outcome_id": "bound", "observation": "Token is IP/device-bound or has expired.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": "Try harvesting a fresher token, or one from a higher-privilege victim."}
+    ]},
+    {"action_id": "bridge_xss_stored_to_cookie_theft", "from_state": "xss_stored_confirmed", "action": "Deliver a payload that exfiltrates session cookies/tokens to an attacker-controlled endpoint.", "technique": "session exfiltration", "tools": ["Burp Collaborator"], "playbook_ref": "xss_stored", "outcomes": [
+      {"outcome_id": "success", "observation": "Cookies/tokens are received at the attacker endpoint.", "likelihood": "likely", "to_state": "session_cookie_theft_possible", "note": null},
+      {"outcome_id": "httponly", "observation": "Cookies are HttpOnly and cannot be read via JavaScript.", "likelihood": "possible", "to_state": "xss_stored_confirmed", "note": "Pivot to performing privileged actions directly via the XSS instead of stealing the token."}
+    ]},
+    {"action_id": "bridge_xss_reflected_to_cookie_theft", "from_state": "xss_reflected_confirmed", "action": "Deliver the payload via a crafted link to exfiltrate session data or perform a privileged action as the victim.", "technique": "session exfiltration", "tools": ["Burp Collaborator"], "playbook_ref": "xss_reflected", "outcomes": [
+      {"outcome_id": "success", "observation": "Cookies/tokens are received at the attacker endpoint.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": null},
+      {"outcome_id": "httponly", "observation": "Cookies are HttpOnly and cannot be read via JavaScript.", "likelihood": "possible", "to_state": "xss_reflected_confirmed", "note": "Pivot to performing privileged actions directly via the XSS instead of stealing the token."}
+    ]},
+    {"action_id": "bridge_xss_dom_to_cookie_theft", "from_state": "xss_dom_confirmed", "action": "Trigger the DOM XSS via the crafted source input to exfiltrate session data.", "technique": "session exfiltration", "tools": ["browser"], "playbook_ref": "xss_dom", "outcomes": [
+      {"outcome_id": "success", "observation": "Cookies/tokens are received at the attacker endpoint.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": null},
+      {"outcome_id": "httponly", "observation": "Cookies are HttpOnly and cannot be read via JavaScript.", "likelihood": "possible", "to_state": "xss_dom_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_smuggling_to_cookie_theft", "from_state": "http_request_smuggling_confirmed", "action": "Use the smuggling primitive to capture another user's request/response.", "technique": "response queue poisoning", "tools": ["Burp Suite"], "playbook_ref": "http_request_smuggling", "outcomes": [
+      {"outcome_id": "success", "observation": "A victim's session data is captured.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": null},
+      {"outcome_id": "cache_only", "observation": "Desync confirmed but only usable for cache poisoning at scale, not direct capture.", "likelihood": "possible", "to_state": "http_request_smuggling_confirmed", "note": "See cache poisoning chain for the mass-impact variant."}
+    ]},
+    {"action_id": "bridge_cache_poisoning_to_cookie_theft", "from_state": "cache_poisoning_confirmed", "action": "Poison the shared cache with a payload that exfiltrates victim session data at scale.", "technique": "cache poisoning payload delivery", "tools": ["Burp Suite"], "playbook_ref": "cache_poisoning", "outcomes": [
+      {"outcome_id": "success", "observation": "Poisoned response harvests session data from multiple victims.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": null},
+      {"outcome_id": "dos_only", "observation": "Poisoning only achieves denial of service (error responses cached).", "likelihood": "possible", "to_state": "cache_poisoning_confirmed", "note": null}
+    ]},
+    {"action_id": "bridge_csrf_to_privileged_action", "from_state": "csrf_confirmed", "action": "Chain the CSRF against a state-changing endpoint that grants privileges (e.g. add attacker as admin, change victim's email).", "technique": "CSRF chaining", "tools": ["browser"], "playbook_ref": "csrf", "outcomes": [
+      {"outcome_id": "success", "observation": "A privileged endpoint is reachable via CSRF.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "limited", "observation": "No privileged endpoint is CSRF-able from this vector.", "likelihood": "likely", "to_state": "csrf_confirmed", "note": "Impact limited to the specific action already confirmed."}
+    ]},
+    {"action_id": "bridge_open_redirect_to_creds", "from_state": "open_redirect_confirmed", "action": "Chain the open redirect with an in-scope OAuth/SSO flow to leak authorization codes/tokens to an attacker-controlled domain.", "technique": "OAuth redirect chaining", "tools": ["browser"], "playbook_ref": "open_redirect", "outcomes": [
+      {"outcome_id": "success", "observation": "An authorization code/token is leaked via the redirect chain.", "likelihood": "rare", "to_state": "valid_credentials_found", "note": null},
+      {"outcome_id": "no_oauth", "observation": "No OAuth/SSO flow is in scope to chain with.", "likelihood": "likely", "to_state": "open_redirect_confirmed", "note": "Primarily useful for phishing without a chainable flow."}
+    ]},
+    {"action_id": "bridge_cors_to_data", "from_state": "cors_misconfiguration_confirmed", "action": "Read authenticated API responses cross-origin using the credentialed CORS misconfiguration.", "technique": "cross-origin credentialed read", "tools": ["browser", "fetch API"], "playbook_ref": "cors_misconfiguration", "outcomes": [
+      {"outcome_id": "sensitive_data", "observation": "Sensitive account/business data is read cross-origin.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null},
+      {"outcome_id": "session_token", "observation": "A session token/API key is present in the read response.", "likelihood": "possible", "to_state": "privileged_session_obtained", "note": null}
+    ]},
+    {"action_id": "bridge_graphql_to_data", "from_state": "graphql_abuse_confirmed", "action": "Query under-protected fields/mutations discovered via introspection.", "technique": "field-level authorization testing", "tools": ["Burp Suite"], "playbook_ref": "graphql_abuse", "outcomes": [
+      {"outcome_id": "sensitive_data", "observation": "Sensitive data is returned by an under-protected field.", "likelihood": "likely", "to_state": "sensitive_data_exfiltrated", "note": null},
+      {"outcome_id": "privileged_mutation", "observation": "An under-protected mutation performs a privileged action.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null}
+    ]},
+    {"action_id": "bridge_prototype_pollution_to_gadget", "from_state": "prototype_pollution_confirmed", "action": "Chain the pollution with a security-sensitive gadget (auth-check default, template-rendering flag).", "technique": "gadget chaining", "tools": ["manual code review"], "playbook_ref": "prototype_pollution", "outcomes": [
+      {"outcome_id": "privesc", "observation": "A gadget consuming the polluted property grants privilege.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "xss_gadget", "observation": "A gadget consuming the polluted property triggers script execution.", "likelihood": "possible", "to_state": "session_cookie_theft_possible", "note": null}
+    ]},
+    {"action_id": "bridge_clickjacking_to_privileged_action", "from_state": "clickjacking_confirmed", "action": "Chain the clickjacking UI-redress to trick a victim into performing a privileged action.", "technique": "UI overlay alignment", "tools": ["HTML/CSS"], "playbook_ref": "clickjacking", "outcomes": [
+      {"outcome_id": "success", "observation": "A victim click triggers a privileged state change.", "likelihood": "possible", "to_state": "unauthorized_privileged_action_possible", "note": null},
+      {"outcome_id": "limited", "observation": "Only a non-privileged action could be framed.", "likelihood": "likely", "to_state": "clickjacking_confirmed", "note": null}
+    ]}
+  ]
+}

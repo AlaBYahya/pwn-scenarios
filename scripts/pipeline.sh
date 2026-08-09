@@ -35,4 +35,8 @@ python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/
 echo "== Building searchable views (by-class split + SQLite index) ==" >&2
 python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir ../data/scenarios/by_class --db ../data/index.sqlite3
 
-echo "Done. Canonical: ../data/scenarios/scenarios.jsonl | Browsable: ../data/scenarios/by_class/ | Queryable: ../data/index.sqlite3" >&2
+echo "== Building the attack decision graph ==" >&2
+python3 build_graph.py --playbooks ../knowledge/vulnerability_playbooks.json --bridges ../knowledge/graph/bridges.json --out ../data/graph/attack_graph.json
+python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../schema/graph.schema.json
+
+echo "Done. Canonical: ../data/scenarios/scenarios.jsonl | Browsable: ../data/scenarios/by_class/ | Queryable: ../data/index.sqlite3 | Graph: ../data/graph/attack_graph.json" >&2

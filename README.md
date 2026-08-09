@@ -104,12 +104,12 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **16,267 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **16,436 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
 | HackerOne public Hacktivity (GraphQL API) | `hackerone` | 7,897 |
-| Pentester Land + 2 curated GitHub lists + 3 Medium feeds + 3 researcher blogs | `aggregated_writeup` | 5,810 |
+| Pentester Land + 3 curated GitHub lists + 3 Medium feeds + 3 researcher blogs | `aggregated_writeup` | 5,979 |
 | GitHub TryHackMe room-writeup repos | `tryhackme` | 2,391 |
 | GitHub CTF writeup repositories | `ctf` | 169 |
 
@@ -127,10 +127,20 @@ feed, 20 posts). Both sitemap-based sites explicitly allow crawling
 (`robots.txt: Allow: /`) and publish their sitemap for discovery; only each
 page's own `og:title` metadata is read, never the article body. Adding
 Embrace The Red directly strengthened the AI/LLM classes added last round
--- `prompt_injection` grounded instances went from 22 to 45.
+-- `prompt_injection` grounded instances went from 22 to 48.
 
-Six more candidate sites were evaluated and not integrated, for concrete
-reasons rather than being skipped silently -- see "A note on scale" below.
+**insecrez/Bug-bounty-Writeups** (a third curated GitHub list, 783 links)
+was initially misjudged as tools-only and skipped -- its writeup content
+uses `<a href="url">Title</a>` inside markdown tables rather than the
+`[Title](url)` list format the collector was originally built to parse, so
+the first pass found zero matches and looked empty. `collect_curated_lists.py`
+now handles both formats; the corrected pass recovered 783 real links
+across sections that map closely to this project's own vulnerability
+classes, including a dedicated "AI Hacking" section.
+
+Several more candidate sites and platforms were evaluated and not
+integrated, for concrete reasons rather than being skipped silently -- see
+"A note on scale" below.
 
 HackerOne is now a **full pull of every currently disclosed report**
 (12,386 fetched, ~4,489 didn't match a recognized vulnerability class and
@@ -151,7 +161,7 @@ precisely classified records.
 sometimes link to the same HackerOne report we already pulled directly.
 `normalize.py` dedups by URL *across* platforms (not just within one),
 preferring the more precisely-classified HackerOne-native record when both
-exist -- 511 cross-platform duplicates were dropped this way, on top of the
+exist -- 748 cross-platform duplicates were dropped this way, on top of the
 usual per-source dedup.
 
 ### AI/LLM vulnerability classes
@@ -177,7 +187,7 @@ Here's the honest accounting: pushing every legitimate source available as
 far as it goes -- a full pull of HackerOne's disclosed reports (not a
 sample), Pentester Land's complete index, two more curated GitHub
 writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
-dataset from 7,342 to **16,267** unique records. That's real growth, not
+dataset from 7,342 to **16,436** unique records. That's real growth, not
 padding (every record is schema-validated, source-linked, and deduplicated
 by URL across sources). It's not 100k.
 
@@ -277,7 +287,7 @@ simulator are the better starting point -- see below.
 
 ## Finding records: three ways to consume the dataset
 
-A single 16,267-line JSONL file isn't practical to browse or filter by hand.
+A single 16,436-line JSONL file isn't practical to browse or filter by hand.
 Only one form of the dataset is committed to the repo -- the other two are
 generated locally in seconds, not shipped, so the repo stays clonable:
 

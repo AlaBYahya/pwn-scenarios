@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/AlaBYahya/pwn-scenarios/schema/scenario.schema.json",
+  "title": "Pentest/Bug Bounty Scenario",
+  "description": "Unified record format for a single vulnerability scenario: a generalized, reusable condition/step process grounded in a real, publicly disclosed instance.",
+  "type": "object",
+  "required": ["id", "schema_version", "title", "vulnerability", "target", "scenario", "provenance", "source", "tags", "collection_metadata", "license_note"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable identifier, sha256(source.platform + source.url) truncated to 16 hex chars."
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "title": {
+      "type": "string"
+    },
+    "vulnerability": {
+      "type": "object",
+      "required": ["class", "severity"],
+      "additionalProperties": false,
+      "properties": {
+        "class": {
+          "type": "string",
+          "description": "Human-readable vulnerability class, e.g. 'Insecure Direct Object Reference'."
+        },
+        "cwe": {
+          "type": ["string", "null"],
+          "pattern": "^CWE-[0-9]+$"
+        },
+        "owasp_category": {
+          "type": ["string", "null"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["unknown", "low", "medium", "high", "critical"]
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["web", "api", "mobile", "cloud", "network", "binary", "iot", "other"]
+        },
+        "technology_hints": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "required": ["summary", "preconditions", "process", "impact", "remediation"],
+      "additionalProperties": false,
+      "properties": {
+        "summary": {"type": "string"},
+        "preconditions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "process": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["step", "action", "expected_observation"],
+            "additionalProperties": false,
+            "properties": {
+              "step": {"type": "integer", "minimum": 1},
+              "action": {"type": "string"},
+              "technique": {"type": ["string", "null"]},
+              "tools": {"type": "array", "items": {"type": "string"}},
+              "expected_observation": {"type": "string"}
+            }
+          }
+        },
+        "decision_points": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "impact": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "remediation": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["playbook_id", "grounded_instance", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "playbook_id": {
+          "type": "string",
+          "description": "ID of the generic playbook in knowledge/vulnerability_playbooks.json used to populate scenario.process."
+        },
+        "grounded_instance": {
+          "type": "boolean",
+          "description": "True if this record is tied to one specific real, publicly disclosed report/writeup rather than being a bare template."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Confidence of the tag-to-playbook classification match."
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["platform", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "platform": {
+          "type": "string",
+          "enum": ["hackerone", "aggregated_writeup", "ctf", "other"]
+        },
+        "url": {"type": "string", "format": "uri"},
+        "program": {"type": ["string", "null"]},
+        "author": {"type": ["string", "null"]},
+        "disclosed_at": {"type": ["string", "null"], "format": "date"},
+        "bounty": {"type": ["string", "null"]}
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "collection_metadata": {
+      "type": "object",
+      "required": ["collected_at", "collector"],
+      "additionalProperties": false,
+      "properties": {
+        "collected_at": {"type": "string", "format": "date-time"},
+        "collector": {"type": "string"}
+      }
+    },
+    "license_note": {
+      "type": "string",
+      "const": "This record contains normalized classification data and a generic remediation/process playbook, plus a link back to the original source. It does not reproduce the original writeup's text. See DATA_LICENSE for terms."
+    }
+  }
+}

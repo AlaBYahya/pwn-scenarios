@@ -1,0 +1,39 @@
+Data License (CC BY 4.0)
+=========================
+
+Scope: everything under `data/` and `knowledge/` (the scenario records and the
+vulnerability playbook library).
+
+These are licensed under the Creative Commons Attribution 4.0 International
+License (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+
+You are free to share and adapt this data for any purpose, including
+commercial use and training AI models, provided you give appropriate credit
+to this project (pwn-scenarios) and indicate if changes were made.
+
+What this dataset does and does not contain
+---------------------------------------------
+Each record in `data/scenarios/scenarios.jsonl` contains:
+
+1. Originally-authored generic content (`scenario.preconditions`,
+   `scenario.process`, `scenario.impact`, `scenario.remediation`) drawn from
+   `knowledge/vulnerability_playbooks.json` -- written for this project, not
+   copied from any specific writeup. This content is CC BY 4.0 by this
+   project.
+
+2. Factual classification metadata about a real, publicly disclosed report or
+   writeup (title, vulnerability class, severity, program name, author name,
+   disclosure date, a source URL). This metadata is derived from information
+   the source platforms (HackerOne's public Hacktivity, Pentester Land's
+   public writeup index, public GitHub repositories) already make available
+   for exactly this kind of reuse.
+
+3. A link (`source.url`) back to the original writeup.
+
+This dataset intentionally does NOT reproduce the body text of any bug bounty
+report or blog writeup. If you want the full narrative, follow `source.url`
+to the original, which remains under whatever license/copyright its own
+author has applied to it -- that is unaffected by this project's license.
+
+If you are a source author and want your writeup's metadata removed from this
+dataset, please open an issue with the `source.url` in question.

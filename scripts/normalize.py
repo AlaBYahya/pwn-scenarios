@@ -203,7 +203,7 @@ def main():
     # to a HackerOne report we already collected directly) resolves in favor
     # of the more precisely-classified record rather than whichever file glob
     # happened to sort first alphabetically.
-    SOURCE_PRIORITY = ["hackerone.jsonl", "tryhackme.jsonl", "ctf.jsonl", "community_submissions.jsonl", "pentesterland.jsonl", "curated_lists.jsonl", "medium_feeds.jsonl"]
+    SOURCE_PRIORITY = ["hackerone.jsonl", "tryhackme.jsonl", "ctf.jsonl", "community_submissions.jsonl", "blogs.jsonl", "pentesterland.jsonl", "curated_lists.jsonl", "medium_feeds.jsonl"]
     all_files = sorted(glob.glob(os.path.join(args.raw_dir, "*.jsonl")))
     ordered_files = sorted(all_files, key=lambda p: SOURCE_PRIORITY.index(os.path.basename(p)) if os.path.basename(p) in SOURCE_PRIORITY else len(SOURCE_PRIORITY))
 

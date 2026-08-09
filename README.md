@@ -104,12 +104,12 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **16,225 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **16,267 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
 | HackerOne public Hacktivity (GraphQL API) | `hackerone` | 7,897 |
-| Pentester Land + 2 curated GitHub lists + 3 Medium publication RSS feeds | `aggregated_writeup` | 5,768 |
+| Pentester Land + 2 curated GitHub lists + 3 Medium feeds + 3 researcher blogs | `aggregated_writeup` | 5,810 |
 | GitHub TryHackMe room-writeup repos | `tryhackme` | 2,391 |
 | GitHub CTF writeup repositories | `ctf` | 169 |
 
@@ -118,6 +118,19 @@ The Medium feeds (InfoSec Write-ups, System Weakness, OSINT Team --
 only return their ~10 most recent posts per fetch; re-running the collector
 periodically accumulates more as new articles publish, deduped
 automatically by URL.
+
+`scripts/collect_blogs.py` adds three individual researcher blogs:
+**Embrace The Red** (Johann Rehberger's AI/LLM security research -- 213
+posts, sitemap + per-page `og:title` extraction), **Evan Connelly** (bug
+bounty writeups, 6 posts), and **Chybeta** (CTF/pentest writeups via atom
+feed, 20 posts). Both sitemap-based sites explicitly allow crawling
+(`robots.txt: Allow: /`) and publish their sitemap for discovery; only each
+page's own `og:title` metadata is read, never the article body. Adding
+Embrace The Red directly strengthened the AI/LLM classes added last round
+-- `prompt_injection` grounded instances went from 22 to 45.
+
+Six more candidate sites were evaluated and not integrated, for concrete
+reasons rather than being skipped silently -- see "A note on scale" below.
 
 HackerOne is now a **full pull of every currently disclosed report**
 (12,386 fetched, ~4,489 didn't match a recognized vulnerability class and
@@ -138,7 +151,7 @@ precisely classified records.
 sometimes link to the same HackerOne report we already pulled directly.
 `normalize.py` dedups by URL *across* platforms (not just within one),
 preferring the more precisely-classified HackerOne-native record when both
-exist -- 506 cross-platform duplicates were dropped this way, on top of the
+exist -- 511 cross-platform duplicates were dropped this way, on top of the
 usual per-source dedup.
 
 ### AI/LLM vulnerability classes
@@ -164,12 +177,12 @@ Here's the honest accounting: pushing every legitimate source available as
 far as it goes -- a full pull of HackerOne's disclosed reports (not a
 sample), Pentester Land's complete index, two more curated GitHub
 writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
-dataset from 7,342 to **16,225** unique records. That's real growth, not
+dataset from 7,342 to **16,267** unique records. That's real growth, not
 padding (every record is schema-validated, source-linked, and deduplicated
 by URL across sources). It's not 100k.
 
-Three platforms that could plausibly have gotten closer were checked and
-ruled out rather than worked around:
+Platforms that could plausibly have gotten closer were checked and ruled
+out rather than worked around:
 - **Open Bug Bounty** sits behind a Cloudflare bot-detection challenge --
   bypassing that isn't something this project will do.
 - **Intigriti**'s API requires an authenticated account; there's no public,
@@ -177,6 +190,21 @@ ruled out rather than worked around:
 - **Bugcrowd**'s public `crowdstream` is a live *submission-acceptance*
   feed, not a disclosure archive -- almost none of it has `disclosed` set,
   so there's little actual writeup content to collect from it.
+- **Weekly Infosec Writeups** (weekly.infosecwriteups.com) publishes weekly
+  *digest* posts bundling summaries of other sites' writeups, not individual
+  writeups itself -- extracting the embedded links would mean parsing full
+  digest bodies, and the content it bundles is largely already covered by
+  Pentester Land/InfoSec Write-ups directly. Also appears inactive since
+  November 2024.
+- **bugbountyhunting.com** ("Bug Bounty Hunting")'s sitemap only exposes
+  search-query pages (`?q=xss`, `?q=idor`, ...) -- it's a search index over
+  other people's writeups, not a primary source with its own posts.
+- **bugbountyhunter.com/disclosed** links almost entirely to
+  `hackerone.com/reports/*` -- URLs we already collect completely and
+  directly via the HackerOne API. Near-zero unique incremental value.
+- **writeups.io** is a client-side-rendered (Next.js) app with no
+  discoverable public API; its content isn't reachable via a feed, sitemap,
+  or endpoint the way every other source here is.
 
 Reaching 100k for real would mean either scraping full writeup bodies from
 thousands of individual blogs at scale (the copyright problem this project
@@ -249,7 +277,7 @@ simulator are the better starting point -- see below.
 
 ## Finding records: three ways to consume the dataset
 
-A single 16,225-line JSONL file isn't practical to browse or filter by hand.
+A single 16,267-line JSONL file isn't practical to browse or filter by hand.
 Only one form of the dataset is committed to the repo -- the other two are
 generated locally in seconds, not shipped, so the repo stays clonable:
 
@@ -308,6 +336,7 @@ scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collecto
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_curated_lists.py   Additional curated GitHub writeup-list collectors
 scripts/collect_medium_feeds.py    Medium publication RSS feed collector (InfoSec Write-ups, etc.)
+scripts/collect_blogs.py           Individual researcher blog collector (atom feeds + sitemap+og:title)
 scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
 scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cross-repo dedup)
 scripts/ingest_submissions.py      Converts an issue-form submission into community_submissions.jsonl

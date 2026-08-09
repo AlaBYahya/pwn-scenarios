@@ -41,9 +41,16 @@ jobs:
           cd scripts
           python3 validate_graph.py --graph ../data/graph/attack_graph.json --schema ../schema/graph.schema.json
 
-      - name: Rebuild by-class split and confirm it matches the committed files
+      - name: Build the derived views (by-class split + SQLite index) and sanity-check them
+        # These aren't committed (see .gitignore) -- this just confirms build_views.py
+        # still runs cleanly against the current scenarios.jsonl and produces a
+        # SQLite row count matching it, catching schema drift between the two.
         run: |
           cd scripts
           python3 build_views.py --data ../data/scenarios/scenarios.jsonl --by-class-dir /tmp/by_class --db /tmp/index.sqlite3
-          diff -rq /tmp/by_class ../data/scenarios/by_class || \
-            (echo "::error::data/scenarios/by_class/ is out of date -- run scripts/build_views.py and commit the result." && exit 1)
+          jsonl_count=$(wc -l < ../data/scenarios/scenarios.jsonl)
+          db_count=$(python3 -c "import sqlite3; print(sqlite3.connect('/tmp/index.sqlite3').execute('SELECT COUNT(*) FROM scenarios').fetchone()[0])")
+          by_class_count=$(cat /tmp/by_class/*.jsonl | wc -l)
+          echo "scenarios.jsonl: $jsonl_count | sqlite rows: $db_count | by_class total: $by_class_count"
+          [ "$jsonl_count" -eq "$db_count" ] && [ "$jsonl_count" -eq "$by_class_count" ] || \
+            (echo "::error::Derived view record counts don't match scenarios.jsonl -- build_views.py may be broken." && exit 1)

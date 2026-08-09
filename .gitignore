@@ -2,3 +2,9 @@ data/raw/
 __pycache__/
 *.pyc
 .DS_Store
+
+# Derived views, 100% mechanically regenerable from data/scenarios/scenarios.jsonl
+# via `scripts/build_views.py` -- not shipped in the repo to keep clone size sane.
+# See "Building the derived views locally" in the README.
+data/index.sqlite3
+data/scenarios/by_class/

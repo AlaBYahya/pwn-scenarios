@@ -26,6 +26,9 @@ python3 collect_pentesterland.py --limit "$PL_LIMIT" --out ../data/raw/pentester
 echo "== Collecting additional curated GitHub writeup lists ==" >&2
 python3 collect_curated_lists.py --out ../data/raw/curated_lists.jsonl
 
+echo "== Collecting Medium publication RSS feeds ==" >&2
+python3 collect_medium_feeds.py --out ../data/raw/medium_feeds.jsonl
+
 echo "== Collecting CTF writeup repositories ==" >&2
 python3 collect_ctf.py --per-page "$CTF_PER_PAGE" --out ../data/raw/ctf.jsonl
 

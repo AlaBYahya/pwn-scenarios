@@ -104,14 +104,20 @@ what is and isn't reproduced from the original sources.
 
 ## Dataset snapshot
 
-`data/scenarios/scenarios.jsonl` -- **16,212 records**, one JSON object per line.
+`data/scenarios/scenarios.jsonl` -- **16,225 records**, one JSON object per line.
 
 | Source | Platform | Records |
 |---|---|---|
 | HackerOne public Hacktivity (GraphQL API) | `hackerone` | 7,897 |
-| Pentester Land + 2 curated GitHub writeup-list repos | `aggregated_writeup` | 5,755 |
+| Pentester Land + 2 curated GitHub lists + 3 Medium publication RSS feeds | `aggregated_writeup` | 5,768 |
 | GitHub TryHackMe room-writeup repos | `tryhackme` | 2,391 |
 | GitHub CTF writeup repositories | `ctf` | 169 |
+
+The Medium feeds (InfoSec Write-ups, System Weakness, OSINT Team --
+`scripts/collect_medium_feeds.py`, via each publication's own RSS `/feed`)
+only return their ~10 most recent posts per fetch; re-running the collector
+periodically accumulates more as new articles publish, deduped
+automatically by URL.
 
 HackerOne is now a **full pull of every currently disclosed report**
 (12,386 fetched, ~4,489 didn't match a recognized vulnerability class and
@@ -158,7 +164,7 @@ Here's the honest accounting: pushing every legitimate source available as
 far as it goes -- a full pull of HackerOne's disclosed reports (not a
 sample), Pentester Land's complete index, two more curated GitHub
 writeup-list repos, and a much wider TryHackMe/CTF repo search -- got the
-dataset from 7,342 to **16,212** unique records. That's real growth, not
+dataset from 7,342 to **16,225** unique records. That's real growth, not
 padding (every record is schema-validated, source-linked, and deduplicated
 by URL across sources). It's not 100k.
 
@@ -222,8 +228,9 @@ plus real grounding links. It's a poor fit for **supervised fine-tuning as
 a raw dump**: training on it directly would mostly teach a model to
 memorize ~35 canned answers repeated thousands of times, not to generalize.
 
-If you're building a RAG pipeline: use `data/index.sqlite3` or
-`data/scenarios/by_class/` directly, keyed by CWE/class/tag as needed.
+If you're building a RAG pipeline: run `python3 scripts/build_views.py`
+once, then use `data/index.sqlite3` or `data/scenarios/by_class/` directly,
+keyed by CWE/class/tag as needed.
 
 If you want fine-tuning data anyway (e.g. as one ingredient in a larger SFT
 mix, or an eval set): `scripts/sample_balanced.py` caps how many records any
@@ -242,30 +249,48 @@ simulator are the better starting point -- see below.
 
 ## Finding records: three ways to consume the dataset
 
-A single 7,342-line JSONL file isn't practical to browse or filter by hand,
-so the dataset ships in three forms, all derived from the same source of
-truth:
+A single 16,225-line JSONL file isn't practical to browse or filter by hand.
+Only one form of the dataset is committed to the repo -- the other two are
+generated locally in seconds, not shipped, so the repo stays clonable:
 
-1. **`data/scenarios/scenarios.jsonl`** -- the canonical file, one record per
-   line. Best for bulk loading (e.g. `datasets.load_dataset("json", data_files=...)`
-   in Python) or streaming the whole thing.
-2. **`data/scenarios/by_class/<playbook_id>.jsonl`** -- the same records
-   split per vulnerability class (37 files), so you can open or download just
-   `by_class/sqli.jsonl` or `by_class/ssrf.jsonl` directly.
-3. **`data/index.sqlite3`** -- a pre-built, indexed SQLite database (indexed
-   on CWE, severity, platform, playbook_id, target_type, confidence, plus an
-   FTS5 full-text index) for actual filtering. Query it directly with `sqlite3`,
-   or use the bundled CLI:
+1. **`data/scenarios/scenarios.jsonl`** (committed, ~47MB) -- the canonical
+   file, one record per line. Best for bulk loading (e.g.
+   `datasets.load_dataset("json", data_files=...)` in Python) or streaming
+   the whole thing.
+2. **`data/scenarios/by_class/<playbook_id>.jsonl`** (git-ignored, build
+   locally) -- the same records split per vulnerability class, so you can
+   work with just `by_class/sqli.jsonl` or `by_class/ssrf.jsonl` without
+   loading everything.
+3. **`data/index.sqlite3`** (git-ignored, build locally) -- an indexed
+   SQLite database (CWE, severity, platform, playbook_id, target_type,
+   confidence, plus an FTS5 full-text index) for actual filtering.
 
-   ```bash
-   cd scripts
-   python3 query.py --cwe CWE-89                          # by CWE
-   python3 query.py --playbook ssrf --severity high        # by class + severity
-   python3 query.py --platform tryhackme --playbook sqli   # by source + class
-   python3 query.py --search "cache poisoning"             # full-text search
-   python3 query.py --cwe CWE-639 --json                   # full record JSON out
-   python3 query.py                                        # no filters -> lists all playbook_ids/platforms
-   ```
+Build both in one step, no arguments needed:
+
+```bash
+cd scripts
+python3 build_views.py
+```
+
+Then query it directly with `sqlite3`, or use the bundled CLI:
+
+```bash
+python3 query.py --cwe CWE-89                          # by CWE
+python3 query.py --playbook ssrf --severity high        # by class + severity
+python3 query.py --platform tryhackme --playbook sqli   # by source + class
+python3 query.py --search "cache poisoning"             # full-text search
+python3 query.py --cwe CWE-639 --json                   # full record JSON out
+python3 query.py                                        # no filters -> lists all playbook_ids/platforms
+```
+
+**Why these two aren't committed**: both are 100% mechanically derived from
+`scenarios.jsonl` -- shipping them meant storing the same ~16k records
+three times over (scenarios.jsonl + by_class + inside the SQLite rows),
+which is how the repo hit ~179MB and tripped GitHub's recommended
+50MB-per-file warning on the SQLite index. `build_views.py` regenerates
+both from the one committed source of truth in well under a minute; CI
+runs it on every push to catch drift (record-count check against
+`scenarios.jsonl`), it just doesn't commit the output.
 
 ## Repo layout
 
@@ -282,6 +307,7 @@ knowledge/community_submissions.jsonl    Committed log of writeups submitted via
 scripts/collect_hackerone.py       Public HackerOne Hacktivity metadata collector
 scripts/collect_pentesterland.py   Pentester Land curated writeup-link collector
 scripts/collect_curated_lists.py   Additional curated GitHub writeup-list collectors
+scripts/collect_medium_feeds.py    Medium publication RSS feed collector (InfoSec Write-ups, etc.)
 scripts/collect_ctf.py             GitHub CTF-writeup-repo collector (topic search)
 scripts/collect_tryhackme.py       GitHub TryHackMe room-writeup collector (cross-repo dedup)
 scripts/ingest_submissions.py      Converts an issue-form submission into community_submissions.jsonl
@@ -296,9 +322,9 @@ scripts/query_graph.py             CLI for traversing the graph / finding candid
 scripts/simulate_graph.py          Samples synthetic (state, action, outcome, reward) episodes from the graph
 scripts/pipeline.sh                Runs the full chain: collect -> normalize -> validate -> build_views -> build_graph
 data/scenarios/scenarios.jsonl     The canonical published scenario dataset
-data/scenarios/by_class/           Same records, split per vulnerability class
+data/scenarios/by_class/           Same records, split per vulnerability class (gitignored, `build_views.py`)
 data/scenarios/balanced_sample.jsonl   Class-balanced subset (see "Using this dataset")
-data/index.sqlite3                 Indexed + full-text-searchable SQLite view of the scenario dataset
+data/index.sqlite3                 Indexed + full-text-searchable SQLite view (gitignored, `build_views.py`)
 data/graph/attack_graph.json       The generated attack decision graph (states + actions)
 data/graph/episodes_*.jsonl        Simulated episodes per policy (random / greedy / epsilon_greedy)
 data/raw/                          Ephemeral collector output (gitignored, regenerate locally)
@@ -382,14 +408,14 @@ structured so a `--llm` mode could be added without changing the schema).
   vulnerability classes" above.
 - Not 100k records -- see "A note on scale" above for exactly which sources
   were tried, which were ruled out, and why.
-- **Repo size is growing fast**: working tree is now ~179MB (was ~78MB two
-  rounds ago), mostly `data/index.sqlite3` (71MB) and the by-class split
-  duplicating `scenarios.jsonl` a second time (47MB each). Still well within
-  GitHub's limits, but if community submissions and future source expansion
-  keep pushing this up, moving the derived views (SQLite index, by-class
-  split, episodes) to Git LFS or a release artifact instead of committing
-  them directly is worth considering rather than continuing to 3x-store
-  the same data on every regeneration.
+- **Repo size**: `data/index.sqlite3` and `data/scenarios/by_class/` are no
+  longer committed (they're 100% derived from `scenarios.jsonl` --
+  regenerate with `python3 scripts/build_views.py`), which is what actually
+  fixed the growth problem noted in earlier versions of this doc rather than
+  just working around it. `scenarios.jsonl` itself (~47MB) still grows with
+  every new source and every community submission, which is expected and
+  fine -- it's real, non-duplicated data. If it eventually gets large enough
+  to matter on its own, Git LFS is the next lever, not before.
 
 ## License
 

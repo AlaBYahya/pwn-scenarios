@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220" role="img" aria-label="pwn-scenarios — IT sec for fun and profit">
+  <rect x="0" y="0" width="900" height="220" rx="14" fill="#0d1117"/>
+  <text x="60" y="128" font-family="ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace" font-size="72" font-weight="700">
+    <tspan fill="#39d9c0">pwn</tspan><tspan fill="#e6edf3">-scenarios</tspan>
+  </text>
+  <rect x="62" y="150" width="238" height="4" fill="#39d9c0"/>
+  <text x="60" y="185" font-family="ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace" font-size="20" letter-spacing="2" fill="#8b949e">IT SEC FOR FUN AND PROFIT</text>
+</svg>

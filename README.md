@@ -1,4 +1,4 @@
-# pwn-scenarios
+<p align="center"><img src="assets/logo.svg" alt="pwn-scenarios — IT sec for fun and profit" width="600"></p>
 
 A dataset of penetration testing / bug bounty **scenarios** -- generalized,
 reusable condition → step → impact → remediation processes for common

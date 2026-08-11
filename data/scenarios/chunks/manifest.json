@@ -1,13 +1,88 @@
 {
-  "total_records": 59,
+  "total_records": 30293,
   "records_per_chunk": 2000,
-  "chunk_count": 1,
-  "sha256": "d6f90645d87b113c52b4a9a7ede766e3f512f8289bc448314db3b54a6954a305",
+  "chunk_count": 16,
+  "sha256": "a4079cb3e347bc172bdd96b5ca96850c932c354d8af063b8669435f2e13d0e25",
   "chunks": [
     {
       "file": "scenarios.part001.jsonl",
-      "records": 59,
-      "bytes": 211364
+      "records": 2000,
+      "bytes": 5909211
+    },
+    {
+      "file": "scenarios.part002.jsonl",
+      "records": 2000,
+      "bytes": 5888179
+    },
+    {
+      "file": "scenarios.part003.jsonl",
+      "records": 2000,
+      "bytes": 5878726
+    },
+    {
+      "file": "scenarios.part004.jsonl",
+      "records": 2000,
+      "bytes": 5852659
+    },
+    {
+      "file": "scenarios.part005.jsonl",
+      "records": 2000,
+      "bytes": 5821177
+    },
+    {
+      "file": "scenarios.part006.jsonl",
+      "records": 2000,
+      "bytes": 5938069
+    },
+    {
+      "file": "scenarios.part007.jsonl",
+      "records": 2000,
+      "bytes": 6066401
+    },
+    {
+      "file": "scenarios.part008.jsonl",
+      "records": 2000,
+      "bytes": 6071863
+    },
+    {
+      "file": "scenarios.part009.jsonl",
+      "records": 2000,
+      "bytes": 5360874
+    },
+    {
+      "file": "scenarios.part010.jsonl",
+      "records": 2000,
+      "bytes": 5372997
+    },
+    {
+      "file": "scenarios.part011.jsonl",
+      "records": 2000,
+      "bytes": 5410055
+    },
+    {
+      "file": "scenarios.part012.jsonl",
+      "records": 2000,
+      "bytes": 5410308
+    },
+    {
+      "file": "scenarios.part013.jsonl",
+      "records": 2000,
+      "bytes": 6046747
+    },
+    {
+      "file": "scenarios.part014.jsonl",
+      "records": 2000,
+      "bytes": 6037649
+    },
+    {
+      "file": "scenarios.part015.jsonl",
+      "records": 2000,
+      "bytes": 6045490
+    },
+    {
+      "file": "scenarios.part016.jsonl",
+      "records": 293,
+      "bytes": 893640
     }
   ]
 }

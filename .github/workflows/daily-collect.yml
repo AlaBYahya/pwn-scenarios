@@ -51,7 +51,7 @@ jobs:
       - name: Normalize, validate, and re-chunk
         run: |
           cd scripts
-          python3 normalize.py --raw-dir ../data/raw --out ../data/scenarios/scenarios.jsonl
+          python3 normalize.py --raw-dir ../data/raw --existing ../data/scenarios/scenarios.jsonl --out ../data/scenarios/scenarios.jsonl
           python3 validate.py --data ../data/scenarios/scenarios.jsonl --schema ../schema/scenario.schema.json
           python3 chunk_scenarios.py --data ../data/scenarios/scenarios.jsonl --out-dir ../data/scenarios/chunks --records-per-chunk 2000
 

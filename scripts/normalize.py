@@ -198,6 +198,17 @@ def main():
     ap.add_argument("--playbooks", default="../knowledge/vulnerability_playbooks.json")
     ap.add_argument("--out", default="../data/scenarios/scenarios.jsonl")
     ap.add_argument("--max-per-source", type=int, default=0, help="0 = no cap")
+    ap.add_argument(
+        "--existing",
+        default=None,
+        help=(
+            "Path to an already-normalized scenarios.jsonl to merge new records on top "
+            "of, instead of rebuilding from --raw-dir alone. Use this when --raw-dir only "
+            "contains a partial/incremental set of sources (e.g. the daily RSS+blogs job) "
+            "-- without it, the output would only ever contain today's raw-dir sources and "
+            "silently drop everything from sources not re-collected this run."
+        ),
+    )
     args = ap.parse_args()
 
     playbooks_by_id, alias_map = load_playbooks(args.playbooks)
@@ -205,6 +216,7 @@ def main():
     seen_ids = set()
     seen_urls = set()
     total_in, total_out, total_skipped, total_cross_platform_dupes = 0, 0, 0, 0
+    total_existing = 0
     skip_reasons = {}
 
     # Process the most structured/authoritative source for a given real-world
@@ -216,7 +228,29 @@ def main():
     all_files = sorted(glob.glob(os.path.join(args.raw_dir, "*.jsonl")))
     ordered_files = sorted(all_files, key=lambda p: SOURCE_PRIORITY.index(os.path.basename(p)) if os.path.basename(p) in SOURCE_PRIORITY else len(SOURCE_PRIORITY))
 
+    # Read any existing output fully into memory first -- --existing and --out
+    # are typically the same path (merge new records into the current dataset
+    # in place), so this must happen before args.out is opened for writing.
+    existing_lines = []
+    if args.existing and os.path.exists(args.existing):
+        with open(args.existing) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                existing_lines.append(line)
+                rec = json.loads(line)
+                seen_ids.add(rec["id"])
+                url = rec.get("source", {}).get("url")
+                if url:
+                    seen_urls.add(url)
+        total_existing = len(existing_lines)
+
     with open(args.out, "w") as out_f:
+        for line in existing_lines:
+            out_f.write(line + "\n")
+            total_out += 1
+
         for raw_path in ordered_files:
             collector_name = os.path.basename(raw_path)
             count_this_source = 0
@@ -289,7 +323,7 @@ def main():
                     total_out += 1
                     count_this_source += 1
 
-    print(f"Read {total_in} raw records, wrote {total_out} scenarios, skipped {total_skipped} (unclassified), {total_cross_platform_dupes} cross-platform URL duplicates dropped", file=sys.stderr)
+    print(f"Kept {total_existing} existing scenarios, read {total_in} new raw records, wrote {total_out} scenarios total, skipped {total_skipped} (unclassified), {total_cross_platform_dupes} cross-platform/existing URL duplicates dropped", file=sys.stderr)
     print(f"Skip breakdown by source: {skip_reasons}", file=sys.stderr)
 
 

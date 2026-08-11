@@ -34,6 +34,9 @@ jobs:
       - name: Reassemble scenarios.jsonl from committed chunks
         run: cat data/scenarios/chunks/scenarios.part*.jsonl > data/scenarios/scenarios.jsonl
 
+      - name: Create data/raw (gitignored, doesn't exist on a fresh checkout)
+        run: mkdir -p data/raw
+
       - name: Collect from every source
         run: |
           cd scripts

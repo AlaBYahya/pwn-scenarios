@@ -244,5 +244,11 @@ Each episode:
 hand-authored generic-bridge states (21 defined, 6 are detection-signal
 overrides of already-generated states) / 45 generic-bridge actions, 47
 technology states / 37 technology actions covering 17 real CVEs, and 8
-AI-bridge actions adding zero new states. Validated with zero schema
+AI-bridge actions adding zero new states.
+
+A 7-playbook blockchain/smart-contract domain (reentrancy, integer
+overflow/underflow, access control, oracle manipulation, flash loan
+attacks, unchecked external calls, front-running/MEV) was added on top of
+this, contributing 36 new states and 28 new actions -- bringing the graph
+to **329 states, 299 actions** in total. Validated with zero schema
 errors, zero unreachable states (`scripts/validate_graph.py`).

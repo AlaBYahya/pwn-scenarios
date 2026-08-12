@@ -82,6 +82,86 @@
       ]
     },
     {
+      "state_id": "access_control_smart_contract_after_step1",
+      "description": "Step 1 of Smart Contract Access Control Flaw testing succeeded: A sensitive function is publicly callable (external/public) without a visible access-control modifier",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A sensitive function is publicly callable (external/public) without a visible access-control modifier"
+        }
+      ]
+    },
+    {
+      "state_id": "access_control_smart_contract_after_step2",
+      "description": "Step 2 of Smart Contract Access Control Flaw testing succeeded: No onlyOwner/AccessControl role check guards the function, or the check references the wrong variable",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "No onlyOwner/AccessControl role check guards the function, or the check references the wrong variable"
+        }
+      ]
+    },
+    {
+      "state_id": "access_control_smart_contract_after_step3",
+      "description": "Step 3 of Smart Contract Access Control Flaw testing succeeded: Transaction succeeds despite the caller having no legitimate privilege",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Transaction succeeds despite the caller having no legitimate privilege"
+        }
+      ]
+    },
+    {
+      "state_id": "access_control_smart_contract_confirmed",
+      "description": "Smart Contract Access Control Flaw confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Attacker gains funds, destroys the contract, or becomes the new owner/admin"
+        }
+      ]
+    },
+    {
+      "state_id": "access_control_smart_contract_ruled_out",
+      "description": "Smart Contract Access Control Flaw was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "account_takeover_after_step1",
       "description": "Step 1 of Account Takeover testing succeeded: Full list of flows that can change or grant access to account control",
       "tier": "recon",
@@ -284,6 +364,22 @@
       "value": "none",
       "target_types": [
         "binary"
+      ],
+      "playbook_ref": null,
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Target is confirmed in-scope and reachable (rules of engagement / scope document)."
+        }
+      ]
+    },
+    {
+      "state_id": "blockchain_target_identified",
+      "description": "A blockchain target has been identified and is in scope for testing.",
+      "tier": "entry",
+      "value": "none",
+      "target_types": [
+        "blockchain"
       ],
       "playbook_ref": null,
       "detection_signals": [
@@ -1509,6 +1605,86 @@
       ]
     },
     {
+      "state_id": "flash_loan_attack_after_step1",
+      "description": "Step 1 of Flash Loan Attack testing succeeded: A pricing, collateral, or voting calculation reads live balances/reserves with no protection against intra-transaction manipulation",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A pricing, collateral, or voting calculation reads live balances/reserves with no protection against intra-transaction manipulation"
+        }
+      ]
+    },
+    {
+      "state_id": "flash_loan_attack_after_step2",
+      "description": "Step 2 of Flash Loan Attack testing succeeded: Large, uncollateralized capital is available for the duration of a single transaction",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Large, uncollateralized capital is available for the duration of a single transaction"
+        }
+      ]
+    },
+    {
+      "state_id": "flash_loan_attack_after_step3",
+      "description": "Step 3 of Flash Loan Attack testing succeeded: The protocol's internal state now reflects a temporarily distorted value favorable to the attacker",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "The protocol's internal state now reflects a temporarily distorted value favorable to the attacker"
+        }
+      ]
+    },
+    {
+      "state_id": "flash_loan_attack_confirmed",
+      "description": "Flash Loan Attack confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Transaction completes atomically, leaving the attacker with extracted profit and the loan repaid"
+        }
+      ]
+    },
+    {
+      "state_id": "flash_loan_attack_ruled_out",
+      "description": "Flash Loan Attack was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "follina_confirmed",
       "description": "Follina (MSDT remote code execution via Office) confirmed exploitable against a victim opening the crafted document.",
       "tier": "vulnerability_confirmed",
@@ -1545,6 +1721,86 @@
           "signal_type": "manual_judgment",
           "description": "Malicious document did not trigger MSDT execution; target is patched or MSDT protocol handler is disabled.",
           "examples": []
+        }
+      ]
+    },
+    {
+      "state_id": "front_running_mev_after_step1",
+      "description": "Step 1 of Front-Running / MEV Exploitation testing succeeded: A pending transaction (large swap, liquidation, mint) with a predictable price/state impact is observed",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "front_running_mev",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A pending transaction (large swap, liquidation, mint) with a predictable price/state impact is observed"
+        }
+      ]
+    },
+    {
+      "state_id": "front_running_mev_after_step2",
+      "description": "Step 2 of Front-Running / MEV Exploitation testing succeeded: Simulation confirms a profitable window exists if the attacker trades immediately before and/or after the victim transaction",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "front_running_mev",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Simulation confirms a profitable window exists if the attacker trades immediately before and/or after the victim transaction"
+        }
+      ]
+    },
+    {
+      "state_id": "front_running_mev_after_step3",
+      "description": "Step 3 of Front-Running / MEV Exploitation testing succeeded: Attacker transaction is mined immediately before the victim's, capturing the pre-trade price",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "front_running_mev",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Attacker transaction is mined immediately before the victim's, capturing the pre-trade price"
+        }
+      ]
+    },
+    {
+      "state_id": "front_running_mev_confirmed",
+      "description": "Front-Running / MEV Exploitation confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "medium",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "front_running_mev",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Attacker captures the price differential as profit; victim receives worse execution than expected"
+        }
+      ]
+    },
+    {
+      "state_id": "front_running_mev_ruled_out",
+      "description": "Front-Running / MEV Exploitation was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "front_running_mev",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
         }
       ]
     },
@@ -2252,6 +2508,86 @@
         "api"
       ],
       "playbook_ref": "insecure_output_handling",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "integer_overflow_underflow_after_step1",
+      "description": "Step 1 of Integer Overflow/Underflow testing succeeded: Arithmetic on user-influenceable values occurs inside an unchecked{} block or a pre-0.8 contract without SafeMath",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Arithmetic on user-influenceable values occurs inside an unchecked{} block or a pre-0.8 contract without SafeMath"
+        }
+      ]
+    },
+    {
+      "state_id": "integer_overflow_underflow_after_step2",
+      "description": "Step 2 of Integer Overflow/Underflow testing succeeded: A user-supplied parameter or attacker-influenced balance feeds directly into the vulnerable arithmetic",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A user-supplied parameter or attacker-influenced balance feeds directly into the vulnerable arithmetic"
+        }
+      ]
+    },
+    {
+      "state_id": "integer_overflow_underflow_after_step3",
+      "description": "Step 3 of Integer Overflow/Underflow testing succeeded: Resulting variable holds an unexpectedly huge or negative-wrapped value",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Resulting variable holds an unexpectedly huge or negative-wrapped value"
+        }
+      ]
+    },
+    {
+      "state_id": "integer_overflow_underflow_confirmed",
+      "description": "Integer Overflow/Underflow confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Attacker obtains funds or privileges inconsistent with their legitimate balance"
+        }
+      ]
+    },
+    {
+      "state_id": "integer_overflow_underflow_ruled_out",
+      "description": "Integer Overflow/Underflow was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
       "detection_signals": [
         {
           "signal_type": "manual_judgment",
@@ -3070,6 +3406,86 @@
       ]
     },
     {
+      "state_id": "oracle_manipulation_after_step1",
+      "description": "Step 1 of Price Oracle Manipulation testing succeeded: Contract reads getReserves() or an equivalent single-block spot price directly, without a TWAP or oracle network",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Contract reads getReserves() or an equivalent single-block spot price directly, without a TWAP or oracle network"
+        }
+      ]
+    },
+    {
+      "state_id": "oracle_manipulation_after_step2",
+      "description": "Step 2 of Price Oracle Manipulation testing succeeded: Pool depth is small enough that a large but obtainable swap meaningfully moves the reported price",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Pool depth is small enough that a large but obtainable swap meaningfully moves the reported price"
+        }
+      ]
+    },
+    {
+      "state_id": "oracle_manipulation_after_step3",
+      "description": "Step 3 of Price Oracle Manipulation testing succeeded: Oracle-reported price is now significantly distorted from the true market price",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Oracle-reported price is now significantly distorted from the true market price"
+        }
+      ]
+    },
+    {
+      "state_id": "oracle_manipulation_confirmed",
+      "description": "Price Oracle Manipulation confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Attacker extracts value inconsistent with the true market price before the price reverts"
+        }
+      ]
+    },
+    {
+      "state_id": "oracle_manipulation_ruled_out",
+      "description": "Price Oracle Manipulation was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "other_target_identified",
       "description": "A other target has been identified and is in scope for testing.",
       "tier": "entry",
@@ -3623,6 +4039,86 @@
         "web"
       ],
       "playbook_ref": "rce_generic",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
+      "state_id": "reentrancy_after_step1",
+      "description": "Step 1 of Reentrancy testing succeeded: An external call to msg.sender or an arbitrary address occurs before balance/state variables are updated",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "reentrancy",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "An external call to msg.sender or an arbitrary address occurs before balance/state variables are updated"
+        }
+      ]
+    },
+    {
+      "state_id": "reentrancy_after_step2",
+      "description": "Step 2 of Reentrancy testing succeeded: No nonReentrant modifier or equivalent guard protects the vulnerable function",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "reentrancy",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "No nonReentrant modifier or equivalent guard protects the vulnerable function"
+        }
+      ]
+    },
+    {
+      "state_id": "reentrancy_after_step3",
+      "description": "Step 3 of Reentrancy testing succeeded: Nested recursive calls succeed before the first call's state update completes",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "reentrancy",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Nested recursive calls succeed before the first call's state update completes"
+        }
+      ]
+    },
+    {
+      "state_id": "reentrancy_confirmed",
+      "description": "Reentrancy confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "critical",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "reentrancy",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Contract balance drained beyond the attacker's legitimate entitlement"
+        }
+      ]
+    },
+    {
+      "state_id": "reentrancy_ruled_out",
+      "description": "Reentrancy was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "reentrancy",
       "detection_signals": [
         {
           "signal_type": "manual_judgment",
@@ -4410,6 +4906,86 @@
       ]
     },
     {
+      "state_id": "unchecked_external_call_after_step1",
+      "description": "Step 1 of Unchecked External Call / Delegatecall Injection testing succeeded: A .call/.send result is not checked (require(success)), so a failed call is silently ignored",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A .call/.send result is not checked (require(success)), so a failed call is silently ignored"
+        }
+      ]
+    },
+    {
+      "state_id": "unchecked_external_call_after_step2",
+      "description": "Step 2 of Unchecked External Call / Delegatecall Injection testing succeeded: Contract state is updated (e.g. marking funds as sent) regardless of whether the call actually succeeded",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Contract state is updated (e.g. marking funds as sent) regardless of whether the call actually succeeded"
+        }
+      ]
+    },
+    {
+      "state_id": "unchecked_external_call_after_step3",
+      "description": "Step 3 of Unchecked External Call / Delegatecall Injection testing succeeded: A proxy contract delegatecalls to an address stored in a slot that is writable by an unprivileged caller",
+      "tier": "recon",
+      "value": "low",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "A proxy contract delegatecalls to an address stored in a slot that is writable by an unprivileged caller"
+        }
+      ]
+    },
+    {
+      "state_id": "unchecked_external_call_confirmed",
+      "description": "Unchecked External Call / Delegatecall Injection confirmed exploitable.",
+      "tier": "vulnerability_confirmed",
+      "value": "high",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Attacker either corrupts accounting state or takes full control of the proxy's storage"
+        }
+      ]
+    },
+    {
+      "state_id": "unchecked_external_call_ruled_out",
+      "description": "Unchecked External Call / Delegatecall Injection was not confirmed via the attempted path on this target.",
+      "tier": "ruled_out",
+      "value": "none",
+      "target_types": [
+        "blockchain"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "detection_signals": [
+        {
+          "signal_type": "manual_judgment",
+          "description": "Expected result absent across the attempted variations of this technique."
+        }
+      ]
+    },
+    {
       "state_id": "unrestricted_file_upload_after_step1",
       "description": "Step 1 of Unrestricted File Upload testing succeeded: Upload accepts certain extensions; validation method inferred from error messages",
       "tier": "recon",
@@ -5085,6 +5661,120 @@
           "observation": "Expected result not observed ('Setting a client-side flag/parameter marks the session as MFA-verified without actual verification' did not occur).",
           "likelihood": "possible",
           "to_state": "2fa_bypass_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "access_control_smart_contract_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Enumerate privileged-sounding functions in the contract ABI (withdraw, setOwner, mint, selfdestruct, upgrade)",
+      "technique": "ABI/source review",
+      "tools": [
+        "Slither",
+        "Etherscan",
+        "manual audit"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A sensitive function is publicly callable (external/public) without a visible access-control modifier",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A sensitive function is publicly callable (external/public) without a visible access-control modifier' did not occur).",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "access_control_smart_contract_step2",
+      "from_state": "access_control_smart_contract_after_step1",
+      "action": "Check for missing or misconfigured access-control logic",
+      "technique": "static analysis",
+      "tools": [
+        "Slither",
+        "manual review"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "No onlyOwner/AccessControl role check guards the function, or the check references the wrong variable",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('No onlyOwner/AccessControl role check guards the function, or the check references the wrong variable' did not occur).",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "access_control_smart_contract_step3",
+      "from_state": "access_control_smart_contract_after_step2",
+      "action": "Call the function directly from an unprivileged account",
+      "technique": "direct invocation",
+      "tools": [
+        "Foundry",
+        "cast",
+        "Etherscan Write Contract"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Transaction succeeds despite the caller having no legitimate privilege",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Transaction succeeds despite the caller having no legitimate privilege' did not occur).",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "access_control_smart_contract_step4",
+      "from_state": "access_control_smart_contract_after_step3",
+      "action": "Escalate to fund theft, contract destruction, or ownership takeover",
+      "technique": "exploitation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "access_control_smart_contract",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Attacker gains funds, destroys the contract, or becomes the new owner/admin",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Attacker gains funds, destroys the contract, or becomes the new owner/admin' did not occur).",
+          "likelihood": "possible",
+          "to_state": "access_control_smart_contract_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
@@ -8796,6 +9486,230 @@
       "is_bridge": true
     },
     {
+      "action_id": "flash_loan_attack_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Identify a protocol invariant that assumes stable capital or price within a single block",
+      "technique": "protocol/source review",
+      "tools": [
+        "Etherscan",
+        "manual audit"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A pricing, collateral, or voting calculation reads live balances/reserves with no protection against intra-transaction manipulation",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A pricing, collateral, or voting calculation reads live balances/reserves with no protection against intra-transaction manipulation' did not occur).",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "flash_loan_attack_step2",
+      "from_state": "flash_loan_attack_after_step1",
+      "action": "Borrow large capital atomically via a flash loan provider",
+      "technique": "flash loan sourcing",
+      "tools": [
+        "Aave",
+        "dYdX",
+        "Balancer"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Large, uncollateralized capital is available for the duration of a single transaction",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Large, uncollateralized capital is available for the duration of a single transaction' did not occur).",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "flash_loan_attack_step3",
+      "from_state": "flash_loan_attack_after_step2",
+      "action": "Use the borrowed capital to distort the target invariant (price, voting power, LP share)",
+      "technique": "invariant manipulation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "The protocol's internal state now reflects a temporarily distorted value favorable to the attacker",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"The protocol's internal state now reflects a temporarily distorted value favorable to the attacker\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "flash_loan_attack_step4",
+      "from_state": "flash_loan_attack_after_step3",
+      "action": "Execute the profitable action against the distorted state, then repay the flash loan plus fee within the same transaction",
+      "technique": "exploitation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "flash_loan_attack",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Transaction completes atomically, leaving the attacker with extracted profit and the loan repaid",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Transaction completes atomically, leaving the attacker with extracted profit and the loan repaid' did not occur).",
+          "likelihood": "possible",
+          "to_state": "flash_loan_attack_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "front_running_mev_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Monitor the public mempool for profitable pending transactions",
+      "technique": "mempool monitoring",
+      "tools": [
+        "Flashbots mempool feed",
+        "custom mempool watchers"
+      ],
+      "playbook_ref": "front_running_mev",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A pending transaction (large swap, liquidation, mint) with a predictable price/state impact is observed",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A pending transaction (large swap, liquidation, mint) with a predictable price/state impact is observed' did not occur).",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "front_running_mev_step2",
+      "from_state": "front_running_mev_after_step1",
+      "action": "Simulate the target transaction's price/state impact",
+      "technique": "transaction simulation",
+      "tools": [
+        "Foundry",
+        "Tenderly"
+      ],
+      "playbook_ref": "front_running_mev",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Simulation confirms a profitable window exists if the attacker trades immediately before and/or after the victim transaction",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Simulation confirms a profitable window exists if the attacker trades immediately before and/or after the victim transaction' did not occur).",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "front_running_mev_step3",
+      "from_state": "front_running_mev_after_step2",
+      "action": "Submit a higher-gas-price or bundled transaction to execute before the victim's transaction",
+      "technique": "front-running / bundling",
+      "tools": [
+        "Flashbots bundle",
+        "custom relay"
+      ],
+      "playbook_ref": "front_running_mev",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Attacker transaction is mined immediately before the victim's, capturing the pre-trade price",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"Attacker transaction is mined immediately before the victim's, capturing the pre-trade price\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "front_running_mev_step4",
+      "from_state": "front_running_mev_after_step3",
+      "action": "Optionally submit a matching transaction immediately after to close out the sandwich",
+      "technique": "back-running",
+      "tools": [
+        "Flashbots bundle"
+      ],
+      "playbook_ref": "front_running_mev",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Attacker captures the price differential as profit; victim receives worse execution than expected",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Attacker captures the price differential as profit; victim receives worse execution than expected' did not occur).",
+          "likelihood": "possible",
+          "to_state": "front_running_mev_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
       "action_id": "graphql_abuse_step1",
       "from_state": "api_target_identified",
       "action": "Send an introspection query to enumerate the full schema",
@@ -9534,6 +10448,118 @@
           "observation": "Expected result not observed ('Payload executes (e.g. JavaScript runs in the rendering browser, injected SQL alters a query, injected shell metacharacters affect a command)' did not occur).",
           "likelihood": "possible",
           "to_state": "insecure_output_handling_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "integer_overflow_underflow_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Identify arithmetic operations without SafeMath or Solidity >=0.8 built-in overflow checks",
+      "technique": "static/manual code review",
+      "tools": [
+        "Slither",
+        "MythX"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Arithmetic on user-influenceable values occurs inside an unchecked{} block or a pre-0.8 contract without SafeMath",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Arithmetic on user-influenceable values occurs inside an unchecked{} block or a pre-0.8 contract without SafeMath' did not occur).",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "integer_overflow_underflow_step2",
+      "from_state": "integer_overflow_underflow_after_step1",
+      "action": "Determine whether an attacker can control one of the operands",
+      "technique": "data flow analysis",
+      "tools": [
+        "Slither",
+        "manual review"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A user-supplied parameter or attacker-influenced balance feeds directly into the vulnerable arithmetic",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A user-supplied parameter or attacker-influenced balance feeds directly into the vulnerable arithmetic' did not occur).",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "integer_overflow_underflow_step3",
+      "from_state": "integer_overflow_underflow_after_step2",
+      "action": "Craft an input that wraps the value (e.g. subtract more than the balance to underflow to near-max uint)",
+      "technique": "exploit development",
+      "tools": [
+        "Foundry",
+        "Hardhat"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Resulting variable holds an unexpectedly huge or negative-wrapped value",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Resulting variable holds an unexpectedly huge or negative-wrapped value' did not occur).",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "integer_overflow_underflow_step4",
+      "from_state": "integer_overflow_underflow_after_step3",
+      "action": "Exploit the corrupted balance/state for unauthorized gain (mint, withdraw, bypass cap)",
+      "technique": "exploitation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "integer_overflow_underflow",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Attacker obtains funds or privileges inconsistent with their legitimate balance",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Attacker obtains funds or privileges inconsistent with their legitimate balance' did not occur).",
+          "likelihood": "possible",
+          "to_state": "integer_overflow_underflow_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
@@ -10334,6 +11360,118 @@
       ]
     },
     {
+      "action_id": "oracle_manipulation_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Identify price-dependent logic sourced from a single spot price",
+      "technique": "source review",
+      "tools": [
+        "Etherscan",
+        "manual audit"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Contract reads getReserves() or an equivalent single-block spot price directly, without a TWAP or oracle network",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Contract reads getReserves() or an equivalent single-block spot price directly, without a TWAP or oracle network' did not occur).",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "oracle_manipulation_step2",
+      "from_state": "oracle_manipulation_after_step1",
+      "action": "Determine that the underlying liquidity pool is manipulable within one transaction relative to available capital",
+      "technique": "liquidity analysis",
+      "tools": [
+        "DEX analytics",
+        "manual review"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Pool depth is small enough that a large but obtainable swap meaningfully moves the reported price",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Pool depth is small enough that a large but obtainable swap meaningfully moves the reported price' did not occur).",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "oracle_manipulation_step3",
+      "from_state": "oracle_manipulation_after_step2",
+      "action": "Borrow large capital (typically via flash loan) and swap to skew the pool's reported price",
+      "technique": "price manipulation",
+      "tools": [
+        "Foundry",
+        "Aave/Balancer flash loan"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Oracle-reported price is now significantly distorted from the true market price",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Oracle-reported price is now significantly distorted from the true market price' did not occur).",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "oracle_manipulation_step4",
+      "from_state": "oracle_manipulation_after_step3",
+      "action": "Exploit the skewed price within the same transaction (e.g. borrow against inflated collateral, or buy underpriced assets), then repay the loan",
+      "technique": "exploitation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "oracle_manipulation",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Attacker extracts value inconsistent with the true market price before the price reverts",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Attacker extracts value inconsistent with the true market price before the price reverts' did not occur).",
+          "likelihood": "possible",
+          "to_state": "oracle_manipulation_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
       "action_id": "path_traversal_step1",
       "from_state": "web_target_identified",
       "action": "Identify parameters that reference filenames or paths (download, template, avatar, report)",
@@ -10985,6 +12123,120 @@
           "observation": "Expected result not observed ('Out-of-band callback received or file content returned, proving arbitrary execution' did not occur).",
           "likelihood": "possible",
           "to_state": "rce_generic_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "reentrancy_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Identify external calls that precede state updates in the target contract",
+      "technique": "static/manual code review",
+      "tools": [
+        "Slither",
+        "MythX",
+        "manual audit"
+      ],
+      "playbook_ref": "reentrancy",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "An external call to msg.sender or an arbitrary address occurs before balance/state variables are updated",
+          "likelihood": "possible",
+          "to_state": "reentrancy_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('An external call to msg.sender or an arbitrary address occurs before balance/state variables are updated' did not occur).",
+          "likelihood": "possible",
+          "to_state": "reentrancy_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "reentrancy_step2",
+      "from_state": "reentrancy_after_step1",
+      "action": "Confirm the callee can execute arbitrary code on receipt and no reentrancy guard is present",
+      "technique": "fallback/receive function analysis",
+      "tools": [
+        "Slither",
+        "manual review"
+      ],
+      "playbook_ref": "reentrancy",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "No nonReentrant modifier or equivalent guard protects the vulnerable function",
+          "likelihood": "possible",
+          "to_state": "reentrancy_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('No nonReentrant modifier or equivalent guard protects the vulnerable function' did not occur).",
+          "likelihood": "possible",
+          "to_state": "reentrancy_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "reentrancy_step3",
+      "from_state": "reentrancy_after_step2",
+      "action": "Deploy an attacker contract whose fallback/receive function re-calls the vulnerable function",
+      "technique": "exploit development",
+      "tools": [
+        "Foundry",
+        "Hardhat",
+        "Remix"
+      ],
+      "playbook_ref": "reentrancy",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Nested recursive calls succeed before the first call's state update completes",
+          "likelihood": "possible",
+          "to_state": "reentrancy_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"Nested recursive calls succeed before the first call's state update completes\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "reentrancy_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "reentrancy_step4",
+      "from_state": "reentrancy_after_step3",
+      "action": "Trigger repeated recursive withdrawal before the balance is zeroed, draining funds",
+      "technique": "exploitation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "reentrancy",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Contract balance drained beyond the attacker's legitimate entitlement",
+          "likelihood": "possible",
+          "to_state": "reentrancy_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"Contract balance drained beyond the attacker's legitimate entitlement\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "reentrancy_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]
@@ -11778,6 +13030,116 @@
           "observation": "Expected result not observed ('Scope of affected queries/users determined' did not occur).",
           "likelihood": "possible",
           "to_state": "training_data_poisoning_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "unchecked_external_call_step1",
+      "from_state": "blockchain_target_identified",
+      "action": "Audit low-level calls for unchecked return values",
+      "technique": "static analysis",
+      "tools": [
+        "Slither"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A .call/.send result is not checked (require(success)), so a failed call is silently ignored",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_after_step1",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A .call/.send result is not checked (require(success)), so a failed call is silently ignored' did not occur).",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "unchecked_external_call_step2",
+      "from_state": "unchecked_external_call_after_step1",
+      "action": "Determine whether a failed call allows execution to continue as if it had succeeded",
+      "technique": "control-flow review",
+      "tools": [
+        "manual review"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Contract state is updated (e.g. marking funds as sent) regardless of whether the call actually succeeded",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_after_step2",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('Contract state is updated (e.g. marking funds as sent) regardless of whether the call actually succeeded' did not occur).",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "unchecked_external_call_step3",
+      "from_state": "unchecked_external_call_after_step2",
+      "action": "For delegatecall cases, identify whether the implementation/callee address is attacker-settable",
+      "technique": "proxy pattern review",
+      "tools": [
+        "Slither",
+        "manual audit"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "A proxy contract delegatecalls to an address stored in a slot that is writable by an unprivileged caller",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_after_step3",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed ('A proxy contract delegatecalls to an address stored in a slot that is writable by an unprivileged caller' did not occur).",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_ruled_out",
+          "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
+        }
+      ]
+    },
+    {
+      "action_id": "unchecked_external_call_step4",
+      "from_state": "unchecked_external_call_after_step3",
+      "action": "Exploit via silently-failed-but-assumed-successful logic, or by delegatecalling attacker code that executes in the caller's storage context",
+      "technique": "exploitation",
+      "tools": [
+        "Foundry",
+        "forge script"
+      ],
+      "playbook_ref": "unchecked_external_call",
+      "is_bridge": false,
+      "outcomes": [
+        {
+          "outcome_id": "success",
+          "observation": "Attacker either corrupts accounting state or takes full control of the proxy's storage",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_confirmed",
+          "note": null
+        },
+        {
+          "outcome_id": "failure",
+          "observation": "Expected result not observed (\"Attacker either corrupts accounting state or takes full control of the proxy's storage\" did not occur).",
+          "likelihood": "possible",
+          "to_state": "unchecked_external_call_ruled_out",
           "note": "Pivot: try a different parameter/endpoint for this technique, or move to another vulnerability class from the entry state."
         }
       ]

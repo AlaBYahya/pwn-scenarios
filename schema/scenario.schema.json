@@ -47,7 +47,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["web", "api", "mobile", "cloud", "network", "binary", "iot", "other"]
+          "enum": ["web", "api", "mobile", "cloud", "network", "binary", "iot", "blockchain", "other"]
         },
         "technology_hints": {
           "type": "array",

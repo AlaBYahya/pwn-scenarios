@@ -51,6 +51,10 @@ CONFIRMED_VALUE = {
     "sensitive_information_disclosure_llm": "high", "llm_supply_chain": "high",
     "system_prompt_leakage": "medium", "rag_embedding_weaknesses": "medium",
     "training_data_poisoning": "medium", "model_denial_of_service": "medium",
+    "reentrancy": "critical", "access_control_smart_contract": "critical",
+    "oracle_manipulation": "critical", "flash_loan_attack": "high",
+    "integer_overflow_underflow": "high", "unchecked_external_call": "high",
+    "front_running_mev": "medium",
 }
 
 

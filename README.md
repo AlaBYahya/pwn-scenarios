@@ -68,7 +68,7 @@ for random. Full design, detection signals, and the simulator: [`docs/GRAPH.md`]
 
 ## Dataset snapshot
 
-**30,293 records** across **42 vulnerability classes**.
+**30,303 records** across **42 vulnerability classes**.
 
 | Source | Platform | Records |
 |---|---|---|
@@ -114,11 +114,11 @@ solving playbook rather than a specific vulnerability class.
 ## Using this dataset
 
 `scenarios.jsonl` repeats a relatively small library of authored playbook
-texts (48 classes) across 30k+ records with different source-metadata
+texts (55 classes) across 30k+ records with different source-metadata
 wrappers. That's good for **retrieval** -- look up "what do I know about
 SSRF," get back the playbook plus real grounding links. It's a poor fit for
 **supervised fine-tuning as a raw dump**, since training on it directly
-would mostly teach memorization of ~48 canned answers, not generalization.
+would mostly teach memorization of ~55 canned answers, not generalization.
 
 - **RAG pipeline**: run `python3 scripts/build_views.py` once, then use
   `data/index.sqlite3` or `data/scenarios/by_class/` directly, keyed by
@@ -148,7 +148,7 @@ whole. It ships as fixed-size chunks instead:
    `python3 scripts/build_views.py`) -- per-class files and an indexed,
    full-text-searchable SQLite view.
 4. **[Hugging Face Hub](https://huggingface.co/datasets/aeby/pwn-scenarios)**
-   -- same 30,293 records as a Parquet file, no cloning or reassembly:
+   -- same 30,303 records as a Parquet file, no cloning or reassembly:
    ```python
    from datasets import load_dataset
    ds = load_dataset("aeby/pwn-scenarios")

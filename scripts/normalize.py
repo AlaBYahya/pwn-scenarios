@@ -46,6 +46,41 @@ def load_playbooks(path):
     return by_id, alias_map
 
 
+def build_cwe_index(playbooks_by_id):
+    """Map each CWE string to the playbook_id(s) that declare it, e.g. multiple
+    playbooks can legitimately share a CWE (CWE-287 covers auth_bypass,
+    account_takeover, oauth_misconfiguration, 2fa_bypass alike)."""
+    index = {}
+    for pid, pb in playbooks_by_id.items():
+        cwe = pb.get("cwe")
+        if cwe:
+            index.setdefault(cwe, []).append(pid)
+    return index
+
+
+def classify_by_cwe(cwe_ids, title_text, cwe_index, alias_map):
+    """Classify a record with known, real CWE ID(s) (e.g. from GHSA) against
+    playbooks declaring that CWE. Far higher precision than keyword matching
+    since the CWE is authoritative, not inferred from a headline.
+    Returns (playbook_id, confidence) or (None, None)."""
+    candidates = []
+    for cwe in cwe_ids or []:
+        candidates.extend(cwe_index.get(cwe, []))
+    candidates = list(dict.fromkeys(candidates))  # dedupe, preserve order
+    if not candidates:
+        return None, None
+    if len(candidates) == 1:
+        return candidates[0], "high"
+    # Multiple playbooks share this CWE (e.g. several auth-related classes on
+    # CWE-287) -- disambiguate using the title against only those candidates'
+    # aliases. Agreement between a real CWE and a keyword match is strong.
+    restricted_aliases = [(alias, pid) for alias, pid in alias_map if pid in candidates]
+    pid, _ = classify([title_text], restricted_aliases)
+    if pid:
+        return pid, "high"
+    return candidates[0], "medium"
+
+
 def classify(text_fields, alias_map):
     """Match a list of text fields against playbook aliases. Returns (playbook_id, confidence) or (None, None)."""
     haystack = " ".join(t for t in text_fields if t).lower()
@@ -144,6 +179,18 @@ def build_record(raw, playbook_id, confidence, playbooks_by_id, collector_name):
         stars = raw.get("repo_stars")
         tags = ["hackthebox"]
         summary = f"HackTheBox machine writeup ('{title}') covering {pb['vulnerability_class']}."
+    elif platform == "ghsa":
+        title = raw.get("title") or pb["vulnerability_class"]
+        severity = severity_normalize(raw.get("severity"))
+        program = raw.get("package") or raw.get("ecosystem")
+        author = None
+        disclosed_at = raw.get("disclosed_at")
+        if disclosed_at:
+            disclosed_at = disclosed_at[:10]
+        bounty = None
+        tags = [t for t in [raw.get("ecosystem"), raw.get("cve_id")] if t]
+        pkg_bit = f" in {program}" if program else ""
+        summary = f"{pb['vulnerability_class']} (GitHub Security Advisory {raw.get('ghsa_id')}){pkg_bit}."
     else:
         raise ValueError(f"unknown platform {platform}")
 
@@ -212,6 +259,7 @@ def main():
     args = ap.parse_args()
 
     playbooks_by_id, alias_map = load_playbooks(args.playbooks)
+    cwe_index = build_cwe_index(playbooks_by_id)
 
     seen_ids = set()
     seen_urls = set()
@@ -224,7 +272,7 @@ def main():
     # to a HackerOne report we already collected directly) resolves in favor
     # of the more precisely-classified record rather than whichever file glob
     # happened to sort first alphabetically.
-    SOURCE_PRIORITY = ["hackerone.jsonl", "tryhackme.jsonl", "hackthebox.jsonl", "ctf.jsonl", "community_submissions.jsonl", "blogs.jsonl", "pentesterland.jsonl", "curated_lists.jsonl", "rss_feeds.jsonl"]
+    SOURCE_PRIORITY = ["hackerone.jsonl", "ghsa.jsonl", "tryhackme.jsonl", "hackthebox.jsonl", "ctf.jsonl", "community_submissions.jsonl", "blogs.jsonl", "pentesterland.jsonl", "curated_lists.jsonl", "rss_feeds.jsonl"]
     all_files = sorted(glob.glob(os.path.join(args.raw_dir, "*.jsonl")))
     ordered_files = sorted(all_files, key=lambda p: SOURCE_PRIORITY.index(os.path.basename(p)) if os.path.basename(p) in SOURCE_PRIORITY else len(SOURCE_PRIORITY))
 
@@ -283,16 +331,24 @@ def main():
                     elif platform == "hackthebox":
                         text_fields = [raw.get("title")]
                         tag_field = raw.get("title")
+                    elif platform == "ghsa":
+                        text_fields = tag_field = None  # classified separately below, by real CWE
                     else:
                         continue
 
-                    # Prefer classifying on the dedicated tag field first (higher signal),
-                    # fall back to full text fields.
-                    playbook_id, confidence = classify([tag_field], alias_map)
-                    if not playbook_id:
-                        playbook_id, confidence = classify(text_fields, alias_map)
-                        if playbook_id:
-                            confidence = "low"
+                    if platform == "ghsa":
+                        # Real, published CWE ID(s) beat any keyword match -- classify
+                        # by CWE first, using the title only to disambiguate playbooks
+                        # that share a CWE (see classify_by_cwe).
+                        playbook_id, confidence = classify_by_cwe(raw.get("cwe_ids"), raw.get("title"), cwe_index, alias_map)
+                    else:
+                        # Prefer classifying on the dedicated tag field first (higher signal),
+                        # fall back to full text fields.
+                        playbook_id, confidence = classify([tag_field], alias_map)
+                        if not playbook_id:
+                            playbook_id, confidence = classify(text_fields, alias_map)
+                            if playbook_id:
+                                confidence = "low"
 
                     # Room/box/challenge titles are often thematic (e.g. "Blue", "Ice")
                     # rather than vulnerability-descriptive; fall back to the platform's

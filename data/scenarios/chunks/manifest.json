@@ -1,8 +1,8 @@
 {
-  "total_records": 30303,
+  "total_records": 32817,
   "records_per_chunk": 2000,
-  "chunk_count": 16,
-  "sha256": "67d8c86ab729efaa9079dc837e6ae96941b8087ef931690b208a0441ddf89a40",
+  "chunk_count": 17,
+  "sha256": "4b4d2b5aa096d4c6710bec11d2bef6e01781afff7bd0c09846e04ebdb23b6eec",
   "chunks": [
     {
       "file": "scenarios.part001.jsonl",
@@ -81,8 +81,13 @@
     },
     {
       "file": "scenarios.part016.jsonl",
-      "records": 303,
-      "bytes": 923695
+      "records": 2000,
+      "bytes": 5935113
+    },
+    {
+      "file": "scenarios.part017.jsonl",
+      "records": 817,
+      "bytes": 2444255
     }
   ]
 }

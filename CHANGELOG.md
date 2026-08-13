@@ -3,6 +3,37 @@
 Engineering history: what changed, why, and what was evaluated and rejected.
 For what the dataset *is* and how to use it, see [README.md](README.md).
 
+## Round 6 -- blockchain domain, CWE-grounded GHSA source
+
+- **7 new blockchain/smart-contract playbooks**: reentrancy, integer
+  overflow/underflow, access control, price oracle manipulation, flash
+  loan attacks, unchecked external call/delegatecall injection, and
+  front-running/MEV -- grounded in the SWC Registry and DASP Top 10
+  classification frameworks (not the unverified "Ultimate Offensive Red
+  Team" mega-dataset that was evaluated and rejected: unspecified license
+  per an independent trust audit, re-uploaded near-identically under four
+  unrelated HF accounts). Added a new `blockchain` target type. Attack
+  graph grew 293->329 states, 271->299 actions.
+- **New source: GitHub Security Advisories (GHSA)**, reviewed only, 2,514
+  records. Unlike every prior source, classification here doesn't rely on
+  keyword-matching a headline -- each advisory carries a real, published
+  CWE ID, so `normalize.py` maps it directly to a playbook
+  (`classify_by_cwe`), falling back to alias matching only to disambiguate
+  when several playbooks share a CWE (e.g. CWE-287 covers 4 different auth
+  classes). Result: 2,026 high-confidence + 488 medium-confidence records,
+  zero low-confidence and zero unclassified out of 2,514 -- the cleanest
+  batch of any source so far. Also gave the new blockchain classes their
+  first grounded instances (Price Oracle Manipulation: 87, Integer
+  Overflow/Underflow: 92, Unchecked External Call: 24, Reentrancy: 8) and
+  boosted previously thin classes (JWT 19->100, Mass Assignment 14->69,
+  Hardcoded Secrets 13->62, SSTI 38->114).
+- Dataset: 30,303 -> 32,817 records, 42 -> 46 vulnerability classes,
+  overall high-confidence share 54% -> 56%.
+- Considered next for blockchain grounding specifically: Immunefi's
+  disclosed bug bounty writeups and Rekt.news DeFi hack post-mortems.
+  Rekt.news has no sitemap/RSS (Next.js app, both return HTTP 500) so it'd
+  need direct page-list scraping -- deferred, not rejected.
+
 ## Round 5 -- CVE chain expansion, source diversity, scheduled collection
 
 - **17 CVE chains total** (was 8): added Zerologon, EternalBlue,

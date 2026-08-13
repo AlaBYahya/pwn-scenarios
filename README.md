@@ -50,7 +50,8 @@ States are conditions/capabilities (`idor_confirmed`,
 qualitatively-scored outcomes leading to new states. 35 generic
 vulnerability classes, 17 real CVE chains (Log4Shell, Spring4Shell,
 Zerologon, EternalBlue, PrintNightmare, MOVEit, and more -- CVE IDs/CVSS
-verified against NVD), and 9 AI/LLM classes all converge through a shared
+verified against NVD), 9 AI/LLM classes, and 7 blockchain/smart-contract
+classes all converge through a shared
 vocabulary of states, so e.g. a prompt injection that abuses an
 over-scoped agent tool lands on the exact same `unauthorized_privileged_action_possible`
 state that IDOR does.
@@ -68,48 +69,55 @@ for random. Full design, detection signals, and the simulator: [`docs/GRAPH.md`]
 
 ## Dataset snapshot
 
-**30,303 records** across **42 vulnerability classes**.
+**32,817 records** across **46 vulnerability classes**.
 
 | Source | Platform | Records |
 |---|---|---|
 | HackerOne public Hacktivity (GraphQL API) | `hackerone` | 10,977 |
 | GitHub CTF-writeup repos | `ctf` | 8,454 |
-| Pentester Land + curated GitHub lists + RSS feeds + researcher blogs | `aggregated_writeup` | 6,106 |
+| Pentester Land + curated GitHub lists + RSS feeds + researcher blogs | `aggregated_writeup` | 6,116 |
 | GitHub TryHackMe room-writeup repos | `tryhackme` | 2,956 |
 | GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,800 |
+| GitHub Security Advisories, reviewed only (REST API, classified by real CWE) | `ghsa` | 2,514 |
 
-Records per vulnerability class (all 42; also in
+Records per vulnerability class (all 46; also in
 [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
 or `python3 scripts/query.py` with no filters):
 
 | Class | Records | | Class | Records |
 |---|---:|---|---|---:|
-| CTF challenge (general) | 8,250 | | Stored XSS | 184 |
-| TryHackMe room (general) | 2,815 | | Insecure Deserialization | 182 |
-| Reflected XSS | 2,650 | | Clickjacking | 176 |
-| Sensitive Information Disclosure | 2,265 | | Subdomain Takeover | 152 |
-| Broken Access Control | 1,919 | | Unrestricted File Upload | 132 |
-| HackTheBox machine (general) | 1,770 | | Race Condition | 100 |
-| Business Logic Flaw | 1,304 | | XXE | 94 |
-| Authentication Bypass | 1,018 | | CORS Misconfiguration | 74 |
-| Memory Corruption | 920 | | Prototype Pollution | 68 |
-| Remote Code Execution | 793 | | Cache Poisoning | 66 |
-| Denial of Service | 661 | | DOM XSS | 64 |
-| CSRF | 598 | | OAuth Misconfiguration | 64 |
-| IDOR | 598 | | Prompt Injection (AI/LLM) | 61 |
-| Account Takeover | 509 | | GraphQL Abuse | 53 |
-| SSRF | 506 | | 2FA Bypass | 51 |
-| SQL Injection | 472 | | SSTI | 38 |
-| Path Traversal | 413 | | JWT Vulnerabilities | 19 |
-| Open Redirect | 407 | | Mass Assignment | 14 |
-| Command Injection | 375 | | Hardcoded Secrets | 13 |
-| HTTP Request Smuggling | 232 | | Training Data Poisoning (AI/LLM) | 1 |
-| Cryptographic Issues | 211 | | Model Denial of Service (AI/LLM) | 1 |
+| CTF challenge (general) | 8,252 | | Cryptographic Issues | 211 |
+| TryHackMe room (general) | 2,818 | | Clickjacking | 199 |
+| Reflected XSS | 2,723 | | Race Condition | 197 |
+| Sensitive Information Disclosure | 2,272 | | XXE | 190 |
+| Broken Access Control | 1,999 | | Prototype Pollution | 188 |
+| HackTheBox machine (general) | 1,771 | | Subdomain Takeover | 162 |
+| Business Logic Flaw | 1,304 | | CORS Misconfiguration | 151 |
+| Authentication Bypass | 1,108 | | GraphQL Abuse | 137 |
+| Memory Corruption | 1,001 | | SSTI | 114 |
+| Remote Code Execution | 903 | | JWT Vulnerabilities | 100 |
+| Denial of Service | 763 | | Integer Overflow/Underflow | 92 |
+| CSRF | 694 | | Price Oracle Manipulation | 87 |
+| IDOR | 678 | | DOM XSS | 71 |
+| SSRF | 610 | | Cache Poisoning | 70 |
+| SQL Injection | 568 | | OAuth Misconfiguration | 70 |
+| Path Traversal | 522 | | Mass Assignment | 69 |
+| Account Takeover | 519 | | Hardcoded Secrets | 62 |
+| Open Redirect | 495 | | Prompt Injection (AI/LLM) | 61 |
+| Command Injection | 471 | | 2FA Bypass | 51 |
+| HTTP Request Smuggling | 321 | | Unchecked External Call / Delegatecall Injection | 24 |
+| Insecure Deserialization | 278 | | Reentrancy | 8 |
+| Stored XSS | 216 | | Model Denial of Service (AI/LLM) | 1 |
+| Unrestricted File Upload | 215 | | Training Data Poisoning (AI/LLM) | 1 |
 
-54% of records are `confidence: "high"` classification matches (see
+56% of records are `confidence: "high"` classification matches (see
 [`docs/SCHEMA.md`](docs/SCHEMA.md#confidence-levels)); the "general" rooms
 above are thematically-named CTF/lab challenges that fell back to a generic
-solving playbook rather than a specific vulnerability class.
+solving playbook rather than a specific vulnerability class. Access Control
+Smart Contract, Flash Loan Attack, and Front-Running/MEV are defined
+playbooks (see [`docs/GRAPH.md`](docs/GRAPH.md)) with no grounded records
+yet -- their shared CWEs mostly matched to older, more general classes in
+this round of collection.
 
 ## Using this dataset
 
@@ -148,7 +156,7 @@ whole. It ships as fixed-size chunks instead:
    `python3 scripts/build_views.py`) -- per-class files and an indexed,
    full-text-searchable SQLite view.
 4. **[Hugging Face Hub](https://huggingface.co/datasets/aeby/pwn-scenarios)**
-   -- same 30,303 records as a Parquet file, no cloning or reassembly:
+   -- same 32,817 records as a Parquet file, no cloning or reassembly:
    ```python
    from datasets import load_dataset
    ds = load_dataset("aeby/pwn-scenarios")

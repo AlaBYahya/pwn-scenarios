@@ -27,12 +27,34 @@ For what the dataset *is* and how to use it, see [README.md](README.md).
   Overflow/Underflow: 92, Unchecked External Call: 24, Reentrancy: 8) and
   boosted previously thin classes (JWT 19->100, Mass Assignment 14->69,
   Hardcoded Secrets 13->62, SSTI 38->114).
-- Dataset: 30,303 -> 32,817 records, 42 -> 46 vulnerability classes,
-  overall high-confidence share 54% -> 56%.
-- Considered next for blockchain grounding specifically: Immunefi's
-  disclosed bug bounty writeups and Rekt.news DeFi hack post-mortems.
-  Rekt.news has no sitemap/RSS (Next.js app, both return HTTP 500) so it'd
-  need direct page-list scraping -- deferred, not rejected.
+- Wired `collect_ghsa.py` into `weekly-collect.yml`'s full-rebuild source
+  list before running anything for real -- weekly does a from-scratch
+  rebuild with no `--existing` (by design, since it fully re-collects
+  every source), so omitting GHSA there would have silently deleted every
+  GHSA record on the next scheduled run. Same bug class as the
+  daily-collect destructive-rebuild incident; caught this time before it
+  could fire.
+- Ran the full weekly pipeline for real (not just a local merge) to
+  validate GHSA end-to-end and refresh every other source at the same
+  time: **30,303 -> 31,995 records, 42 -> 47 vulnerability classes,
+  high-confidence share 54% -> 58%**. Synced to the HF mirror
+  (aeby/pwn-scenarios) automatically as part of the same run.
+- **Immunefi checked and mostly rejected for now**: built
+  `collect_immunefi.py` against a curated community list of 135 real,
+  disclosed smart-contract bug bounty writeups (Wormhole $10M, Aurora $6M,
+  Optimism $2M, and more). The table has no vulnerability-class tag, so
+  classification fell back to words extracted from the writeup URL slug --
+  yielded only 2/135 classified (DeFi postmortem slugs like
+  "infinite-money-duplication" or "uninitialized-proxy-bugfix-review"
+  don't overlap with our alias vocabulary). Fetching each writeup's actual
+  page title for a stronger signal was tried and blocked (Medium sits
+  behind a Cloudflare challenge for unauthenticated fetches). Not merged
+  into the dataset at that yield -- script kept for later if a better
+  signal source turns up.
+- **Rekt.news checked and deferred**: real, well-documented DeFi hack
+  post-mortems, but no sitemap.xml or rss.xml (Next.js app, both return
+  HTTP 500) -- would need direct page-list scraping rather than the feed
+  based approach every other blog source uses. Not attempted this round.
 
 ## Round 5 -- CVE chain expansion, source diversity, scheduled collection
 

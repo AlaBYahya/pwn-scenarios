@@ -69,55 +69,55 @@ for random. Full design, detection signals, and the simulator: [`docs/GRAPH.md`]
 
 ## Dataset snapshot
 
-**32,817 records** across **46 vulnerability classes**.
+**31,995 records** across **47 vulnerability classes**.
 
 | Source | Platform | Records |
 |---|---|---|
-| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 10,977 |
-| GitHub CTF-writeup repos | `ctf` | 8,454 |
-| Pentester Land + curated GitHub lists + RSS feeds + researcher blogs | `aggregated_writeup` | 6,116 |
-| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,956 |
-| GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,800 |
+| HackerOne public Hacktivity (GraphQL API) | `hackerone` | 10,984 |
+| GitHub CTF-writeup repos | `ctf` | 8,359 |
+| Pentester Land + curated GitHub lists + RSS feeds + researcher blogs | `aggregated_writeup` | 6,106 |
+| GitHub TryHackMe room-writeup repos | `tryhackme` | 2,416 |
 | GitHub Security Advisories, reviewed only (REST API, classified by real CWE) | `ghsa` | 2,514 |
+| GitHub HackTheBox machine-writeup repos | `hackthebox` | 1,616 |
 
-Records per vulnerability class (all 46; also in
+Records per vulnerability class (all 47; also in
 [`knowledge/vulnerability_playbooks.json`](knowledge/vulnerability_playbooks.json)
 or `python3 scripts/query.py` with no filters):
 
 | Class | Records | | Class | Records |
 |---|---:|---|---|---:|
-| CTF challenge (general) | 8,252 | | Cryptographic Issues | 211 |
-| TryHackMe room (general) | 2,818 | | Clickjacking | 199 |
-| Reflected XSS | 2,723 | | Race Condition | 197 |
-| Sensitive Information Disclosure | 2,272 | | XXE | 190 |
-| Broken Access Control | 1,999 | | Prototype Pollution | 188 |
-| HackTheBox machine (general) | 1,771 | | Subdomain Takeover | 162 |
-| Business Logic Flaw | 1,304 | | CORS Misconfiguration | 151 |
-| Authentication Bypass | 1,108 | | GraphQL Abuse | 137 |
-| Memory Corruption | 1,001 | | SSTI | 114 |
-| Remote Code Execution | 903 | | JWT Vulnerabilities | 100 |
-| Denial of Service | 763 | | Integer Overflow/Underflow | 92 |
-| CSRF | 694 | | Price Oracle Manipulation | 87 |
-| IDOR | 678 | | DOM XSS | 71 |
-| SSRF | 610 | | Cache Poisoning | 70 |
-| SQL Injection | 568 | | OAuth Misconfiguration | 70 |
-| Path Traversal | 522 | | Mass Assignment | 69 |
-| Account Takeover | 519 | | Hardcoded Secrets | 62 |
-| Open Redirect | 495 | | Prompt Injection (AI/LLM) | 61 |
-| Command Injection | 471 | | 2FA Bypass | 51 |
-| HTTP Request Smuggling | 321 | | Unchecked External Call / Delegatecall Injection | 24 |
-| Insecure Deserialization | 278 | | Reentrancy | 8 |
+| CTF challenge (general) | 8,147 | | Clickjacking | 199 |
+| Reflected XSS | 2,720 | | Race Condition | 197 |
+| TryHackMe room (general) | 2,293 | | XXE | 189 |
+| Sensitive Information Disclosure | 2,272 | | Prototype Pollution | 188 |
+| Broken Access Control | 1,994 | | Subdomain Takeover | 162 |
+| HackTheBox machine (general) | 1,594 | | CORS Misconfiguration | 151 |
+| Business Logic Flaw | 1,305 | | GraphQL Abuse | 137 |
+| Authentication Bypass | 1,108 | | SSTI | 114 |
+| Memory Corruption | 1,001 | | JWT Vulnerabilities | 99 |
+| Remote Code Execution | 900 | | Integer Overflow/Underflow | 98 |
+| Denial of Service | 763 | | Price Oracle Manipulation | 88 |
+| CSRF | 692 | | DOM XSS | 71 |
+| IDOR | 676 | | Cache Poisoning | 70 |
+| SSRF | 607 | | OAuth Misconfiguration | 70 |
+| SQL Injection | 566 | | Mass Assignment | 69 |
+| Path Traversal | 521 | | Hardcoded Secrets | 62 |
+| Account Takeover | 518 | | Prompt Injection (AI/LLM) | 61 |
+| Open Redirect | 495 | | 2FA Bypass | 51 |
+| Command Injection | 471 | | Unchecked External Call / Delegatecall Injection | 24 |
+| HTTP Request Smuggling | 320 | | Reentrancy | 8 |
+| Insecure Deserialization | 278 | | Front-Running / MEV | 2 |
 | Stored XSS | 216 | | Model Denial of Service (AI/LLM) | 1 |
 | Unrestricted File Upload | 215 | | Training Data Poisoning (AI/LLM) | 1 |
+| Cryptographic Issues | 211 | | | |
 
-56% of records are `confidence: "high"` classification matches (see
+58% of records are `confidence: "high"` classification matches (see
 [`docs/SCHEMA.md`](docs/SCHEMA.md#confidence-levels)); the "general" rooms
 above are thematically-named CTF/lab challenges that fell back to a generic
 solving playbook rather than a specific vulnerability class. Access Control
-Smart Contract, Flash Loan Attack, and Front-Running/MEV are defined
-playbooks (see [`docs/GRAPH.md`](docs/GRAPH.md)) with no grounded records
-yet -- their shared CWEs mostly matched to older, more general classes in
-this round of collection.
+Smart Contract and Flash Loan Attack are defined playbooks (see
+[`docs/GRAPH.md`](docs/GRAPH.md)) with no grounded records yet -- their
+shared CWEs mostly matched to older, more general classes so far.
 
 ## Using this dataset
 
@@ -156,7 +156,7 @@ whole. It ships as fixed-size chunks instead:
    `python3 scripts/build_views.py`) -- per-class files and an indexed,
    full-text-searchable SQLite view.
 4. **[Hugging Face Hub](https://huggingface.co/datasets/aeby/pwn-scenarios)**
-   -- same 32,817 records as a Parquet file, no cloning or reassembly:
+   -- same 31,995 records as a Parquet file, no cloning or reassembly:
    ```python
    from datasets import load_dataset
    ds = load_dataset("aeby/pwn-scenarios")

@@ -49,6 +49,8 @@ jobs:
           python3 collect_tryhackme.py --repos-per-topic 60 --max-files-per-repo 400 --out ../data/raw/tryhackme.jsonl
           python3 collect_hackthebox.py --repos-per-topic 60 --max-files-per-repo 400 --out ../data/raw/hackthebox.jsonl
           python3 collect_ghsa.py --playbooks ../knowledge/vulnerability_playbooks.json --out ../data/raw/ghsa.jsonl --max-per-cwe 300
+          python3 collect_exploitdb.py --out ../data/raw/exploitdb.jsonl --max-records 6000
+          python3 collect_zdi.py --out ../data/raw/zdi.jsonl
 
       - name: Fold in any community submissions
         run: |

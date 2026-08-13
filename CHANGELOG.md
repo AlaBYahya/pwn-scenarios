@@ -39,6 +39,28 @@ For what the dataset *is* and how to use it, see [README.md](README.md).
   time: **30,303 -> 31,995 records, 42 -> 47 vulnerability classes,
   high-confidence share 54% -> 58%**. Synced to the HF mirror
   (aeby/pwn-scenarios) automatically as part of the same run.
+- **Two more sources: Exploit-DB and ZDI**, evaluated for reputation and
+  access quality first (Bugcrowd's CrowdStream is public but
+  client-rendered with no clean API; CERT/CC has a real API but is small,
+  ~3,500 notes total -- deferred, not built this round).
+  - `collect_exploitdb.py` pulls Offensive Security's official bulk CSV
+    mirror (47,119 total rows), not just the ~50-item RSS window --
+    restricted to `verified == 1`, capped at 6,000 most-recently-updated
+    records so it doesn't dominate composition. Descriptions follow a
+    strict "Product Version - VulnType" convention, so the suffix is a
+    real author-assigned tag, not inferred text.
+  - `collect_zdi.py` pulls Trend Micro's Zero Day Initiative (runs
+    Pwn2Own) published-advisories RSS -- each entry carries a real CVE ID
+    and the vulnerability type named in the title itself.
+  - Local test before merging: 6,200 raw -> 4,186 classified (4,177
+    high-confidence, 0 schema errors).
+- Wired both into `weekly-collect.yml` and `normalize.py`'s
+  `SOURCE_PRIORITY` before running anything live, then ran the full
+  weekly pipeline again: **31,995 -> 36,181 records, high-confidence
+  share 58% -> 63%**. SQL Injection (566->1,624) and Memory Corruption
+  (1,001->1,615) got the biggest boosts. Class count held at 47 --
+  Exploit-DB/ZDI cover general web/binary categories GHSA had already
+  unlocked, not new ones. Synced to HF automatically as part of the run.
 - **Immunefi checked and mostly rejected for now**: built
   `collect_immunefi.py` against a curated community list of 135 real,
   disclosed smart-contract bug bounty writeups (Wormhole $10M, Aurora $6M,
